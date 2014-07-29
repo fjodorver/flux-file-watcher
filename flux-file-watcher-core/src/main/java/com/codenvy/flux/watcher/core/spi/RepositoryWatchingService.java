@@ -16,9 +16,9 @@ import java.nio.file.Path;
  * @author Kevin Pollet
  */
 public interface RepositoryWatchingService {
-    void watch(String projectId, Path path);
+    void watch(Path path);
 
-    void unwatch(String projectId);
+    void unwatch(Path path);
 
     boolean addRepositoryListener(RepositoryListener listener);
 
