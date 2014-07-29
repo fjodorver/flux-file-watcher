@@ -16,11 +16,11 @@ import java.nio.file.Path;
  * @author Kevin Pollet
  */
 public interface RepositoryProvider {
-    boolean addProject(String projectId, Path projectPath);
+    boolean addProject(String projectId, Path path);
 
     boolean removeProject(String projectId);
 
-    Resource getResource(String projectId, Path resourcePath);
+    Resource getResource(String projectId, Path path);
 
     void createResource(Resource resource);
 
