@@ -10,12 +10,11 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.utils;
 
-import com.codenvy.flux.watcher.core.spi.Resource;
-
 import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -35,17 +34,19 @@ public final class ResourceHelper {
     }
 
     /**
-     * @param resource
+     * @param type
+     * @param content
      * @return
-     * @throws java.lang.NullPointerException
      */
-    public static String hash(Resource resource) {
-        checkNotNull(resource);
-        checkNotNull(resource.content());
+    public static String hash(ResourceType type, byte[] content) {
+        checkNotNull(type);
+        if (content == null) {
+            content = new byte[0];
+        }
 
-        switch (resource.type()) {
+        switch (type) {
             case FILE: {
-                final byte[] digest = messageDigest.digest(resource.content());
+                final byte[] digest = messageDigest.digest(content);
                 return DatatypeConverter.printHexBinary(digest);
             }
 

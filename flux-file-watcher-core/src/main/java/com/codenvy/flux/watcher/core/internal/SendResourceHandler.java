@@ -16,7 +16,6 @@ import com.codenvy.flux.watcher.core.MessageHandler;
 import com.codenvy.flux.watcher.core.MessageTypes;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 import com.codenvy.flux.watcher.core.spi.Resource;
-import com.codenvy.flux.watcher.core.utils.ResourceHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,7 +71,7 @@ public class SendResourceHandler implements MessageHandler {
                 response.put(PROJECT_NAME, projectName);
                 response.put(RESOURCE_PATH, resourcePath);
                 response.put(RESOURCE_TIMESTAMP, resource.timestamp());
-                response.put(RESOURCE_HASH, ResourceHelper.hash(resource));
+                response.put(RESOURCE_HASH, resource.hash());
                 response.put(RESOURCE_TYPE, resource.type().name().toLowerCase());
                 if (resource.type() == FILE) {
                     response.put(RESOURCE_CONTENT, new String(resource.content()));
