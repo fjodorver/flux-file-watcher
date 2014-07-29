@@ -13,7 +13,6 @@ package com.codenvy.flux.watcher.core;
 import com.codenvy.flux.watcher.core.internal.EntryCreatedListener;
 import com.codenvy.flux.watcher.core.internal.SendResourceHandler;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
-import com.codenvy.flux.watcher.core.spi.RepositoryWatchService;
 
 import java.net.URL;
 import java.util.Collections;
@@ -38,9 +37,8 @@ public class FluxRepository {
         this.connections = new ConcurrentHashMap<>();
         this.repositoryProvider = ServiceLoader.load(RepositoryProvider.class).iterator().next();
 
-        // initialize the repository provider
-        final RepositoryWatchService watchingService = this.repositoryProvider.getWatchService();
-        watchingService.addRepositoryListener(new EntryCreatedListener(this));
+        // initialize repository listeners
+        this.repositoryProvider.addRepositoryListener(new EntryCreatedListener(this));
     }
 
     public FluxConnection connectTo(URL serverURL) {

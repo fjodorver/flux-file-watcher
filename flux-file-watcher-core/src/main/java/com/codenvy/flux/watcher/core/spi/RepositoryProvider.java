@@ -26,5 +26,7 @@ public interface RepositoryProvider {
 
     void deleteResource(Resource resource);
 
-    RepositoryWatchService getWatchService();
+    boolean addRepositoryListener(RepositoryListener listener);
+
+    boolean removeRepositoryListener(RepositoryListener listener);
 }

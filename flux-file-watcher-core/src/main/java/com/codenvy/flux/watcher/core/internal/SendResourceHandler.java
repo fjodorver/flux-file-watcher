@@ -60,8 +60,8 @@ public class SendResourceHandler implements MessageHandler {
             final String resourcePath = request.getString(RESOURCE_PATH);
 
             // we ask the repository to retrieve the resource
-            final RepositoryProvider repositoryProvider = repository.repositoryProvider();
-            final Resource resource = repositoryProvider.getResource(projectName, Paths.get(resourcePath));
+            final RepositoryProvider repository = this.repository.repositoryProvider();
+            final Resource resource = repository.getResource(projectName, Paths.get(resourcePath));
 
             // we send the resource only if the timestamp are equals or no timestamp is specified
             if (!request.has(RESOURCE_TIMESTAMP) || request.getLong(RESOURCE_TIMESTAMP) == resource.timestamp()) {
