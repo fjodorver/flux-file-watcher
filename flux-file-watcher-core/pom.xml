@@ -1,7 +1,7 @@
 <?xml version="1.0"  encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2014 Codenvy, S.A.
+    Copyright (c) 2014 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -11,18 +11,59 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
          xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <artifactId>flux-file-watcher-parent</artifactId>
-    <groupId>com.codenvy.flux</groupId>    
-    <version>1.0.0-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <artifactId>flux-file-watcher-parent</artifactId>
+        <groupId>com.codenvy.flux</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-  <artifactId>flux-file-watcher-core</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-  <name>flux-file-watcher-core</name>
+    <artifactId>flux-file-watcher-core</artifactId>
+    <name>flux-file-watcher-core</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${com.google.guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.socket</groupId>
+            <artifactId>socket.io-java-client</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${org.slf4j.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactSet>
+                        <includes>
+                            <include>io.socket:socket.io-java-client:*</include>
+                        </includes>
+                    </artifactSet>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
