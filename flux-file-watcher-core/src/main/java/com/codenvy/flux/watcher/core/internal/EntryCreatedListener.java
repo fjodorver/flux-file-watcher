@@ -49,7 +49,7 @@ public class EntryCreatedListener implements RepositoryListener {
             final JSONObject message = new JSONObject();
             message.put(USERNAME, repository.username()); //TODO
             message.put(PROJECT_NAME, createdResource.projectId());
-            message.put(RESOURCE_PATH, createdResource.path().toString());
+            message.put(RESOURCE_PATH, createdResource.path());
             message.put(RESOURCE_TIMESTAMP, createdResource.timestamp());
             message.put(RESOURCE_HASH, createdResource.hash());
             message.put(RESOURCE_TYPE, createdResource.type().name().toLowerCase());

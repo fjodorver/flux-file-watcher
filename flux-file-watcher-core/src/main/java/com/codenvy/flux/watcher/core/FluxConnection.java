@@ -121,7 +121,7 @@ public class FluxConnection {
     }
 
     public void sendMessage(Message message) {
-        socket.emit(message.type().toString(), message);
+        socket.emit(message.type().value(), message);
     }
 
     private Set<MessageHandler> getHandlersFor(final String messageType) {
@@ -148,7 +148,7 @@ public class FluxConnection {
                              .transform(new Function<MessageType, String>() {
                                  @Override
                                  public String apply(MessageType messageType) {
-                                     return messageType.toString();
+                                     return messageType.value();
                                  }
                              })
                              .toImmutableSet();

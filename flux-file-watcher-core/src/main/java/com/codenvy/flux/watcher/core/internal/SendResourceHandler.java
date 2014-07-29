@@ -20,8 +20,6 @@ import com.codenvy.flux.watcher.core.spi.Resource;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.nio.file.Paths;
-
 import static com.codenvy.flux.watcher.core.MessageFields.CALLBACK_ID;
 import static com.codenvy.flux.watcher.core.MessageFields.PROJECT_NAME;
 import static com.codenvy.flux.watcher.core.MessageFields.REQUEST_SENDER_ID;
@@ -39,7 +37,7 @@ import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FILE;
  * @author Kevin Pollet
  */
 //TODO username
-//TODO byte must be sent instead of string
+//TODO bytes must be sent instead of string
 @MessageTypes(GET_RESOURCE_REQUEST)
 public class SendResourceHandler implements MessageHandler {
     private final FluxRepository repository;
@@ -60,7 +58,7 @@ public class SendResourceHandler implements MessageHandler {
 
             // we ask the repository to retrieve the resource
             final RepositoryProvider repository = this.repository.repositoryProvider();
-            final Resource resource = repository.getResource(projectName, Paths.get(resourcePath));
+            final Resource resource = repository.getResource(projectName, resourcePath);
 
             // we send the resource only if the timestamp are equals or no timestamp is specified
             if (!request.has(RESOURCE_TIMESTAMP) || request.getLong(RESOURCE_TIMESTAMP) == resource.timestamp()) {
@@ -77,7 +75,7 @@ public class SendResourceHandler implements MessageHandler {
                     response.put(RESOURCE_CONTENT, new String(resource.content()));
                 }
 
-                message.connection()
+                message.source()
                        .sendMessage(new Message(GET_PROJECT_RESPONSE, response));
             }
 

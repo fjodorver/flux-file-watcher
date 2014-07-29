@@ -33,11 +33,6 @@ public final class ResourceHelper {
         }
     }
 
-    /**
-     * @param type
-     * @param content
-     * @return
-     */
     public static String hash(ResourceType type, byte[] content) {
         checkNotNull(type);
         if (content == null) {

@@ -10,17 +10,15 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.spi;
 
-import java.nio.file.Path;
-
 /**
  * @author Kevin Pollet
  */
 public interface RepositoryProvider {
-    boolean addProject(String projectId, Path path);
+    boolean addProject(String projectId, String path);
 
     boolean removeProject(String projectId);
 
-    Resource getResource(String projectId, Path path);
+    Resource getResource(String projectId, String path);
 
     void createResource(Resource resource);
 

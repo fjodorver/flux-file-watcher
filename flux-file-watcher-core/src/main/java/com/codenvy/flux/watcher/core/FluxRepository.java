@@ -15,7 +15,6 @@ import com.codenvy.flux.watcher.core.internal.SendResourceHandler;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -61,7 +60,7 @@ public class FluxRepository {
         }
     }
 
-    public void addProject(String projectId, Path path) {
+    public void addProject(String projectId, String path) {
         repositoryProvider.addProject(projectId, path);
     }
 

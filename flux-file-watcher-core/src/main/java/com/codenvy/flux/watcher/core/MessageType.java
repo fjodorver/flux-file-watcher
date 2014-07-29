@@ -13,7 +13,6 @@ package com.codenvy.flux.watcher.core;
 /**
  * @author Kevin Pollet
  */
-//TODO naming
 public enum MessageType {
     CONNECT_TO_CHANNEL("connectToChannel"),
     GET_PROJECT_REQUEST("getProjectRequest"),
@@ -24,24 +23,23 @@ public enum MessageType {
     RESOURCE_CHANGED("resourceChanged"),
     RESOURCE_DELETED("resourceDeleted");
 
-    private final String messageType;
+    private final String value;
 
-    MessageType(String messageType) {
-        this.messageType = messageType;
+    MessageType(String value) {
+        this.value = value;
     }
 
     public static MessageType fromType(String type) {
         final MessageType[] messageTypes = MessageType.values();
         for (MessageType oneMessageType : messageTypes) {
-            if (oneMessageType.messageType.equals(type)) {
+            if (oneMessageType.value.equals(type)) {
                 return oneMessageType;
             }
         }
         return null;
     }
 
-    @Override
-    public String toString() {
-        return messageType;
+    public String value() {
+        return value;
     }
 }

@@ -10,20 +10,18 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.spi;
 
-import java.nio.file.Path;
-
 /**
  * @author Kevin Pollet
  */
 public class Resource {
     private final String       projectId;
-    private final Path         path;
+    private final String       path;
     private final long         timestamp;
     private final String       hash;
     private final ResourceType type;
     private final byte[]       content;
 
-    public Resource(String projectId, Path path, long timestamp, String hash, ResourceType type, byte[] content) {
+    public Resource(String projectId, String path, long timestamp, String hash, ResourceType type, byte[] content) {
         this.projectId = projectId;
         this.path = path;
         this.timestamp = timestamp;
@@ -36,7 +34,7 @@ public class Resource {
         return projectId;
     }
 
-    public Path path() {
+    public String path() {
         return path;
     }
 

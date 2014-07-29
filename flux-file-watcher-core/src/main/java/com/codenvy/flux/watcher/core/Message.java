@@ -16,7 +16,7 @@ import org.json.JSONObject;
  * @author Kevin Pollet
  */
 public class Message {
-    private final FluxConnection connection;
+    private final FluxConnection source;
     private final MessageType    type;
     private final JSONObject     content;
 
@@ -24,14 +24,14 @@ public class Message {
         this(null, type, content);
     }
 
-    public Message(FluxConnection connection, MessageType type, JSONObject content) {
-        this.connection = connection;
+    public Message(FluxConnection source, MessageType type, JSONObject content) {
+        this.source = source;
         this.type = type;
         this.content = content;
     }
 
-    public FluxConnection connection() {
-        return connection;
+    public FluxConnection source() {
+        return source;
     }
 
     public MessageType type() {
