@@ -28,6 +28,7 @@ import static com.codenvy.flux.MessageFields.RESOURCE_PATH;
 import static com.codenvy.flux.MessageFields.RESOURCE_TIMESTAMP;
 import static com.codenvy.flux.MessageFields.RESOURCE_TYPE;
 import static com.codenvy.flux.MessageFields.USERNAME;
+import static com.codenvy.flux.MessageType.RESOURCE_CREATED;
 import static com.codenvy.flux.spi.RepositoryEventType.ENTRY_CREATED;
 
 /**
@@ -56,7 +57,7 @@ public class EntryCreatedListener implements RepositoryListener {
 
             // broadcast message to all connections
             for (FluxConnection oneConnection : repository.connections().values()) {
-                oneConnection.sendMessage(new Message(MessageType.RESOURCE_CREATED, message));
+                oneConnection.sendMessage(new Message(RESOURCE_CREATED, message));
             }
 
         } catch (JSONException e) {
