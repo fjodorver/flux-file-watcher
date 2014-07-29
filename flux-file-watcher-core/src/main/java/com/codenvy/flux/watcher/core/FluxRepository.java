@@ -47,7 +47,7 @@ public class FluxRepository {
             FluxConnection newConnection = new FluxConnection(serverURL);
             connection = connections.putIfAbsent(serverURL, newConnection);
             if (connection == null) {
-                connection = initializeConnection(newConnection);
+                connection = initializeAndOpenConnection(newConnection);
             }
         }
         return connection;
@@ -56,7 +56,7 @@ public class FluxRepository {
     public void disconnectFrom(URL serverURL) {
         final FluxConnection connection = connections.get(serverURL);
         if (connection != null) {
-            connection.disconnect();
+            connection.close();
         }
     }
 
@@ -76,9 +76,9 @@ public class FluxRepository {
         return repositoryProvider;
     }
 
-    private FluxConnection initializeConnection(FluxConnection connection) {
+    private FluxConnection initializeAndOpenConnection(FluxConnection connection) {
         connection.addMessageHandler(new SendResourceHandler(this));
-        connection.connect();
+        connection.open();
 
         return connection;
     }
