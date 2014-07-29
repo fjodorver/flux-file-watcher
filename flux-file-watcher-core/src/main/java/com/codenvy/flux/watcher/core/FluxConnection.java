@@ -50,7 +50,7 @@ public class FluxConnection {
         this.messageHandlersLock = new Object();
     }
 
-    public void open() {
+    void open() {
         if (!socket.isConnected()) {
             socket.connect(new IOCallback() {
                 @Override
@@ -102,7 +102,7 @@ public class FluxConnection {
         }
     }
 
-    public void close() {
+    void close() {
         if (socket.isConnected()) {
             socket.disconnect();
         }
