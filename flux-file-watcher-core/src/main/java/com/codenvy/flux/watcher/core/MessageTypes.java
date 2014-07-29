@@ -8,13 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.spi;
+package com.codenvy.flux.watcher.core;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author Kevin Pollet
  */
-public enum RepositoryEventType {
-    ENTRY_CREATED,
-    ENTRY_MODIFIED,
-    ENTRY_DELETED
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface MessageTypes {
+    MessageType[] value();
 }

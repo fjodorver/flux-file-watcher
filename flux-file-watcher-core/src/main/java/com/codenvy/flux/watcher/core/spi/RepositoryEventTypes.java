@@ -8,19 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.spi;
+package com.codenvy.flux.watcher.core.spi;
 
-import java.nio.file.Path;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author Kevin Pollet
  */
-public interface RepositoryWatchingService {
-    void watch(String projectId, Path path);
-
-    void unwatch(String projectId);
-
-    boolean addRepositoryListener(RepositoryListener listener);
-
-    boolean removeRepositoryListener(RepositoryListener listener);
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface RepositoryEventTypes {
+    RepositoryEventType[] value();
 }

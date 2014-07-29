@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux;
+package com.codenvy.flux.watcher.core;
 
 import io.socket.IOAcknowledge;
 import io.socket.IOCallback;
@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.codenvy.flux.MessageType.CONNECT_TO_CHANNEL;
 import static com.google.common.base.Predicates.notNull;
 import static java.util.Collections.emptySet;
 
@@ -66,7 +65,7 @@ public class FluxConnection {
                         final JSONObject message = new JSONObject();
                         message.put("channel", "defaultuser");
 
-                        sendMessage(new Message(CONNECT_TO_CHANNEL, message));
+                        sendMessage(new Message(MessageType.CONNECT_TO_CHANNEL, message));
 
                     } catch (JSONException e) {
                         throw new RuntimeException(e);

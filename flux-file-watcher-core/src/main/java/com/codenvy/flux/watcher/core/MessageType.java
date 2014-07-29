@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux;
+package com.codenvy.flux.watcher.core;
 
 /**
  * @author Kevin Pollet

@@ -8,9 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.utils;
+package com.codenvy.flux.watcher.core.utils;
 
-import com.codenvy.flux.spi.Resource;
+import com.codenvy.flux.watcher.core.spi.Resource;
 
 import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;

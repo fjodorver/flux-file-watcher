@@ -8,12 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux;
+package com.codenvy.flux.watcher.core;
 
-import com.codenvy.flux.internal.EntryCreatedListener;
-import com.codenvy.flux.internal.SendResourceHandler;
-import com.codenvy.flux.spi.RepositoryProvider;
-import com.codenvy.flux.spi.RepositoryWatchingService;
+import com.codenvy.flux.watcher.core.internal.EntryCreatedListener;
+import com.codenvy.flux.watcher.core.internal.SendResourceHandler;
+import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
+import com.codenvy.flux.watcher.core.spi.RepositoryWatchingService;
 
 import java.net.URL;
 import java.util.Collections;

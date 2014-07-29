@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.spi;
+package com.codenvy.flux.watcher.core.spi;
 
 import java.nio.file.Path;
 

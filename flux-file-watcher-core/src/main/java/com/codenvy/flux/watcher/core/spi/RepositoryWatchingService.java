@@ -8,25 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.spi;
+package com.codenvy.flux.watcher.core.spi;
+
+import java.nio.file.Path;
 
 /**
  * @author Kevin Pollet
  */
-public class RepositoryEvent {
-    private final RepositoryEventType type;
-    private final Resource            resource;
+public interface RepositoryWatchingService {
+    void watch(String projectId, Path path);
 
-    public RepositoryEvent(RepositoryEventType type, Resource resource) {
-        this.type = type;
-        this.resource = resource;
-    }
+    void unwatch(String projectId);
 
-    public RepositoryEventType type() {
-        return type;
-    }
+    boolean addRepositoryListener(RepositoryListener listener);
 
-    public Resource resource() {
-        return resource;
-    }
+    boolean removeRepositoryListener(RepositoryListener listener);
 }

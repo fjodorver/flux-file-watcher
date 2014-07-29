@@ -8,28 +8,27 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.internal;
+package com.codenvy.flux.watcher.core.internal;
 
-import com.codenvy.flux.FluxConnection;
-import com.codenvy.flux.FluxRepository;
-import com.codenvy.flux.Message;
-import com.codenvy.flux.MessageType;
-import com.codenvy.flux.spi.RepositoryEvent;
-import com.codenvy.flux.spi.RepositoryEventTypes;
-import com.codenvy.flux.spi.RepositoryListener;
-import com.codenvy.flux.spi.Resource;
+import com.codenvy.flux.watcher.core.FluxConnection;
+import com.codenvy.flux.watcher.core.FluxRepository;
+import com.codenvy.flux.watcher.core.Message;
+import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
+import com.codenvy.flux.watcher.core.spi.RepositoryEventTypes;
+import com.codenvy.flux.watcher.core.spi.RepositoryListener;
+import com.codenvy.flux.watcher.core.spi.Resource;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.codenvy.flux.MessageFields.PROJECT_NAME;
-import static com.codenvy.flux.MessageFields.RESOURCE_HASH;
-import static com.codenvy.flux.MessageFields.RESOURCE_PATH;
-import static com.codenvy.flux.MessageFields.RESOURCE_TIMESTAMP;
-import static com.codenvy.flux.MessageFields.RESOURCE_TYPE;
-import static com.codenvy.flux.MessageFields.USERNAME;
-import static com.codenvy.flux.MessageType.RESOURCE_CREATED;
-import static com.codenvy.flux.spi.RepositoryEventType.ENTRY_CREATED;
+import static com.codenvy.flux.watcher.core.MessageFields.PROJECT_NAME;
+import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_HASH;
+import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_PATH;
+import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TIMESTAMP;
+import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TYPE;
+import static com.codenvy.flux.watcher.core.MessageFields.USERNAME;
+import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CREATED;
+import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_CREATED;
 
 /**
  * @author Kevin Pollet

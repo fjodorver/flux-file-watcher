@@ -8,11 +8,25 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux;
+package com.codenvy.flux.watcher.core.spi;
 
 /**
  * @author Kevin Pollet
  */
-public interface MessageHandler {
-    void onMessage(Message message);
+public class RepositoryEvent {
+    private final RepositoryEventType type;
+    private final Resource            resource;
+
+    public RepositoryEvent(RepositoryEventType type, Resource resource) {
+        this.type = type;
+        this.resource = resource;
+    }
+
+    public RepositoryEventType type() {
+        return type;
+    }
+
+    public Resource resource() {
+        return resource;
+    }
 }

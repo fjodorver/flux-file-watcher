@@ -8,19 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.spi;
-
-import java.nio.file.Path;
+package com.codenvy.flux.watcher.core.spi;
 
 /**
  * @author Kevin Pollet
  */
-public interface RepositoryProvider {
-    Resource getResource(String projectId, Path resourcePath);
-
-    void createResource(Resource resource);
-
-    void deleteResource(Resource resource);
-
-    RepositoryWatchingService getWatchingService();
+public enum RepositoryEventType {
+    ENTRY_CREATED,
+    ENTRY_MODIFIED,
+    ENTRY_DELETED
 }

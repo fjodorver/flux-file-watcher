@@ -8,33 +8,33 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.internal;
+package com.codenvy.flux.watcher.core.internal;
 
-import com.codenvy.flux.FluxRepository;
-import com.codenvy.flux.Message;
-import com.codenvy.flux.MessageHandler;
-import com.codenvy.flux.MessageTypes;
-import com.codenvy.flux.spi.RepositoryProvider;
-import com.codenvy.flux.spi.Resource;
-import com.codenvy.flux.utils.ResourceHelper;
+import com.codenvy.flux.watcher.core.FluxRepository;
+import com.codenvy.flux.watcher.core.Message;
+import com.codenvy.flux.watcher.core.MessageHandler;
+import com.codenvy.flux.watcher.core.MessageTypes;
+import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
+import com.codenvy.flux.watcher.core.spi.Resource;
+import com.codenvy.flux.watcher.core.utils.ResourceHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.file.Paths;
 
-import static com.codenvy.flux.MessageFields.CALLBACK_ID;
-import static com.codenvy.flux.MessageFields.PROJECT_NAME;
-import static com.codenvy.flux.MessageFields.REQUEST_SENDER_ID;
-import static com.codenvy.flux.MessageFields.RESOURCE_CONTENT;
-import static com.codenvy.flux.MessageFields.RESOURCE_HASH;
-import static com.codenvy.flux.MessageFields.RESOURCE_PATH;
-import static com.codenvy.flux.MessageFields.RESOURCE_TIMESTAMP;
-import static com.codenvy.flux.MessageFields.RESOURCE_TYPE;
-import static com.codenvy.flux.MessageFields.USERNAME;
-import static com.codenvy.flux.MessageType.GET_PROJECT_RESPONSE;
-import static com.codenvy.flux.MessageType.GET_RESOURCE_REQUEST;
-import static com.codenvy.flux.spi.Resource.ResourceType.FILE;
+import static com.codenvy.flux.watcher.core.MessageFields.CALLBACK_ID;
+import static com.codenvy.flux.watcher.core.MessageFields.PROJECT_NAME;
+import static com.codenvy.flux.watcher.core.MessageFields.REQUEST_SENDER_ID;
+import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_CONTENT;
+import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_HASH;
+import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_PATH;
+import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TIMESTAMP;
+import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TYPE;
+import static com.codenvy.flux.watcher.core.MessageFields.USERNAME;
+import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_RESPONSE;
+import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_REQUEST;
+import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FILE;
 
 /**
  * @author Kevin Pollet
