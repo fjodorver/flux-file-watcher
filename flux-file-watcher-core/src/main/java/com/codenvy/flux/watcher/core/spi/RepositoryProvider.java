@@ -26,5 +26,5 @@ public interface RepositoryProvider {
 
     void deleteResource(Resource resource);
 
-    RepositoryWatchingService getWatchingService();
+    RepositoryWatchService getWatchService();
 }

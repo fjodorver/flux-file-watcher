@@ -15,7 +15,7 @@ import java.nio.file.Path;
 /**
  * @author Kevin Pollet
  */
-public interface RepositoryWatchingService {
+public interface RepositoryWatchService {
     void watch(Path path);
 
     void unwatch(Path path);
