@@ -45,7 +45,7 @@ public final class FluxCredentials {
      */
     public FluxCredentials(String username, String token) {
         this.username = checkNotNull(username);
-        this.token = checkNotNull(token);
+        this.token = token;
     }
 
     /**
@@ -60,7 +60,7 @@ public final class FluxCredentials {
     /**
      * Returns the user token.
      *
-     * @return the user token.
+     * @return the user token or {@code null} if none.
      */
     public String token() {
         return token;
