@@ -11,9 +11,9 @@
 package com.codenvy.flux.watcher.core;
 
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.net.URL;
 import java.util.UUID;
 
