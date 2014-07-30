@@ -38,7 +38,7 @@ public class FluxModule extends AbstractModule {
     }
 
     @Provides
-    public FluxCredentials provideFluxCredentials() {
+    public FluxCredentials provideCredentials() {
         return new FluxCredentials("defaultuser");
     }
 }
