@@ -41,7 +41,7 @@ public class FluxRepository {
         this.repositoryProvider.addRepositoryListener(new EntryCreatedListener(this));
     }
 
-    public FluxConnection connectTo(URL serverURL) {
+    public FluxConnection connect(URL serverURL) {
         FluxConnection connection = connections.get(serverURL);
         if (connection == null) {
             FluxConnection newConnection = new FluxConnection(serverURL);
@@ -53,7 +53,7 @@ public class FluxRepository {
         return connection;
     }
 
-    public void disconnectFrom(URL serverURL) {
+    public void disconnect(URL serverURL) {
         final FluxConnection connection = connections.get(serverURL);
         if (connection != null) {
             connection.close();
