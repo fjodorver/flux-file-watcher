@@ -11,6 +11,8 @@
 package com.codenvy.flux.watcher.core.spi;
 
 /**
+ * Type of the event sent by a repository.
+ *
  * @author Kevin Pollet
  */
 public enum RepositoryEventType {

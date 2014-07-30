@@ -22,32 +22,28 @@ import com.google.common.collect.FluentIterable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
+import static com.codenvy.flux.watcher.core.MessageType.CONNECT_TO_CHANNEL;
 import static com.google.common.base.Predicates.notNull;
 import static java.util.Collections.emptySet;
 
 /**
  * @author Kevin Pollet
  */
-// TODO implement authentication
-public class FluxConnection {
-    private final static Logger logger = LoggerFactory.getLogger(FluxConnection.class);
-
+public final class FluxConnection {
     private final SocketIO            socket;
+    private final FluxCredentials     credentials;
     private final Set<MessageHandler> messageHandlers;
-    private final Object              messageHandlersLock;
 
-    public FluxConnection(URL serverURL) {
+    public FluxConnection(URL serverURL, FluxCredentials credentials) {
         this.socket = new SocketIO(serverURL);
-        this.messageHandlers = new HashSet<>();
-        this.messageHandlersLock = new Object();
+        this.credentials = credentials;
+        this.messageHandlers = new CopyOnWriteArraySet<>();
     }
 
     void open() {
@@ -63,9 +59,9 @@ public class FluxConnection {
                     try {
 
                         final JSONObject message = new JSONObject();
-                        message.put("channel", "defaultuser");
+                        message.put("channel", credentials.username());
 
-                        sendMessage(new Message(MessageType.CONNECT_TO_CHANNEL, message));
+                        sendMessage(new Message(CONNECT_TO_CHANNEL, message));
 
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
@@ -84,13 +80,10 @@ public class FluxConnection {
 
                 @Override
                 public void on(String messageType, IOAcknowledge ioAcknowledge, Object... objects) {
-                    synchronized (messageHandlersLock) {
-                        final Set<MessageHandler> messageHandlers = getHandlersFor(messageType);
-                        for (MessageHandler oneMessageHandler : messageHandlers) {
-                            final Message message =
-                                    new Message(FluxConnection.this, MessageType.fromType(messageType), (JSONObject)objects[0]);
-                            oneMessageHandler.onMessage(message);
-                        }
+                    final Set<MessageHandler> messageHandlers = getHandlersFor(messageType);
+                    for (MessageHandler oneMessageHandler : messageHandlers) {
+                        final Message message = new Message(FluxConnection.this, MessageType.fromType(messageType), (JSONObject)objects[0]);
+                        oneMessageHandler.onMessage(message);
                     }
                 }
 
@@ -109,15 +102,11 @@ public class FluxConnection {
     }
 
     public boolean addMessageHandler(MessageHandler messageHandler) {
-        synchronized (messageHandlersLock) {
-            return messageHandlers.add(messageHandler);
-        }
+        return messageHandlers.add(messageHandler);
     }
 
     public boolean removeMessageHandler(MessageHandler messageHandler) {
-        synchronized (messageHandlersLock) {
-            return messageHandlers.remove(messageHandler);
-        }
+        return messageHandlers.remove(messageHandler);
     }
 
     public void sendMessage(Message message) {

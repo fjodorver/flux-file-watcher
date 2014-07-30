@@ -10,51 +10,37 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
-import com.codenvy.flux.watcher.core.internal.EntryCreatedListener;
-import com.codenvy.flux.watcher.core.internal.SendResourceHandler;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import java.net.URL;
-import java.util.Collections;
-import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author Kevin Pollet
  */
+@Singleton
 public class FluxRepository {
-    private final int                                id;
-    private final String                             username;
-    private final ConcurrentMap<URL, FluxConnection> connections;
-    private final RepositoryProvider                 repositoryProvider;
+    private final int                   id;
+    private final FluxCredentials       credentials;
+    private final RepositoryProvider    repositoryProvider;
+    private final FluxConnectionManager connectionManager;
 
-    public FluxRepository(String username) {
-        this.username = username;
+    @Inject
+    public FluxRepository(FluxCredentials credentials, FluxConnectionManager connectionManager, RepositoryProvider repositoryProvider) {
         this.id = new Long(UUID.randomUUID().getMostSignificantBits()).intValue();
-        this.connections = new ConcurrentHashMap<>();
-        this.repositoryProvider = ServiceLoader.load(RepositoryProvider.class).iterator().next();
-
-        // initialize repository listeners
-        this.repositoryProvider.addRepositoryListener(new EntryCreatedListener(this));
+        this.credentials = credentials;
+        this.connectionManager = connectionManager;
+        this.repositoryProvider = repositoryProvider;
     }
 
     public FluxConnection connect(URL serverURL) {
-        FluxConnection connection = connections.get(serverURL);
-        if (connection == null) {
-            FluxConnection newConnection = new FluxConnection(serverURL);
-            connection = connections.putIfAbsent(serverURL, newConnection);
-            if (connection == null) {
-                connection = initializeAndOpenConnection(newConnection);
-            }
-        }
-        return connection;
+        return connectionManager.newConnection(serverURL, credentials);
     }
 
     public void disconnect(URL serverURL) {
-        final FluxConnection connection = connections.get(serverURL);
+        final FluxConnection connection = connectionManager.connections().get(serverURL);
         if (connection != null) {
             connection.close();
         }
@@ -72,22 +58,15 @@ public class FluxRepository {
         return id;
     }
 
-    public String username() {
-        return username;
-    }
-
-    public Map<URL, FluxConnection> connections() {
-        return Collections.unmodifiableMap(connections);
+    public FluxCredentials credentials() {
+        return credentials;
     }
 
     public RepositoryProvider repositoryProvider() {
         return repositoryProvider;
     }
 
-    private FluxConnection initializeAndOpenConnection(FluxConnection connection) {
-        connection.addMessageHandler(new SendResourceHandler(this));
-        connection.open();
-
-        return connection;
+    public FluxConnectionManager connectionManager() {
+        return connectionManager;
     }
 }

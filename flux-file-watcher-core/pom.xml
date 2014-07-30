@@ -32,9 +32,24 @@
             <version>${com.google.guava.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>${com.google.code.guice.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
+            <version>${com.google.code.guice.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.socket</groupId>
             <artifactId>socket.io-java-client</artifactId>
             <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>${javax.inject.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

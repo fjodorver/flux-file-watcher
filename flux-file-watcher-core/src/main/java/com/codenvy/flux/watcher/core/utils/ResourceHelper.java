@@ -18,6 +18,8 @@ import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * Helper providing methods to work with {@link com.codenvy.flux.watcher.core.spi.Resource}.
+ *
  * @author Kevin Pollet
  */
 public final class ResourceHelper {
@@ -33,7 +35,16 @@ public final class ResourceHelper {
         }
     }
 
-    public static String hash(ResourceType type, byte[] content) {
+    /**
+     * Calculates the sha1 for the given {@link com.codenvy.flux.watcher.core.spi.Resource.ResourceType} and content.
+     *
+     * @param type
+     *         the {@link com.codenvy.flux.watcher.core.spi.Resource.ResourceType}.
+     * @param content
+     *         the content might be {@code null}.
+     * @return the sha1 as an hexadecimal {@link String}, never {@code null}.
+     */
+    public static String sha1Hash(ResourceType type, byte[] content) {
         checkNotNull(type);
         if (content == null) {
             content = new byte[0];
