@@ -11,7 +11,6 @@
 package com.codenvy.flux.watcher.core.internal;
 
 import com.codenvy.flux.watcher.core.FluxConnectionManager;
-import com.codenvy.flux.watcher.core.FluxCredentials;
 import com.codenvy.flux.watcher.core.Message;
 import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
 import com.codenvy.flux.watcher.core.spi.RepositoryEventTypes;
@@ -29,7 +28,6 @@ import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_HASH;
 import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_PATH;
 import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TIMESTAMP;
 import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TYPE;
-import static com.codenvy.flux.watcher.core.MessageFields.USERNAME;
 import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CREATED;
 import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_CREATED;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -42,22 +40,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 @RepositoryEventTypes(ENTRY_CREATED)
 public final class EntryCreatedListener implements RepositoryListener {
-    private final FluxCredentials       credentials;
     private final FluxConnectionManager connectionManager;
 
     /**
      * Constructs an instance of {@code EntryCreatedListener}.
      *
-     * @param credentials
-     *         the {@link com.codenvy.flux.watcher.core.FluxCredentials}.
      * @param connectionManager
      *         the {@link com.codenvy.flux.watcher.core.FluxConnectionManager}.
      * @throws java.lang.NullPointerException
-     *         if {@code credentials} or {@code connectionManager} parameter is {@code null}.
+     *         if {@code connectionManager} parameter is {@code null}.
      */
     @Inject
-    public EntryCreatedListener(FluxCredentials credentials, FluxConnectionManager connectionManager) {
-        this.credentials = checkNotNull(credentials);
+    public EntryCreatedListener(FluxConnectionManager connectionManager) {
         this.connectionManager = checkNotNull(connectionManager);
     }
 
@@ -68,7 +62,6 @@ public final class EntryCreatedListener implements RepositoryListener {
             final Resource createdResource = event.resource();
 
             final JSONObject message = new JSONObject();
-            message.put(USERNAME, credentials.username());
             message.put(PROJECT_NAME, createdResource.projectId());
             message.put(RESOURCE_PATH, createdResource.path());
             message.put(RESOURCE_TIMESTAMP, createdResource.timestamp());

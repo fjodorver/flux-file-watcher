@@ -10,7 +10,6 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
-import com.codenvy.flux.watcher.core.FluxCredentials;
 import com.codenvy.flux.watcher.core.Message;
 import com.codenvy.flux.watcher.core.MessageHandler;
 import com.codenvy.flux.watcher.core.MessageTypes;
@@ -31,7 +30,6 @@ import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_HASH;
 import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_PATH;
 import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TIMESTAMP;
 import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TYPE;
-import static com.codenvy.flux.watcher.core.MessageFields.USERNAME;
 import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_RESPONSE;
 import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_REQUEST;
 import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FILE;
@@ -45,22 +43,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 @MessageTypes(GET_RESOURCE_REQUEST)
 public final class SendResourceHandler implements MessageHandler {
-    private final FluxCredentials    credentials;
     private final RepositoryProvider repositoryProvider;
 
     /**
      * Constructs an instance of {@link com.codenvy.flux.watcher.core.internal.SendResourceHandler}.
      *
-     * @param credentials
-     *         the {@link com.codenvy.flux.watcher.core.FluxCredentials}.
      * @param repositoryProvider
      *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider}.
      * @throws java.lang.NullPointerException
-     *         if {@code credentials} or {@code repositoryProvider} parameter is {@code null}.
+     *         if {@code repositoryProvider} parameter is {@code null}.
      */
     @Inject
-    public SendResourceHandler(FluxCredentials credentials, RepositoryProvider repositoryProvider) {
-        this.credentials = checkNotNull(credentials);
+    public SendResourceHandler(RepositoryProvider repositoryProvider) {
         this.repositoryProvider = checkNotNull(repositoryProvider);
     }
 
@@ -69,34 +63,30 @@ public final class SendResourceHandler implements MessageHandler {
         try {
 
             final JSONObject request = message.content();
-            final String username = request.getString(USERNAME);
             final int callbackID = request.getInt(CALLBACK_ID);
             final String requestSenderID = request.getString(REQUEST_SENDER_ID);
             final String projectName = request.getString(PROJECT_NAME);
             final String resourcePath = request.getString(RESOURCE_PATH);
 
-            if (credentials.username().equals(username)) {
-                // we ask the repository to retrieve the resource
-                final Resource resource = repositoryProvider.getResource(projectName, resourcePath);
+            // we ask the repository to retrieve the resource
+            final Resource resource = repositoryProvider.getResource(projectName, resourcePath);
 
-                // we send the resource only if the timestamp are equals or no timestamp is specified
-                if (!request.has(RESOURCE_TIMESTAMP) || request.getLong(RESOURCE_TIMESTAMP) == resource.timestamp()) {
-                    final JSONObject response = new JSONObject();
-                    response.put(CALLBACK_ID, callbackID);
-                    response.put(REQUEST_SENDER_ID, requestSenderID);
-                    response.put(USERNAME, username);
-                    response.put(PROJECT_NAME, projectName);
-                    response.put(RESOURCE_PATH, resourcePath);
-                    response.put(RESOURCE_TIMESTAMP, resource.timestamp());
-                    response.put(RESOURCE_HASH, resource.hash());
-                    response.put(RESOURCE_TYPE, resource.type().name().toLowerCase());
-                    if (resource.type() == FILE) {
-                        response.put(RESOURCE_CONTENT, new String(resource.content()));
-                    }
-
-                    message.source()
-                           .sendMessage(new Message(GET_PROJECT_RESPONSE, response));
+            // we send the resource only if the timestamp are equals or no timestamp is specified
+            if (!request.has(RESOURCE_TIMESTAMP) || request.getLong(RESOURCE_TIMESTAMP) == resource.timestamp()) {
+                final JSONObject response = new JSONObject();
+                response.put(CALLBACK_ID, callbackID);
+                response.put(REQUEST_SENDER_ID, requestSenderID);
+                response.put(PROJECT_NAME, projectName);
+                response.put(RESOURCE_PATH, resourcePath);
+                response.put(RESOURCE_TIMESTAMP, resource.timestamp());
+                response.put(RESOURCE_HASH, resource.hash());
+                response.put(RESOURCE_TYPE, resource.type().name().toLowerCase());
+                if (resource.type() == FILE) {
+                    response.put(RESOURCE_CONTENT, new String(resource.content()));
                 }
+
+                message.source()
+                       .sendMessage(new Message(GET_PROJECT_RESPONSE, response));
             }
 
         } catch (JSONException e) {

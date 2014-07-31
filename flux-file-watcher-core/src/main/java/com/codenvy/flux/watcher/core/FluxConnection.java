@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import static com.codenvy.flux.watcher.core.MessageFields.USERNAME;
 import static com.codenvy.flux.watcher.core.MessageType.CONNECT_TO_CHANNEL;
 import static com.google.common.base.Predicates.notNull;
 import static java.util.Collections.emptySet;
@@ -80,7 +81,7 @@ public final class FluxConnection {
 
                 @Override
                 public void on(String messageType, IOAcknowledge ioAcknowledge, Object... objects) {
-                    final Set<MessageHandler> messageHandlers = getHandlersFor(messageType);
+                    final Set<MessageHandler> messageHandlers = getMessageHandlersFor(messageType);
                     for (MessageHandler oneMessageHandler : messageHandlers) {
                         final Message message = new Message(FluxConnection.this, MessageType.fromType(messageType), (JSONObject)objects[0]);
                         oneMessageHandler.onMessage(message);
@@ -111,23 +112,32 @@ public final class FluxConnection {
     }
 
     public void sendMessage(Message message) {
+        final JSONObject content = message.content();
+        if (!content.has(USERNAME)) {
+            try {
+                content.put(USERNAME, credentials.username());
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         socket.emit(message.type().value(), message);
     }
 
-    private Set<MessageHandler> getHandlersFor(final String messageType) {
+    private Set<MessageHandler> getMessageHandlersFor(final String messageType) {
         return FluentIterable.from(messageHandlers)
                              .filter(notNull())
                              .filter(new Predicate<MessageHandler>() {
                                  @Override
                                  public boolean apply(MessageHandler messageHandler) {
-                                     final Set<String> supportedTypes = getSupportedMessageTypesFor(messageHandler);
+                                     final Set<String> supportedTypes = getMessageTypesFor(messageHandler);
                                      return supportedTypes.contains(messageType);
                                  }
                              })
                              .toSet();
     }
 
-    private Set<String> getSupportedMessageTypesFor(MessageHandler messageHandler) {
+    private Set<String> getMessageTypesFor(MessageHandler messageHandler) {
         final MessageTypes types = messageHandler.getClass().getAnnotation(MessageTypes.class);
         if (types == null) {
             return emptySet();

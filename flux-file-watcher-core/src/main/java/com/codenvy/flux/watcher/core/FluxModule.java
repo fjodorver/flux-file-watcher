@@ -14,7 +14,6 @@ import com.codenvy.flux.watcher.core.internal.EntryCreatedListener;
 import com.codenvy.flux.watcher.core.internal.SendResourceHandler;
 import com.codenvy.flux.watcher.core.spi.RepositoryListener;
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
 
 /**
@@ -35,10 +34,5 @@ public class FluxModule extends AbstractModule {
         // repository listeners binding
         final Multibinder<RepositoryListener> repositoryListenerBinder = Multibinder.newSetBinder(binder(), RepositoryListener.class);
         repositoryListenerBinder.addBinding().to(EntryCreatedListener.class);
-    }
-
-    @Provides
-    protected FluxCredentials provideCredentials() {
-        return new FluxCredentials("defaultuser");
     }
 }

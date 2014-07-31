@@ -23,19 +23,17 @@ import java.util.UUID;
 @Singleton
 public class FluxRepository {
     private final int                   id;
-    private final FluxCredentials       credentials;
     private final RepositoryProvider    repositoryProvider;
     private final FluxConnectionManager connectionManager;
 
     @Inject
-    public FluxRepository(FluxCredentials credentials, FluxConnectionManager connectionManager, RepositoryProvider repositoryProvider) {
+    public FluxRepository(FluxConnectionManager connectionManager, RepositoryProvider repositoryProvider) {
         this.id = new Long(UUID.randomUUID().getMostSignificantBits()).intValue();
-        this.credentials = credentials;
         this.connectionManager = connectionManager;
         this.repositoryProvider = repositoryProvider;
     }
 
-    public FluxConnection connect(URL serverURL) {
+    public FluxConnection connect(URL serverURL, FluxCredentials credentials) {
         return connectionManager.openConnection(serverURL, credentials);
     }
 
@@ -53,10 +51,6 @@ public class FluxRepository {
 
     public int id() {
         return id;
-    }
-
-    public FluxCredentials credentials() {
-        return credentials;
     }
 
     public RepositoryProvider repositoryProvider() {
