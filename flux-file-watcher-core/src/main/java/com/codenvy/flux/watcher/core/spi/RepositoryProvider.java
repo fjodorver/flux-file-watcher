@@ -15,6 +15,7 @@ package com.codenvy.flux.watcher.core.spi;
  *
  * @author Kevin Pollet
  */
+//TODO add project and path doesn't exist, behaviour?
 public interface RepositoryProvider {
     /**
      * Add a project to the repository implementation.
@@ -23,9 +24,11 @@ public interface RepositoryProvider {
      *         the project id.
      * @param path
      *         the absolute project path.
-     * @return {@code true} if the project was not already added and the path exists, {@code false} otherwise.
+     * @return {@code true} if project was not already added and path exists, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code projectId} or {@code path} parameter is {@code null}.
+     * @throws java.lang.IllegalArgumentException
+     *         if the given {@code path} is not a directory.
      */
     boolean addProject(String projectId, String path);
 
@@ -34,7 +37,7 @@ public interface RepositoryProvider {
      *
      * @param projectId
      *         the project id.
-     * @return {@code true} if the project exists, {@code false} otherwise.
+     * @return {@code true} if project exists, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code projectId} parameter is {@code null}.
      */
@@ -79,6 +82,8 @@ public interface RepositoryProvider {
      * @param listener
      *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryListener} to add.
      * @return {@code true} if the listener was not already added, {@code false} otherwise.
+     * @throws java.lang.NullPointerException
+     *         if {@code listener} parameter is {@code null}.
      */
     boolean addRepositoryListener(RepositoryListener listener);
 
@@ -88,6 +93,8 @@ public interface RepositoryProvider {
      * @param listener
      *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryListener} to remove.
      * @return {@code true} if the listener exists, {@code false} otherwise.
+     * @throws java.lang.NullPointerException
+     *         if {@code listener} parameter is {@code null}.
      */
     boolean removeRepositoryListener(RepositoryListener listener);
 }
