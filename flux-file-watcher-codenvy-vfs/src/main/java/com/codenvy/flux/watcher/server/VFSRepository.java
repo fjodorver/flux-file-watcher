@@ -116,6 +116,15 @@ public class VFSRepository implements RepositoryProvider {
         return repositoryListeners.remove(listener);
     }
 
+    @Override
+    public <T> T unwrap(Class<T> clazz) {
+        checkNotNull(clazz);
+        if (clazz.isAssignableFrom(this.getClass())) {
+            return clazz.cast(this);
+        }
+        throw new IllegalArgumentException("Repository provider cannot be unwrapped to '" + clazz.getName() + "'");
+    }
+
     void fireRepositoryEvent(RepositoryEvent event) {
         final Set<RepositoryListener> filteredListeners = new HashSet<>();
         for (RepositoryListener oneRepositoryListener : repositoryListeners) {
