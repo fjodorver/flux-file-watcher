@@ -21,7 +21,7 @@ import com.codenvy.flux.watcher.core.spi.Resource;
  */
 public class DummyRepositoryProvider implements RepositoryProvider {
     @Override
-    public boolean addProject(String projectId, String path) {
+    public boolean addProject(String projectId, String projectPath) {
         return false;
     }
 
@@ -53,5 +53,10 @@ public class DummyRepositoryProvider implements RepositoryProvider {
     @Override
     public boolean removeRepositoryListener(RepositoryListener listener) {
         return false;
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> clazz) {
+        return null;
     }
 }

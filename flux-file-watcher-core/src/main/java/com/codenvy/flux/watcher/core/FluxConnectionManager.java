@@ -10,11 +10,11 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
+import com.google.inject.Provider;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -22,36 +22,42 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author Kevin Pollet
  */
-@Singleton
+//TODO concurrency
 //TODO remove connection wen needed, pool ?
+@Singleton
 public final class FluxConnectionManager {
     private final ConcurrentMap<URL, FluxConnection> connections;
-    private final Set<MessageHandler>                messageHandlers;
+    private final Provider<Set<MessageHandler>>      messageHandlersProvider;
 
     @Inject
-    public FluxConnectionManager(Set<MessageHandler> messageHandlers) {
-        this.messageHandlers = messageHandlers;
+    public FluxConnectionManager(Provider<Set<MessageHandler>> messageHandlersProvider) {
+        this.messageHandlersProvider = messageHandlersProvider;
         this.connections = new ConcurrentHashMap<>();
     }
 
-    public FluxConnection newConnection(URL serverURL, FluxCredentials credentials) {
+    public FluxConnection openConnection(URL serverURL, FluxCredentials credentials) {
         FluxConnection connection = connections.get(serverURL);
         if (connection == null) {
-            FluxConnection newConnection = new FluxConnection(serverURL, credentials);
+            FluxConnection newConnection = new FluxConnection(serverURL, credentials, messageHandlersProvider.get());
             connection = connections.putIfAbsent(serverURL, newConnection);
             if (connection == null) {
-                connection = newConnection;
-                for (MessageHandler oneMessageHandler : messageHandlers) {
-                    connection.addMessageHandler(oneMessageHandler);
-                }
-                newConnection.open();
+                connection = newConnection.open();
             }
         }
 
         return connection;
     }
 
-    public Map<URL, FluxConnection> connections() {
-        return Collections.unmodifiableMap(connections);
+    public void closeConnection(URL serverURL) {
+        final FluxConnection connection = connections.remove(serverURL);
+        if (connection != null) {
+            connection.close();
+        }
+    }
+
+    public void broadcastMessage(Message message) {
+        for (FluxConnection oneConnection : connections.values()) {
+            oneConnection.sendMessage(message);
+        }
     }
 }

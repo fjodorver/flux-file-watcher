@@ -19,13 +19,12 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 
-import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
@@ -39,31 +38,36 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FOLDER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.notNull;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.createDirectory;
 import static java.nio.file.Files.createFile;
 import static java.nio.file.Files.delete;
 import static java.nio.file.Files.exists;
+import static java.nio.file.Files.getLastModifiedTime;
+import static java.nio.file.Files.isDirectory;
 import static java.nio.file.Files.setLastModifiedTime;
 import static java.nio.file.Files.write;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
- * {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} implementation.
+ * {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} implementation backed by Java {@code FileSystem}.
  *
  * @author Kevin Pollet
  */
 @Singleton
 public class FileSystemRepository implements RepositoryProvider {
     private final ConcurrentMap<String, Path> projects;
-    private final WatchRepositoryService      watchService;
+    private final FileSystemWatchService      watchService;
     private final Set<RepositoryListener>     repositoryListeners;
+    private final FileSystem                  fileSystem;
 
     @Inject
-    public FileSystemRepository(Set<RepositoryListener> repositoryListeners) {
+    public FileSystemRepository(FileSystem fileSystem, Set<RepositoryListener> repositoryListeners) {
+        this.fileSystem = fileSystem;
         this.projects = new ConcurrentHashMap<>();
-        this.watchService = new WatchRepositoryService(this);
+        this.watchService = new FileSystemWatchService(fileSystem, this);
         this.repositoryListeners = new CopyOnWriteArraySet<>(repositoryListeners);
 
         // start the watch service
@@ -71,19 +75,17 @@ public class FileSystemRepository implements RepositoryProvider {
     }
 
     @Override
-    public boolean addProject(String projectId, String path) {
+    public boolean addProject(String projectId, String projectPath) {
         checkNotNull(projectId);
-        checkNotNull(path);
+        checkNotNull(projectPath);
 
-        final Path projectPath = Paths.get(path);
-        checkArgument(Files.isDirectory(projectPath));
+        final Path newProjectPath = fileSystem.getPath(projectPath);
+        checkArgument(exists(newProjectPath) && isDirectory(newProjectPath) && newProjectPath.isAbsolute());
 
-        if (exists(projectPath)) {
-            final Path previousProjectPath = projects.putIfAbsent(projectId, projectPath);
-            if (previousProjectPath == null) {
-                watchService.watch(projectPath);
-                return true;
-            }
+        final Path previousProjectPath = projects.putIfAbsent(projectId, newProjectPath);
+        if (previousProjectPath == null) {
+            watchService.watch(newProjectPath);
+            return true;
         }
         return false;
     }
@@ -109,8 +111,8 @@ public class FileSystemRepository implements RepositoryProvider {
             final Path resourcePath = projectPath.resolve(path);
             if (exists(resourcePath)) {
                 try {
-                    final boolean isDirectory = Files.isDirectory(resourcePath);
-                    final long timestamp = Files.getLastModifiedTime(resourcePath).toMillis();
+                    final boolean isDirectory = isDirectory(resourcePath);
+                    final long timestamp = getLastModifiedTime(resourcePath).toMillis();
 
                     return isDirectory ? Resource.newFolder(projectId, path, timestamp)
                                        : Resource.newFile(projectId, path, timestamp, Files.readAllBytes(resourcePath));
@@ -192,6 +194,15 @@ public class FileSystemRepository implements RepositoryProvider {
         return repositoryListeners.remove(listener);
     }
 
+    @Override
+    public <T> T unwrap(Class<T> clazz) {
+        checkNotNull(clazz);
+        if (clazz.isAssignableFrom(this.getClass())) {
+            return clazz.cast(this);
+        }
+        throw new IllegalArgumentException("Repository provider cannot be unwrapped to '" + clazz.getName() + "'");
+    }
+
     public Map<String, Path> projects() {
         return unmodifiableMap(projects);
     }
@@ -199,17 +210,15 @@ public class FileSystemRepository implements RepositoryProvider {
     void fireRepositoryEvent(final RepositoryEvent event) {
         final Set<RepositoryListener> filteredRepositoryListeners = FluentIterable
                 .from(repositoryListeners)
+                .filter(notNull())
                 .filter(new Predicate<RepositoryListener>() {
                     @Override
-                    public boolean apply(@Nullable RepositoryListener listener) {
-                        if (listener == null) {
-                            return false;
-                        }
+                    public boolean apply(RepositoryListener listener) {
                         final RepositoryEventTypes repositoryEventTypes = listener.getClass().getAnnotation(RepositoryEventTypes.class);
                         return Arrays.asList(repositoryEventTypes.value()).contains(event.type());
                     }
                 })
-                .toImmutableSet();
+                .toSet();
 
         for (RepositoryListener oneRepositoryListener : filteredRepositoryListeners) {
             oneRepositoryListener.onEvent(event);

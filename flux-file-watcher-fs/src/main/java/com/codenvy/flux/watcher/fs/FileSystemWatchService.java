@@ -17,7 +17,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
+import java.nio.file.FileSystem;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,28 +49,31 @@ import static java.nio.file.WatchEvent.Kind;
  *
  * @author Kevin Pollet
  */
-public final class WatchRepositoryService extends Thread {
+//TODO file system as parameter ??
+public final class FileSystemWatchService extends Thread {
     private final WatchService          watchService;
     private final BiMap<WatchKey, Path> watchKeys;
     private final Object                watchKeysMutex;
     private final FileSystemRepository  repository;
 
     /**
-     * Constructs an instance of {@link WatchRepositoryService}.
+     * Constructs an instance of {@link FileSystemWatchService}.
      *
+     * @param fileSystem
+     *         the {@link java.nio.file.FileSystem} to watch.
      * @param repository
      *         the {@link com.codenvy.flux.watcher.fs.FileSystemRepository} instance.
      * @throws java.lang.NullPointerException
      *         if {@code repository} parameter is {@code null}.
      */
-    WatchRepositoryService(FileSystemRepository repository) {
+    FileSystemWatchService(FileSystem fileSystem, FileSystemRepository repository) {
         this.repository = checkNotNull(repository);
         this.watchKeys = HashBiMap.create();
         this.watchKeysMutex = new Object();
 
         try {
 
-            this.watchService = FileSystems.getDefault().newWatchService();
+            this.watchService = fileSystem.newWatchService();
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -217,33 +220,33 @@ public final class WatchRepositoryService extends Thread {
     /**
      * Converts the given {@link java.nio.file.Path} to a {@link com.codenvy.flux.watcher.core.spi.Resource}.
      *
-     * @param path
+     * @param resourcePath
      *         the {@link java.nio.file.Path} to convert.
      * @return the corresponding {@link com.codenvy.flux.watcher.core.spi.Resource} instance or {@code null} if conversion is impossible.
      * @throws java.lang.NullPointerException
-     *         if {@code path} parameter is {@code null}.
+     *         if {@code resourcePath} parameter is {@code null}.
      * @throws java.lang.IllegalArgumentException
-     *         if {@code path} parameter is not absolute.
+     *         if {@code resourcePath} parameter is not absolute.
      */
-    private Resource pathToResource(Path path) {
-        checkNotNull(path);
-        checkArgument(path.isAbsolute());
+    private Resource pathToResource(Path resourcePath) {
+        checkNotNull(resourcePath);
+        checkArgument(resourcePath.isAbsolute());
 
-        if (exists(path)) {
+        if (exists(resourcePath)) {
             try {
 
-                final boolean isDirectory = isDirectory(path);
-                final long timestamp = getLastModifiedTime(path).toMillis();
+                final boolean isDirectory = isDirectory(resourcePath);
+                final long timestamp = getLastModifiedTime(resourcePath).toMillis();
 
                 // TODO better?
                 for (Map.Entry<String, Path> oneEntry : repository.projects().entrySet()) {
                     final String projectId = oneEntry.getKey();
                     final Path projectPath = oneEntry.getValue();
-                    if (path.startsWith(oneEntry.getValue())) {
-                        final String relativeResourcePath = projectPath.relativize(path).toString();
+                    if (resourcePath.startsWith(oneEntry.getValue())) {
+                        final String relativeResourcePath = projectPath.relativize(resourcePath).toString();
 
                         return isDirectory ? Resource.newFolder(projectId, relativeResourcePath, timestamp)
-                                           : Resource.newFile(projectId, relativeResourcePath, timestamp, Files.readAllBytes(path));
+                                           : Resource.newFile(projectId, relativeResourcePath, timestamp, Files.readAllBytes(resourcePath));
                     }
                 }
 

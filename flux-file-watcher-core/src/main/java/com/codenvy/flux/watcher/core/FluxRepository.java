@@ -36,14 +36,11 @@ public class FluxRepository {
     }
 
     public FluxConnection connect(URL serverURL) {
-        return connectionManager.newConnection(serverURL, credentials);
+        return connectionManager.openConnection(serverURL, credentials);
     }
 
     public void disconnect(URL serverURL) {
-        final FluxConnection connection = connectionManager.connections().get(serverURL);
-        if (connection != null) {
-            connection.close();
-        }
+        connectionManager.closeConnection(serverURL);
     }
 
     public void addProject(String projectId, String path) {

@@ -40,13 +40,13 @@ public final class FluxConnection {
     private final FluxCredentials     credentials;
     private final Set<MessageHandler> messageHandlers;
 
-    public FluxConnection(URL serverURL, FluxCredentials credentials) {
+    public FluxConnection(URL serverURL, FluxCredentials credentials, Set<MessageHandler> messageHandlers) {
         this.socket = new SocketIO(serverURL);
         this.credentials = credentials;
-        this.messageHandlers = new CopyOnWriteArraySet<>();
+        this.messageHandlers = new CopyOnWriteArraySet<>(messageHandlers);
     }
 
-    void open() {
+    FluxConnection open() {
         if (!socket.isConnected()) {
             socket.connect(new IOCallback() {
                 @Override
@@ -93,6 +93,7 @@ public final class FluxConnection {
                 }
             });
         }
+        return this;
     }
 
     void close() {
@@ -123,7 +124,7 @@ public final class FluxConnection {
                                      return supportedTypes.contains(messageType);
                                  }
                              })
-                             .toImmutableSet();
+                             .toSet();
     }
 
     private Set<String> getSupportedMessageTypesFor(MessageHandler messageHandler) {
@@ -140,6 +141,6 @@ public final class FluxConnection {
                                      return messageType.value();
                                  }
                              })
-                             .toImmutableSet();
+                             .toSet();
     }
 }

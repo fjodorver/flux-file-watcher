@@ -15,22 +15,21 @@ package com.codenvy.flux.watcher.core.spi;
  *
  * @author Kevin Pollet
  */
-//TODO add project and path doesn't exist, behaviour?
 public interface RepositoryProvider {
     /**
      * Add a project to the repository implementation.
      *
      * @param projectId
      *         the project id.
-     * @param path
-     *         the absolute project path.
-     * @return {@code true} if project was not already added and path exists, {@code false} otherwise.
+     * @param projectPath
+     *         the absolute project projectPath.
+     * @return {@code true} if project was not already added and projectPath exists, {@code false} otherwise.
      * @throws java.lang.NullPointerException
-     *         if {@code projectId} or {@code path} parameter is {@code null}.
+     *         if {@code projectId} or {@code projectPath} parameter is {@code null}.
      * @throws java.lang.IllegalArgumentException
-     *         if the given {@code path} is not a directory.
+     *         if the given {@code projectPath} is not a directory, doesn't exist or is not absolute.
      */
-    boolean addProject(String projectId, String path);
+    boolean addProject(String projectId, String projectPath);
 
     /**
      * Remove a project from the repository implementation.
@@ -97,4 +96,19 @@ public interface RepositoryProvider {
      *         if {@code listener} parameter is {@code null}.
      */
     boolean removeRepositoryListener(RepositoryListener listener);
+
+    /**
+     * Unwrap the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} to access implementation specific methods.
+     *
+     * @param clazz
+     *         the type to unwrap to.
+     * @param <T>
+     *         the type to unwrap to.
+     * @return the unwrapped {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} implementation.
+     * @throws java.lang.NullPointerException
+     *         if {@code clazz} parameter is {@code null}.
+     * @throws java.lang.IllegalArgumentException
+     *         if the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} cannot be unwrapped to the given type.
+     */
+    <T> T unwrap(Class<T> clazz);
 }

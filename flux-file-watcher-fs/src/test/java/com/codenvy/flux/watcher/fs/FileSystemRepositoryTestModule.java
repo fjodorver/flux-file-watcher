@@ -10,26 +10,32 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
+import com.google.common.jimfs.Jimfs;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 
+import static com.google.common.jimfs.Jimfs.URI_SCHEME;
+
 /**
- * The file system repository provider implementation Guice bindings.
- *
  * @author Kevin Pollet
  */
-public class FileSystemRepositoryModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(RepositoryProvider.class).to(FileSystemRepository.class);
-    }
+public final class FileSystemRepositoryTestModule extends FileSystemRepositoryModule {
+    public static final String FILE_SYSTEM_NAME = "in-memory";
 
-    @Provides
+    @Override
     protected FileSystem provideFileSystem() {
-        return FileSystems.getDefault();
+        try {
+
+            return FileSystems.getFileSystem(new URI(URI_SCHEME, FILE_SYSTEM_NAME, null, null));
+
+        } catch (FileSystemNotFoundException e) {
+            return Jimfs.newFileSystem(FILE_SYSTEM_NAME);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

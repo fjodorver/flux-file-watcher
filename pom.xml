@@ -44,6 +44,8 @@
     </modules>
 
     <properties>
+        <com.google.guava.version>17.0</com.google.guava.version>
+        <com.google.jimfs.version>1.0</com.google.jimfs.version>
         <license_years>2014</license_years>
     </properties>
 

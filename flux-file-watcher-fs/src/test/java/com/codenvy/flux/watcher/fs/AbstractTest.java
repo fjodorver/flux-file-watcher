@@ -10,26 +10,20 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
+import com.codenvy.flux.watcher.core.FluxModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
+import org.junit.BeforeClass;
 
 /**
- * The file system repository provider implementation Guice bindings.
- *
  * @author Kevin Pollet
  */
-public class FileSystemRepositoryModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(RepositoryProvider.class).to(FileSystemRepository.class);
-    }
+public class AbstractTest {
+    protected static Injector injector;
 
-    @Provides
-    protected FileSystem provideFileSystem() {
-        return FileSystems.getDefault();
+    @BeforeClass
+    public static void initialize() {
+        injector = Guice.createInjector(new FluxModule(), new FileSystemRepositoryTestModule());
     }
 }

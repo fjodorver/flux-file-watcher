@@ -10,7 +10,6 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
-import com.codenvy.flux.watcher.core.FluxConnection;
 import com.codenvy.flux.watcher.core.FluxConnectionManager;
 import com.codenvy.flux.watcher.core.FluxCredentials;
 import com.codenvy.flux.watcher.core.Message;
@@ -77,9 +76,7 @@ public final class EntryCreatedListener implements RepositoryListener {
             message.put(RESOURCE_TYPE, createdResource.type().name().toLowerCase());
 
             // broadcast message to all connections
-            for (FluxConnection oneConnection : connectionManager.connections().values()) {
-                oneConnection.sendMessage(new Message(RESOURCE_CREATED, message));
-            }
+            connectionManager.broadcastMessage(new Message(RESOURCE_CREATED, message));
 
         } catch (JSONException e) {
             throw new RuntimeException(e);
