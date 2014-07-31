@@ -10,14 +10,6 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.server;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.io.ByteArrayInputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 import com.codenvy.api.project.server.ProjectService;
 import com.codenvy.api.project.shared.dto.ProjectDescriptor;
 import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
@@ -28,9 +20,17 @@ import com.codenvy.flux.watcher.core.spi.Resource;
 import com.codenvy.flux.watcher.core.spi.Resource.ResourceType;
 import com.google.inject.Inject;
 
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} implementation.
- * 
+ *
  * @author Stéphane Tournié
  */
 public class VFSRepository implements RepositoryProvider {

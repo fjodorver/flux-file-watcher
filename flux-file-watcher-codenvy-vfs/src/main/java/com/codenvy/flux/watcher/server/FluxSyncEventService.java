@@ -10,12 +10,6 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.server;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.codenvy.api.core.notification.EventService;
 import com.codenvy.api.core.notification.EventSubscriber;
 import com.codenvy.api.project.server.ProjectService;
@@ -27,6 +21,12 @@ import com.codenvy.flux.watcher.core.spi.Resource;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 /**
  * Service notifying Flux repository about publishing of VFS events in Codenvy.
  *
@@ -35,7 +35,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class FluxSyncEventService {
 
-    private static final Logger                     LOG = LoggerFactory.getLogger(FluxSyncEventService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FluxSyncEventService.class);
 
     private final EventService                      eventService;
     private final EventSubscriber<VirtualFileEvent> subscriber;
@@ -60,12 +60,11 @@ public class FluxSyncEventService {
 
     /**
      * Subscriber receiving notification events from Codenvy VFS.
-     *
      */
     public class VirtualFileEventSubscriber implements EventSubscriber<VirtualFileEvent> {
 
-        private VFSRepository repositoryProvider;
-        private ProjectService        projectService;
+        private VFSRepository  repositoryProvider;
+        private ProjectService projectService;
 
         public VirtualFileEventSubscriber(VFSRepository repositoryProvider, ProjectService projectService) {
             this.repositoryProvider = repositoryProvider;
@@ -93,7 +92,7 @@ public class FluxSyncEventService {
                     String eventPath = event.getPath();
                     ProjectDescriptor project = null;
                     try {
-                        project = projectService.getProject(eventWorkspace, eventPath); 
+                        project = projectService.getProject(eventWorkspace, eventPath);
                     } catch (Exception e) {
                         LOG.error(e.getMessage());
                     }
