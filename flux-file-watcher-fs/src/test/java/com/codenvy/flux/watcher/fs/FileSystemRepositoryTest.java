@@ -22,30 +22,28 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.inject.Singleton;
 import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashSet;
 
 import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_CREATED;
 import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_DELETED;
 import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_MODIFIED;
 import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FILE;
 import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FOLDER;
-import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.createDirectory;
+import static com.codenvy.flux.watcher.fs.TestConstants.PROJECT_ID;
+import static com.codenvy.flux.watcher.fs.TestConstants.PROJECT_PATH;
+import static com.codenvy.flux.watcher.fs.TestConstants.RELATIVE_PROJECT_HELLO_FILE_PATH;
+import static com.codenvy.flux.watcher.fs.TestConstants.RELATIVE_PROJECT_MAIN_FOLDER_PATH;
+import static com.codenvy.flux.watcher.fs.TestConstants.RELATIVE_PROJECT_README_FILE_PATH;
+import static com.codenvy.flux.watcher.fs.TestConstants.RELATIVE_PROJECT_SRC_FOLDER_PATH;
 import static java.nio.file.Files.createFile;
-import static java.nio.file.Files.delete;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.nio.file.Files.isDirectory;
 import static java.nio.file.Files.readAllBytes;
-import static java.nio.file.Files.walkFileTree;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -57,24 +55,11 @@ import static org.mockito.Mockito.verify;
  * @author Kevin Pollet
  */
 public final class FileSystemRepositoryTest extends AbstractTest {
-    private static final String PROJECT_ID                        = "codenvy-project-id";
-    private static final String PROJECT_PATH                      = "/codenvy-project";
-    private static final String RELATIVE_PROJECT_SRC_FOLDER_PATH  = "src";
-    private static final String RELATIVE_PROJECT_MAIN_FOLDER_PATH = "src/main";
-    private static final String RELATIVE_PROJECT_HELLO_FILE_PATH  = "src/hello";
-    private static final String RELATIVE_PROJECT_README_FILE_PATH = "readme";
-
     private FileSystemRepository fileSystemRepository;
-    private FileSystem           fileSystem;
 
     @Before
     public void beforeTest() throws IOException {
-        fileSystemRepository = injector().getInstance(FileSystemRepository.class);
-        fileSystem = injector().getInstance(FileSystem.class);
-
-        createDirectory(fileSystem.getPath(PROJECT_PATH));
-        createDirectory(fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH));
-        createFile(fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH));
+        fileSystemRepository = new FileSystemRepository(fileSystem(), new HashSet<RepositoryListener>());
 
         final int numberOfProjects = fileSystemRepository.projects().size();
         final boolean isAdded = fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
@@ -90,20 +75,6 @@ public final class FileSystemRepositoryTest extends AbstractTest {
 
         Assert.assertTrue(isRemoved);
         Assert.assertEquals(numberOfProjects - 1, fileSystemRepository.projects().size());
-
-        walkFileTree(fileSystem.getPath(PROJECT_PATH), new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                delete(dir);
-                return CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                delete(file);
-                return CONTINUE;
-            }
-        });
     }
 
     @Test(expected = NullPointerException.class)
@@ -168,7 +139,7 @@ public final class FileSystemRepositoryTest extends AbstractTest {
 
     @Test
     public void testGetResourceWithFilePath() throws IOException {
-        final Path absoluteResourcePath = fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH);
+        final Path absoluteResourcePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH);
         final Resource resource = fileSystemRepository.getResource(PROJECT_ID, RELATIVE_PROJECT_README_FILE_PATH);
 
         Assert.assertNotNull(resource);
@@ -182,7 +153,7 @@ public final class FileSystemRepositoryTest extends AbstractTest {
 
     @Test
     public void testGetResourceWithFolderPath() throws IOException {
-        final Path absoluteFolderPath = fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
+        final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
         final Resource resource = fileSystemRepository.getResource(PROJECT_ID, RELATIVE_PROJECT_SRC_FOLDER_PATH);
 
         Assert.assertNotNull(resource);
@@ -206,7 +177,7 @@ public final class FileSystemRepositoryTest extends AbstractTest {
         calendar.set(Calendar.MONTH, 8);
         calendar.set(Calendar.YEAR, 1984);
 
-        final Path absoluteFolderPath = fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_MAIN_FOLDER_PATH);
+        final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_MAIN_FOLDER_PATH);
         fileSystemRepository.createResource(
                 Resource.newFolder(PROJECT_ID, RELATIVE_PROJECT_MAIN_FOLDER_PATH, calendar.getTimeInMillis()));
 
@@ -223,7 +194,7 @@ public final class FileSystemRepositoryTest extends AbstractTest {
         calendar.set(Calendar.MONTH, 8);
         calendar.set(Calendar.YEAR, 1984);
 
-        final Path absoluteFilePath = fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_HELLO_FILE_PATH);
+        final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_HELLO_FILE_PATH);
         fileSystemRepository.createResource(
                 Resource.newFile(PROJECT_ID, RELATIVE_PROJECT_HELLO_FILE_PATH, calendar.getTimeInMillis(), helloFileContent));
 
@@ -241,7 +212,7 @@ public final class FileSystemRepositoryTest extends AbstractTest {
 
     @Test
     public void testDeleteResourceWithEmptyFolderResource() throws IOException {
-        final Path absoluteFolderPath = fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
+        final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
         fileSystemRepository.deleteResource(Resource.newFolder(PROJECT_ID, RELATIVE_PROJECT_SRC_FOLDER_PATH, System.currentTimeMillis()));
 
         Assert.assertFalse(exists(absoluteFolderPath));
@@ -249,10 +220,10 @@ public final class FileSystemRepositoryTest extends AbstractTest {
 
     @Test
     public void testDeleteResourceWithNonEmptyFolderResource() throws IOException {
-        final Path absoluteFilePath = fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_HELLO_FILE_PATH);
+        final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_HELLO_FILE_PATH);
         createFile(absoluteFilePath);
 
-        final Path absoluteFolderPath = fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
+        final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
         fileSystemRepository.deleteResource(Resource.newFolder(PROJECT_ID, RELATIVE_PROJECT_SRC_FOLDER_PATH, System.currentTimeMillis()));
 
         Assert.assertFalse(exists(absoluteFolderPath));
@@ -260,7 +231,7 @@ public final class FileSystemRepositoryTest extends AbstractTest {
 
     @Test
     public void testDeleteResourceWithFileResource() throws IOException {
-        final Path absoluteFilePath = fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH);
+        final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH);
         fileSystemRepository
                 .deleteResource(Resource.newFile(PROJECT_ID, RELATIVE_PROJECT_README_FILE_PATH, System.currentTimeMillis(), new byte[0]));
 
@@ -302,19 +273,23 @@ public final class FileSystemRepositoryTest extends AbstractTest {
 
     @Test
     public void testFireRepositoryEvent() {
+        final EntryCreatedListener entryCreatedListener = new EntryCreatedListener();
+        fileSystemRepository.addRepositoryListener(entryCreatedListener);
+
+        final EntryModifiedListener entryModifiedListener = new EntryModifiedListener();
+        fileSystemRepository.addRepositoryListener(entryModifiedListener);
+
+        final EntryDeletedListener entryDeletedListener = new EntryDeletedListener();
+        fileSystemRepository.addRepositoryListener(entryDeletedListener);
+
+        final EntryCreatedAndModifiedListener entryCreatedAndModifiedListener = new EntryCreatedAndModifiedListener();
+        fileSystemRepository.addRepositoryListener(entryCreatedAndModifiedListener);
+
         fireAllEventTypes();
 
-        final EntryCreatedListener entryCreatedListener = injector().getInstance(EntryCreatedListener.class);
         verify(entryCreatedListener.mock, times(1)).onEvent(any(RepositoryEvent.class));
-
-        final EntryModifiedListener entryModifiedListener = injector().getInstance(EntryModifiedListener.class);
         verify(entryModifiedListener.mock, times(1)).onEvent(any(RepositoryEvent.class));
-
-        final EntryDeletedListener entryDeletedListener = injector().getInstance(EntryDeletedListener.class);
         verify(entryDeletedListener.mock, times(1)).onEvent(any(RepositoryEvent.class));
-
-        final EntryCreatedAndModifiedListener entryCreatedAndModifiedListener =
-                injector().getInstance(EntryCreatedAndModifiedListener.class);
         verify(entryCreatedAndModifiedListener.mock, times(2)).onEvent(any(RepositoryEvent.class));
     }
 
@@ -331,7 +306,6 @@ public final class FileSystemRepositoryTest extends AbstractTest {
         fileSystemRepository.fireRepositoryEvent(entryModifiedEvent);
     }
 
-    @Singleton
     @RepositoryEventTypes(ENTRY_CREATED)
     public static class EntryCreatedListener implements RepositoryListener {
         private final RepositoryListener mock;
@@ -346,7 +320,6 @@ public final class FileSystemRepositoryTest extends AbstractTest {
         }
     }
 
-    @Singleton
     @RepositoryEventTypes(ENTRY_DELETED)
     public static class EntryDeletedListener implements RepositoryListener {
         private final RepositoryListener mock;
@@ -361,7 +334,6 @@ public final class FileSystemRepositoryTest extends AbstractTest {
         }
     }
 
-    @Singleton
     @RepositoryEventTypes(ENTRY_MODIFIED)
     public static class EntryModifiedListener implements RepositoryListener {
         private final RepositoryListener mock;
@@ -376,7 +348,6 @@ public final class FileSystemRepositoryTest extends AbstractTest {
         }
     }
 
-    @Singleton
     @RepositoryEventTypes({ENTRY_CREATED, ENTRY_MODIFIED})
     public static class EntryCreatedAndModifiedListener implements RepositoryListener {
         private final RepositoryListener mock;

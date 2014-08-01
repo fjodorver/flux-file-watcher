@@ -17,9 +17,9 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import java.io.IOException;
+import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.WatchEvent;
@@ -37,6 +37,7 @@ import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.nio.file.Files.isDirectory;
+import static java.nio.file.Files.readAllBytes;
 import static java.nio.file.Files.walkFileTree;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
@@ -49,7 +50,6 @@ import static java.nio.file.WatchEvent.Kind;
  *
  * @author Kevin Pollet
  */
-//TODO file system as parameter ??
 public final class FileSystemWatchService extends Thread {
     private final WatchService          watchService;
     private final BiMap<WatchKey, Path> watchKeys;
@@ -177,7 +177,7 @@ public final class FileSystemWatchService extends Thread {
 
                     final Path watchablePath = (Path)watchKey.watchable();
                     final RepositoryEventType repositoryEventType = kindToRepositoryEventType(pathEvent.kind());
-                    final Resource resource = pathToResource(watchablePath.resolve(pathEvent.context()));
+                    final Resource resource = pathToResource(pathEvent.kind(), watchablePath, pathEvent.context());
                     if (repositoryEventType != null && resource != null) {
                         repository.fireRepositoryEvent(new RepositoryEvent(repositoryEventType, resource));
                     }
@@ -190,7 +190,7 @@ public final class FileSystemWatchService extends Thread {
                     }
                 }
 
-            } catch (InterruptedException e) {
+            } catch (ClosedWatchServiceException | InterruptedException e) {
                 return;
             }
         }
@@ -220,40 +220,55 @@ public final class FileSystemWatchService extends Thread {
     /**
      * Converts the given {@link java.nio.file.Path} to a {@link com.codenvy.flux.watcher.core.spi.Resource}.
      *
+     * @param kind
+     *         the {@link java.nio.file.WatchEvent.Kind}.
+     * @param watchablePath
+     *         the watchable {@link java.nio.file.Path}.
      * @param resourcePath
-     *         the {@link java.nio.file.Path} to convert.
+     *         the {@link java.nio.file.Path} to the {@code watchablePath}.
      * @return the corresponding {@link com.codenvy.flux.watcher.core.spi.Resource} instance or {@code null} if conversion is impossible.
      * @throws java.lang.NullPointerException
-     *         if {@code resourcePath} parameter is {@code null}.
+     *         if {@code kind}, {@code watchablePath} or {@code resourcePath} parameter is {@code null}.
      * @throws java.lang.IllegalArgumentException
-     *         if {@code resourcePath} parameter is not absolute.
+     *         if the {@code kind} is not {@link java.nio.file.StandardWatchEventKinds#ENTRY_DELETE} and the resource doesn't exist.
      */
-    private Resource pathToResource(Path resourcePath) {
+    private Resource pathToResource(Kind<Path> kind, Path watchablePath, Path resourcePath) {
+        checkNotNull(kind);
+        checkNotNull(watchablePath);
         checkNotNull(resourcePath);
-        checkArgument(resourcePath.isAbsolute());
 
-        if (exists(resourcePath)) {
-            try {
+        try {
 
-                final boolean isDirectory = isDirectory(resourcePath);
-                final long timestamp = getLastModifiedTime(resourcePath).toMillis();
+            final Path absoluteResourcePath = watchablePath.resolve(resourcePath);
+            final boolean exists = exists(absoluteResourcePath);
+            checkArgument(kind == ENTRY_DELETE || exists);
 
-                // TODO better?
-                for (Map.Entry<String, Path> oneEntry : repository.projects().entrySet()) {
-                    final String projectId = oneEntry.getKey();
-                    final Path projectPath = oneEntry.getValue();
-                    if (resourcePath.startsWith(oneEntry.getValue())) {
-                        final String relativeResourcePath = projectPath.relativize(resourcePath).toString();
 
-                        return isDirectory ? Resource.newFolder(projectId, relativeResourcePath, timestamp)
-                                           : Resource.newFile(projectId, relativeResourcePath, timestamp, Files.readAllBytes(resourcePath));
+            final long timestamp = exists ? getLastModifiedTime(absoluteResourcePath).toMillis() : System.currentTimeMillis();
+
+            // TODO better?
+            for (Map.Entry<String, Path> oneEntry : repository.projects().entrySet()) {
+                final String projectId = oneEntry.getKey();
+                final Path projectPath = oneEntry.getValue();
+
+                if (absoluteResourcePath.startsWith(oneEntry.getValue())) {
+                    final String relativeProjectResourcePath = projectPath.relativize(absoluteResourcePath).toString();
+
+                    if (exists) {
+                        final boolean isDirectory = isDirectory(absoluteResourcePath);
+                        return isDirectory ? Resource.newFolder(projectId, relativeProjectResourcePath, timestamp)
+                                           : Resource.newFile(projectId, relativeProjectResourcePath, timestamp, readAllBytes(absoluteResourcePath));
+
+                    } else {
+                        return Resource.newUnknown(projectId, relativeProjectResourcePath, timestamp);
                     }
                 }
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
         return null;
     }
 

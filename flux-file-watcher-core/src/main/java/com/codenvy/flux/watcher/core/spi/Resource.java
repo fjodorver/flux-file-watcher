@@ -14,6 +14,7 @@ import com.codenvy.flux.watcher.core.utils.ResourceHelper;
 
 import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FILE;
 import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FOLDER;
+import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.UNKNOWN;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -28,6 +29,24 @@ public final class Resource {
     private final String       hash;
     private final ResourceType type;
     private final byte[]       content;
+
+    /**
+     * Constructs an instance of {@link com.codenvy.flux.watcher.core.spi.Resource} representing a {@link
+     * com.codenvy.flux.watcher.core.spi.Resource.ResourceType#UNKNOWN}.
+     *
+     * @param projectId
+     *         the project id this {@link com.codenvy.flux.watcher.core.spi.Resource} belongs to.
+     * @param path
+     *         the {@link com.codenvy.flux.watcher.core.spi.Resource} relative path.
+     * @param timestamp
+     *         the {@link com.codenvy.flux.watcher.core.spi.Resource} timestamp.
+     * @return the new {@link com.codenvy.flux.watcher.core.spi.Resource} instance.
+     * @throws java.lang.NullPointerException
+     *         if {@code projectId} or {@code path} parameter is {@code null}.
+     */
+    public static Resource newUnknown(String projectId, String path, long timestamp) {
+        return new Resource(projectId, path, timestamp, UNKNOWN, new byte[0]);
+    }
 
     /**
      * Constructs an instance of {@link com.codenvy.flux.watcher.core.spi.Resource} representing a {@link
@@ -151,6 +170,7 @@ public final class Resource {
      */
     public enum ResourceType {
         FILE,
-        FOLDER
+        FOLDER,
+        UNKNOWN
     }
 }
