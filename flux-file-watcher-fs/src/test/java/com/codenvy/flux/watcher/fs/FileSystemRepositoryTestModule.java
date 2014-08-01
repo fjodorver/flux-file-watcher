@@ -10,7 +10,9 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
+import com.codenvy.flux.watcher.core.spi.RepositoryListener;
 import com.google.common.jimfs.Jimfs;
+import com.google.inject.multibindings.Multibinder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,6 +27,18 @@ import static com.google.common.jimfs.Jimfs.URI_SCHEME;
  */
 public final class FileSystemRepositoryTestModule extends FileSystemRepositoryModule {
     public static final String FILE_SYSTEM_NAME = "in-memory";
+
+    @Override
+    protected void configure() {
+        super.configure();
+
+        // register repository listeners
+        final Multibinder<RepositoryListener> repositoryListeners = Multibinder.newSetBinder(binder(), RepositoryListener.class);
+        repositoryListeners.addBinding().to(FileSystemRepositoryTest.EntryCreatedListener.class);
+        repositoryListeners.addBinding().to(FileSystemRepositoryTest.EntryModifiedListener.class);
+        repositoryListeners.addBinding().to(FileSystemRepositoryTest.EntryDeletedListener.class);
+        repositoryListeners.addBinding().to(FileSystemRepositoryTest.EntryCreatedAndModifiedListener.class);
+    }
 
     @Override
     protected FileSystem provideFileSystem() {

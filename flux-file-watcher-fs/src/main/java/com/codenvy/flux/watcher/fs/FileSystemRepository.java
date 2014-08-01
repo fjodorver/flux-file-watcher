@@ -207,7 +207,9 @@ public class FileSystemRepository implements RepositoryProvider {
         return unmodifiableMap(projects);
     }
 
-    void fireRepositoryEvent(final RepositoryEvent event) {
+    public void fireRepositoryEvent(final RepositoryEvent event) {
+        checkNotNull(event);
+
         final Set<RepositoryListener> filteredRepositoryListeners = FluentIterable
                 .from(repositoryListeners)
                 .filter(notNull())
