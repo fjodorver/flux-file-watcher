@@ -39,13 +39,13 @@ public class FluxSyncEventService {
 
     private final EventService                      eventService;
     private final EventSubscriber<VirtualFileEvent> subscriber;
-    //private final VFSRepository             repositoryProvider;
+    //private final VFSRepository             repository;
 
     @Inject
-    FluxSyncEventService(EventService eventService, VFSRepository repositoryProvider, ProjectService projectService) {
+    FluxSyncEventService(EventService eventService, VFSRepository repository, ProjectService projectService) {
         this.eventService = eventService;
-        this.subscriber = new VirtualFileEventSubscriber(repositoryProvider, projectService);
-        //this.repositoryProvider = repositoryProvider;
+        this.subscriber = new VirtualFileEventSubscriber(repository, projectService);
+        //this.repositoryProvider = repository;
     }
 
     @PostConstruct
@@ -63,17 +63,17 @@ public class FluxSyncEventService {
      */
     public class VirtualFileEventSubscriber implements EventSubscriber<VirtualFileEvent> {
 
-        private VFSRepository  repositoryProvider;
+        private VFSRepository  repository;
         private ProjectService projectService;
 
-        public VirtualFileEventSubscriber(VFSRepository repositoryProvider, ProjectService projectService) {
-            this.repositoryProvider = repositoryProvider;
+        public VirtualFileEventSubscriber(VFSRepository repository, ProjectService projectService) {
+            this.repository = repository;
             this.projectService = projectService;
         }
 
         @Override
         public void onEvent(VirtualFileEvent event) {
-            if (repositoryProvider != null) {
+            if (repository != null) {
                 VirtualFileEvent.ChangeType eventType = event.getType();
                 RepositoryEventType repoType = null;
                 if ((eventType == VirtualFileEvent.ChangeType.CREATED) || (eventType == VirtualFileEvent.ChangeType.MOVED)
@@ -109,7 +109,7 @@ public class FluxSyncEventService {
                     repoEvent = new RepositoryEvent(repoType, resource);
                 }
 
-                repositoryProvider.fireRepositoryEvent(repoEvent);
+                repository.fireRepositoryEvent(repoEvent);
             }
         }
     }
