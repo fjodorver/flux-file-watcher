@@ -23,7 +23,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.nio.file.FileSystem;
@@ -49,6 +48,7 @@ import static java.nio.file.Files.isDirectory;
 import static java.nio.file.Files.readAllBytes;
 import static java.nio.file.Files.walkFileTree;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -340,16 +340,12 @@ public final class FileSystemRepositoryTest extends AbstractTest {
         private final RepositoryListener mock;
 
         public EntryCreatedListener() {
-            this.mock = Mockito.mock(RepositoryListener.class);
+            this.mock = mock(RepositoryListener.class);
         }
 
         @Override
         public void onEvent(RepositoryEvent event) {
             mock.onEvent(event);
-        }
-
-        public RepositoryListener mock() {
-            return mock;
         }
     }
 
@@ -359,16 +355,12 @@ public final class FileSystemRepositoryTest extends AbstractTest {
         private final RepositoryListener mock;
 
         public EntryDeletedListener() {
-            this.mock = Mockito.mock(RepositoryListener.class);
+            this.mock = mock(RepositoryListener.class);
         }
 
         @Override
         public void onEvent(RepositoryEvent event) {
             mock.onEvent(event);
-        }
-
-        public RepositoryListener mock() {
-            return mock;
         }
     }
 
@@ -378,16 +370,12 @@ public final class FileSystemRepositoryTest extends AbstractTest {
         private final RepositoryListener mock;
 
         public EntryModifiedListener() {
-            this.mock = Mockito.mock(RepositoryListener.class);
+            this.mock = mock(RepositoryListener.class);
         }
 
         @Override
         public void onEvent(RepositoryEvent event) {
             mock.onEvent(event);
-        }
-
-        public RepositoryListener mock() {
-            return mock;
         }
     }
 
@@ -397,17 +385,12 @@ public final class FileSystemRepositoryTest extends AbstractTest {
         private final RepositoryListener mock;
 
         public EntryCreatedAndModifiedListener() {
-            this.mock = Mockito.mock(RepositoryListener.class);
+            this.mock = mock(RepositoryListener.class);
         }
 
         @Override
         public void onEvent(RepositoryEvent event) {
             mock.onEvent(event);
         }
-
-        public RepositoryListener mock() {
-            return mock;
-        }
     }
 }
-
