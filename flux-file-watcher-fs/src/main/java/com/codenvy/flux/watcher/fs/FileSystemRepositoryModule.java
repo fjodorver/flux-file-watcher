@@ -14,6 +14,7 @@ import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
+import javax.inject.Singleton;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 
@@ -28,6 +29,7 @@ public class FileSystemRepositoryModule extends AbstractModule {
         bind(RepositoryProvider.class).to(FileSystemRepository.class);
     }
 
+    @Singleton
     @Provides
     protected FileSystem provideFileSystem() {
         return FileSystems.getDefault();

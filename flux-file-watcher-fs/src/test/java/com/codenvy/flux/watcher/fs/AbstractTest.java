@@ -14,16 +14,19 @@ import com.codenvy.flux.watcher.core.FluxModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import org.junit.BeforeClass;
-
 /**
+ * Abstract test class bootstrapping a Guice injector.
+ *
  * @author Kevin Pollet
  */
 public class AbstractTest {
-    protected static Injector injector;
+    private final Injector injector;
 
-    @BeforeClass
-    public static void initialize() {
+    public AbstractTest() {
         injector = Guice.createInjector(new FluxModule(), new FileSystemRepositoryTestModule());
+    }
+
+    public Injector injector() {
+        return injector;
     }
 }

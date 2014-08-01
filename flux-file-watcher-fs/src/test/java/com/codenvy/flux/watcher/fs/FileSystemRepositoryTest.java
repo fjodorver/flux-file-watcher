@@ -16,14 +16,13 @@ import com.codenvy.flux.watcher.core.spi.RepositoryEventTypes;
 import com.codenvy.flux.watcher.core.spi.RepositoryListener;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 import com.codenvy.flux.watcher.core.spi.Resource;
-import com.google.inject.Singleton;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileVisitResult;
@@ -65,17 +64,14 @@ public final class FileSystemRepositoryTest extends AbstractTest {
     private static final String RELATIVE_PROJECT_HELLO_FILE_PATH  = "src/hello";
     private static final String RELATIVE_PROJECT_README_FILE_PATH = "readme";
 
-    private static FileSystemRepository fileSystemRepository;
-    private static FileSystem           fileSystem;
-
-    @BeforeClass
-    public static void beforeClass() throws IOException {
-        fileSystemRepository = injector.getInstance(FileSystemRepository.class);
-        fileSystem = injector.getInstance(FileSystem.class);
-    }
+    private FileSystemRepository fileSystemRepository;
+    private FileSystem           fileSystem;
 
     @Before
     public void beforeTest() throws IOException {
+        fileSystemRepository = injector().getInstance(FileSystemRepository.class);
+        fileSystem = injector().getInstance(FileSystem.class);
+
         createDirectory(fileSystem.getPath(PROJECT_PATH));
         createDirectory(fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH));
         createFile(fileSystem.getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH));
@@ -308,16 +304,17 @@ public final class FileSystemRepositoryTest extends AbstractTest {
     public void testFireRepositoryEvent() {
         fireAllEventTypes();
 
-        final EntryCreatedListener entryCreatedListener = injector.getInstance(EntryCreatedListener.class);
+        final EntryCreatedListener entryCreatedListener = injector().getInstance(EntryCreatedListener.class);
         verify(entryCreatedListener.mock, times(1)).onEvent(any(RepositoryEvent.class));
 
-        final EntryModifiedListener entryModifiedListener = injector.getInstance(EntryModifiedListener.class);
+        final EntryModifiedListener entryModifiedListener = injector().getInstance(EntryModifiedListener.class);
         verify(entryModifiedListener.mock, times(1)).onEvent(any(RepositoryEvent.class));
 
-        final EntryDeletedListener entryDeletedListener = injector.getInstance(EntryDeletedListener.class);
+        final EntryDeletedListener entryDeletedListener = injector().getInstance(EntryDeletedListener.class);
         verify(entryDeletedListener.mock, times(1)).onEvent(any(RepositoryEvent.class));
 
-        final EntryCreatedAndModifiedListener entryCreatedAndModifiedListener = injector.getInstance(EntryCreatedAndModifiedListener.class);
+        final EntryCreatedAndModifiedListener entryCreatedAndModifiedListener =
+                injector().getInstance(EntryCreatedAndModifiedListener.class);
         verify(entryCreatedAndModifiedListener.mock, times(2)).onEvent(any(RepositoryEvent.class));
     }
 
