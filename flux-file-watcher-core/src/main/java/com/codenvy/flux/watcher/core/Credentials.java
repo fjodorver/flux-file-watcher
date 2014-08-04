@@ -17,24 +17,24 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Kevin Pollet
  */
-public class FluxCredentials {
+public class Credentials {
     private final String username;
     private final String token;
 
     /**
-     * Constructs an instance of {@link FluxCredentials}.
+     * Constructs an instance of {@link Credentials}.
      *
      * @param username
      *         the username.
      * @throws java.lang.NullPointerException
      *         if {@code username} parameter is {@code null}.
      */
-    public FluxCredentials(String username) {
+    public Credentials(String username) {
         this(username, null);
     }
 
     /**
-     * Constructs an instance of {@link FluxCredentials}.
+     * Constructs an instance of {@link Credentials}.
      *
      * @param username
      *         the username.
@@ -43,7 +43,7 @@ public class FluxCredentials {
      * @throws java.lang.NullPointerException
      *         if {@code username} parameter is {@code null}.
      */
-    public FluxCredentials(String username, String token) {
+    public Credentials(String username, String token) {
         this.username = checkNotNull(username);
         this.token = token;
     }

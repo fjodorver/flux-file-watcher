@@ -51,13 +51,13 @@ public class FluxConnector {
      * @param serverURL
      *         the server {@link java.net.URL} to connect to.
      * @param credentials
-     *         the {@link com.codenvy.flux.watcher.core.FluxCredentials} to use for the connection.
+     *         the {@link Credentials} to use for the connection.
      * @return the opened {@link com.codenvy.flux.watcher.core.FluxConnection} or the existing {@link
      * com.codenvy.flux.watcher.core.FluxConnection} if already opened.
      * @throws java.lang.NullPointerException
      *         if {@code serverURL} or {@code credentials} parameter is {@code null}.
      */
-    public FluxConnection connect(URL serverURL, FluxCredentials credentials) {
+    public FluxConnection connect(URL serverURL, Credentials credentials) {
         checkNotNull(serverURL);
         checkNotNull(credentials);
 

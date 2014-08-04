@@ -37,7 +37,7 @@ public class FluxRepository {
         return id;
     }
 
-    public FluxConnection connect(URL serverURL, FluxCredentials credentials) {
+    public FluxConnection connect(URL serverURL, Credentials credentials) {
         return fluxConnector.connect(serverURL, credentials);
     }
 

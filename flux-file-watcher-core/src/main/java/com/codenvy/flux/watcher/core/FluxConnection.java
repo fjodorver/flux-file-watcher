@@ -38,10 +38,10 @@ import static java.util.Collections.emptySet;
  */
 public class FluxConnection {
     private final SocketIO            socket;
-    private final FluxCredentials     credentials;
+    private final Credentials         credentials;
     private final Set<MessageHandler> messageHandlers;
 
-    FluxConnection(URL serverURL, FluxCredentials credentials, Set<MessageHandler> messageHandlers) {
+    FluxConnection(URL serverURL, Credentials credentials, Set<MessageHandler> messageHandlers) {
         this.socket = new SocketIO(serverURL);
         this.credentials = credentials;
         this.messageHandlers = new CopyOnWriteArraySet<>(messageHandlers);
