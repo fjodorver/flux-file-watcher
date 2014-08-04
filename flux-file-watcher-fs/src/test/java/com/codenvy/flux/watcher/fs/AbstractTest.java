@@ -22,9 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
-import static com.codenvy.flux.watcher.fs.TestConstants.PROJECT_PATH;
-import static com.codenvy.flux.watcher.fs.TestConstants.RELATIVE_PROJECT_README_FILE_PATH;
-import static com.codenvy.flux.watcher.fs.TestConstants.RELATIVE_PROJECT_SRC_FOLDER_PATH;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.createDirectory;
 import static java.nio.file.Files.createFile;
@@ -37,6 +34,13 @@ import static java.nio.file.Files.walkFileTree;
  * @author Kevin Pollet
  */
 public class AbstractTest {
+    public static final String PROJECT_ID                        = "codenvy-project-id";
+    public static final String PROJECT_PATH                      = "/codenvy-project";
+    public static final String RELATIVE_PROJECT_SRC_FOLDER_PATH  = "src";
+    public static final String RELATIVE_PROJECT_MAIN_FOLDER_PATH = "src/main";
+    public static final String RELATIVE_PROJECT_HELLO_FILE_PATH  = "src/hello";
+    public static final String RELATIVE_PROJECT_README_FILE_PATH = "readme";
+
     private FileSystem fileSystem;
 
     public FileSystem fileSystem() {
