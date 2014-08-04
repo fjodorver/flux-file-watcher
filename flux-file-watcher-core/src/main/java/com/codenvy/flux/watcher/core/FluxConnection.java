@@ -36,7 +36,7 @@ import static java.util.Collections.emptySet;
 /**
  * @author Kevin Pollet
  */
-public final class FluxConnection {
+public class FluxConnection {
     private final SocketIO            socket;
     private final FluxCredentials     credentials;
     private final Set<MessageHandler> messageHandlers;

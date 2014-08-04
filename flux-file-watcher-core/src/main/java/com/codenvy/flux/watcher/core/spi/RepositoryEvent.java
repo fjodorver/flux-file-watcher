@@ -19,7 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see com.codenvy.flux.watcher.core.spi.RepositoryEventType
  * @see com.codenvy.flux.watcher.core.spi.Resource
  */
-public final class RepositoryEvent {
+public class RepositoryEvent {
     private final RepositoryEventType type;
     private final Resource            resource;
 

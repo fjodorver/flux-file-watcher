@@ -27,7 +27,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Kevin Pollet
  */
 @Singleton
-public final class FluxConnector {
+public class FluxConnector {
     private final ConcurrentMap<URL, FluxConnection> connections;
     private final Provider<Set<MessageHandler>>      messageHandlersProvider;
 

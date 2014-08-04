@@ -51,7 +51,7 @@ import static java.nio.file.WatchEvent.Kind;
  *
  * @author Kevin Pollet
  */
-public final class FileSystemWatchService extends Thread {
+public class FileSystemWatchService extends Thread {
     private final WatchService          watchService;
     private final BiMap<WatchKey, Path> watchKeys;
     private final Object                watchKeysMutex;

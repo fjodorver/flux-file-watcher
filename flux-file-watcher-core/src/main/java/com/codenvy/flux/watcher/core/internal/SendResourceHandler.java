@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Singleton
 @MessageTypes(GET_RESOURCE_REQUEST)
-public final class SendResourceHandler implements MessageHandler {
+public class SendResourceHandler implements MessageHandler {
     private final RepositoryProvider repositoryProvider;
 
     /**

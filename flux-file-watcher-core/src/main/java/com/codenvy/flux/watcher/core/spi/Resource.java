@@ -22,7 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Kevin Pollet
  */
-public final class Resource {
+public class Resource {
     private final String       projectId;
     private final String       path;
     private final long         timestamp;

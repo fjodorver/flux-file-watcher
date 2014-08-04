@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Singleton
 @RepositoryEventTypes(ENTRY_CREATED)
-public final class EntryCreatedListener implements RepositoryListener {
+public class EntryCreatedListener implements RepositoryListener {
     private final FluxConnector fluxConnector;
 
     /**

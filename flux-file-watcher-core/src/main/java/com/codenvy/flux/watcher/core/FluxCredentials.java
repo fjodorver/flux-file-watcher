@@ -17,7 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Kevin Pollet
  */
-public final class FluxCredentials {
+public class FluxCredentials {
     private final String username;
     private final String token;
 
