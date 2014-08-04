@@ -30,10 +30,13 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.USERNAME;
 import static com.codenvy.flux.watcher.core.MessageType.CONNECT_TO_CHANNEL;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.notNull;
 import static java.util.Collections.emptySet;
 
 /**
+ * Represents a connection to a Flux remote.
+ *
  * @author Kevin Pollet
  */
 public class FluxConnection {
@@ -41,12 +44,29 @@ public class FluxConnection {
     private final Credentials         credentials;
     private final Set<MessageHandler> messageHandlers;
 
+    /**
+     * Constructs an instance of {@code FluxConnection}.
+     *
+     * @param serverURL
+     *         the server {@link java.net.URL} to connect to.
+     * @param credentials
+     *         the {@link com.codenvy.flux.watcher.core.Credentials} used to connect.
+     * @param messageHandlers
+     *         the {@link com.codenvy.flux.watcher.core.MessageHandler} to add before opening the connection.
+     * @throws java.lang.NullPointerException
+     *         if {@code serverURL}, {@code credentials} or {@code messageHandlers} parameter is {@code null}.
+     */
     FluxConnection(URL serverURL, Credentials credentials, Set<MessageHandler> messageHandlers) {
-        this.socket = new SocketIO(serverURL);
-        this.credentials = credentials;
-        this.messageHandlers = new CopyOnWriteArraySet<>(messageHandlers);
+        this.socket = new SocketIO(checkNotNull(serverURL));
+        this.credentials = checkNotNull(credentials);
+        this.messageHandlers = new CopyOnWriteArraySet<>(checkNotNull(messageHandlers));
     }
 
+    /**
+     * Open the connection.
+     *
+     * @return the opened {@link com.codenvy.flux.watcher.core.FluxConnection} instance.
+     */
     FluxConnection open() {
         if (!socket.isConnected()) {
             socket.connect(new IOCallback() {
@@ -97,21 +117,52 @@ public class FluxConnection {
         return this;
     }
 
+    /**
+     * Close the connection.
+     */
     void close() {
         if (socket.isConnected()) {
             socket.disconnect();
         }
     }
 
-    public boolean addMessageHandler(MessageHandler messageHandler) {
-        return messageHandlers.add(messageHandler);
+    /**
+     * Adds a {@link com.codenvy.flux.watcher.core.MessageHandler}.
+     *
+     * @param handler
+     *         the {@link com.codenvy.flux.watcher.core.MessageHandler} to add.
+     * @return {@code true} if the {@code handler} is not already added, {@code false} otherwise.
+     * @throws java.lang.NullPointerException
+     *         if {@code handler} parameter is {@code null}.
+     */
+    public boolean addMessageHandler(MessageHandler handler) {
+        return messageHandlers.add(checkNotNull(handler));
     }
 
-    public boolean removeMessageHandler(MessageHandler messageHandler) {
-        return messageHandlers.remove(messageHandler);
+    /**
+     * Removes a {@link com.codenvy.flux.watcher.core.MessageHandler}.
+     *
+     * @param handler
+     *         the {@link com.codenvy.flux.watcher.core.MessageHandler} to remove.
+     * @return {@code true} if the {@code handler} was already added, {@code false} otherwise.
+     * @throws java.lang.NullPointerException
+     *         if {@code handler} parameter is {@code null}.
+     */
+    public boolean removeMessageHandler(MessageHandler handler) {
+        return messageHandlers.remove(checkNotNull(handler));
     }
 
+    /**
+     * Sends a {@link com.codenvy.flux.watcher.core.Message} on this connection
+     *
+     * @param message
+     *         the {@link com.codenvy.flux.watcher.core.Message} instance to send.
+     * @throws java.lang.NullPointerException
+     *         if {@code message} parameter is {@code null}.
+     */
     public void sendMessage(Message message) {
+        checkNotNull(message);
+
         final JSONObject content = message.content();
         if (!content.has(USERNAME.value())) {
             try {

@@ -36,7 +36,7 @@ import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Handler replying to a getResourceRequest request.
+ * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#GET_RESOURCE_REQUEST}.
  *
  * @author Kevin Pollet
  */

@@ -11,8 +11,17 @@
 package com.codenvy.flux.watcher.core;
 
 /**
+ * Interface implemented to be advise when a {@link com.codenvy.flux.watcher.core.Message} is received by a {@link
+ * com.codenvy.flux.watcher.core.FluxConnection}.
+ *
  * @author Kevin Pollet
  */
 public interface MessageHandler {
+    /**
+     * Method called when a {@link com.codenvy.flux.watcher.core.Message} is received.
+     *
+     * @param message
+     *         the {@link com.codenvy.flux.watcher.core.Message} instance, never {@code null}.
+     */
     void onMessage(Message message);
 }

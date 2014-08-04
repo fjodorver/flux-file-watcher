@@ -11,7 +11,10 @@
 package com.codenvy.flux.watcher.core;
 
 /**
+ * The types of Flux message.
+ *
  * @author Kevin Pollet
+ * @see com.codenvy.flux.watcher.core.Message
  */
 public enum MessageType {
     CONNECT_TO_CHANNEL("connectToChannel"),
@@ -25,20 +28,38 @@ public enum MessageType {
 
     private final String value;
 
+    /**
+     * Constructs an instance of {@link com.codenvy.flux.watcher.core.MessageType}.
+     *
+     * @param value
+     *         the {@link com.codenvy.flux.watcher.core.MessageType} value.
+     */
     MessageType(String value) {
         this.value = value;
     }
 
-    public static MessageType fromType(String type) {
+    /**
+     * Returns the {@link com.codenvy.flux.watcher.core.MessageType} corresponding to the given value.
+     *
+     * @param value
+     *         the {@link com.codenvy.flux.watcher.core.MessageType} value.
+     * @return the {@link com.codenvy.flux.watcher.core.MessageType} corresponding to the given value or {@code null} if none.
+     */
+    public static MessageType fromType(String value) {
         final MessageType[] messageTypes = MessageType.values();
         for (MessageType oneMessageType : messageTypes) {
-            if (oneMessageType.value.equals(type)) {
+            if (oneMessageType.value.equals(value)) {
                 return oneMessageType;
             }
         }
         return null;
     }
 
+    /**
+     * Returns the {@link com.codenvy.flux.watcher.core.MessageType} value.
+     *
+     * @return the {@link com.codenvy.flux.watcher.core.MessageType} value, never {@code null}.
+     */
     public String value() {
         return value;
     }
