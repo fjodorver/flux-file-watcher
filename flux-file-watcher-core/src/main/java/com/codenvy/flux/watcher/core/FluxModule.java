@@ -25,7 +25,7 @@ public class FluxModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(FluxRepository.class);
-        bind(FluxConnectionManager.class);
+        bind(FluxConnector.class);
         bind(RepositoryEventBus.class);
 
 

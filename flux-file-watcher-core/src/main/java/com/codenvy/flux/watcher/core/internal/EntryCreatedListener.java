@@ -10,7 +10,7 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
-import com.codenvy.flux.watcher.core.FluxConnectionManager;
+import com.codenvy.flux.watcher.core.FluxConnector;
 import com.codenvy.flux.watcher.core.Message;
 import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
 import com.codenvy.flux.watcher.core.spi.RepositoryEventTypes;
@@ -40,19 +40,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 @RepositoryEventTypes(ENTRY_CREATED)
 public final class EntryCreatedListener implements RepositoryListener {
-    private final FluxConnectionManager connectionManager;
+    private final FluxConnector fluxConnector;
 
     /**
      * Constructs an instance of {@code EntryCreatedListener}.
      *
-     * @param connectionManager
-     *         the {@link com.codenvy.flux.watcher.core.FluxConnectionManager}.
+     * @param fluxConnector
+     *         the {@link com.codenvy.flux.watcher.core.FluxConnector}.
      * @throws java.lang.NullPointerException
-     *         if {@code connectionManager} parameter is {@code null}.
+     *         if {@code fluxConnector} parameter is {@code null}.
      */
     @Inject
-    public EntryCreatedListener(FluxConnectionManager connectionManager) {
-        this.connectionManager = checkNotNull(connectionManager);
+    public EntryCreatedListener(FluxConnector fluxConnector) {
+        this.fluxConnector = checkNotNull(fluxConnector);
     }
 
     @Override
@@ -69,7 +69,7 @@ public final class EntryCreatedListener implements RepositoryListener {
             message.put(RESOURCE_TYPE, createdResource.type().name().toLowerCase());
 
             // broadcast message to all connections
-            connectionManager.broadcastMessage(new Message(RESOURCE_CREATED, message));
+            fluxConnector.broadcastMessage(new Message(RESOURCE_CREATED, message));
 
         } catch (JSONException e) {
             throw new RuntimeException(e);

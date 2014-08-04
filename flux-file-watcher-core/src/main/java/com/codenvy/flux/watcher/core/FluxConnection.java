@@ -41,7 +41,7 @@ public final class FluxConnection {
     private final FluxCredentials     credentials;
     private final Set<MessageHandler> messageHandlers;
 
-    public FluxConnection(URL serverURL, FluxCredentials credentials, Set<MessageHandler> messageHandlers) {
+    FluxConnection(URL serverURL, FluxCredentials credentials, Set<MessageHandler> messageHandlers) {
         this.socket = new SocketIO(serverURL);
         this.credentials = credentials;
         this.messageHandlers = new CopyOnWriteArraySet<>(messageHandlers);

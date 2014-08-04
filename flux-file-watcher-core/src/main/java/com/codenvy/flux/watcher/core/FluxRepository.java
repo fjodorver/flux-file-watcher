@@ -22,23 +22,27 @@ import java.util.UUID;
  */
 @Singleton
 public class FluxRepository {
-    private final int                   id;
-    private final RepositoryProvider    repositoryProvider;
-    private final FluxConnectionManager connectionManager;
+    private final int                id;
+    private final RepositoryProvider repositoryProvider;
+    private final FluxConnector      fluxConnector;
 
     @Inject
-    public FluxRepository(FluxConnectionManager connectionManager, RepositoryProvider repositoryProvider) {
+    public FluxRepository(FluxConnector fluxConnector, RepositoryProvider repositoryProvider) {
         this.id = new Long(UUID.randomUUID().getMostSignificantBits()).intValue();
-        this.connectionManager = connectionManager;
+        this.fluxConnector = fluxConnector;
         this.repositoryProvider = repositoryProvider;
     }
 
+    public int id() {
+        return id;
+    }
+
     public FluxConnection connect(URL serverURL, FluxCredentials credentials) {
-        return connectionManager.openConnection(serverURL, credentials);
+        return fluxConnector.connect(serverURL, credentials);
     }
 
     public void disconnect(URL serverURL) {
-        connectionManager.closeConnection(serverURL);
+        fluxConnector.disconnect(serverURL);
     }
 
     public void addProject(String projectId, String path) {
@@ -49,15 +53,11 @@ public class FluxRepository {
         repositoryProvider.removeProject(projectId);
     }
 
-    public int id() {
-        return id;
-    }
-
-    public RepositoryProvider repositoryProvider() {
+    public RepositoryProvider underlyingRepository() {
         return repositoryProvider;
     }
 
-    public FluxConnectionManager connectionManager() {
-        return connectionManager;
+    public FluxConnector fluxConnector() {
+        return fluxConnector;
     }
 }
