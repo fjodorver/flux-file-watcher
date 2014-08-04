@@ -13,23 +13,16 @@ package com.codenvy.flux.watcher.server;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.ByteArrayInputStream;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.codenvy.api.project.server.ProjectService;
 import com.codenvy.api.project.shared.dto.ProjectDescriptor;
-import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventTypes;
-import com.codenvy.flux.watcher.core.spi.RepositoryListener;
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
+import com.codenvy.flux.watcher.core.RepositoryListener;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
-import com.codenvy.flux.watcher.core.spi.Resource;
-import com.codenvy.flux.watcher.core.spi.Resource.ResourceType;
+import com.codenvy.flux.watcher.core.Resource;
+import com.codenvy.flux.watcher.core.Resource.ResourceType;
 import com.google.inject.Inject;
 
 /**

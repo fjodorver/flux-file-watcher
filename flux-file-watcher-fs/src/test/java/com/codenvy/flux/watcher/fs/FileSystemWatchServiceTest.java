@@ -10,12 +10,12 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventType;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventTypes;
-import com.codenvy.flux.watcher.core.spi.RepositoryListener;
-import com.codenvy.flux.watcher.core.spi.Resource;
+import com.codenvy.flux.watcher.core.RepositoryEvent;
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
+import com.codenvy.flux.watcher.core.RepositoryEventType;
+import com.codenvy.flux.watcher.core.RepositoryEventTypes;
+import com.codenvy.flux.watcher.core.RepositoryListener;
+import com.codenvy.flux.watcher.core.Resource;
 import com.google.common.base.Throwables;
 
 import org.junit.Assert;
@@ -33,12 +33,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_CREATED;
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_DELETED;
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_MODIFIED;
-import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FILE;
-import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FOLDER;
-import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.UNKNOWN;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_CREATED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_DELETED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_MODIFIED;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.FOLDER;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.UNKNOWN;
 import static com.codenvy.flux.watcher.fs.TestConstants.PROJECT_ID;
 import static com.codenvy.flux.watcher.fs.TestConstants.PROJECT_PATH;
 import static com.codenvy.flux.watcher.fs.TestConstants.RELATIVE_PROJECT_HELLO_FILE_PATH;

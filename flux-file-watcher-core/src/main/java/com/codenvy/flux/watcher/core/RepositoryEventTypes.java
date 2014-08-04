@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.watcher.core.spi;
+package com.codenvy.flux.watcher.core;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -17,8 +17,8 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Annotation used on a {@link com.codenvy.flux.watcher.core.spi.RepositoryListener} to specify the {@link
- * com.codenvy.flux.watcher.core.spi.RepositoryEventType} it listens.
+ * Annotation used on a {@link RepositoryListener} to specify the {@link
+ * RepositoryEventType} it listens.
  *
  * @author Kevin Pollet
  */

@@ -15,10 +15,10 @@ import com.codenvy.api.core.notification.EventSubscriber;
 import com.codenvy.api.project.server.ProjectService;
 import com.codenvy.api.project.shared.dto.ProjectDescriptor;
 import com.codenvy.api.vfs.server.observation.VirtualFileEvent;
-import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventType;
-import com.codenvy.flux.watcher.core.spi.Resource;
+import com.codenvy.flux.watcher.core.RepositoryEvent;
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
+import com.codenvy.flux.watcher.core.RepositoryEventType;
+import com.codenvy.flux.watcher.core.Resource;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 

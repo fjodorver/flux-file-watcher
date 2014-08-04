@@ -10,10 +10,10 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
-import com.codenvy.flux.watcher.core.spi.RepositoryListener;
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
+import com.codenvy.flux.watcher.core.RepositoryListener;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
-import com.codenvy.flux.watcher.core.spi.Resource;
+import com.codenvy.flux.watcher.core.Resource;
 import com.google.inject.Inject;
 
 import javax.inject.Singleton;
@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FOLDER;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.FOLDER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.nio.file.FileVisitResult.CONTINUE;

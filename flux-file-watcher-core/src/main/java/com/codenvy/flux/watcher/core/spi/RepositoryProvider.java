@@ -10,6 +10,9 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.spi;
 
+import com.codenvy.flux.watcher.core.RepositoryListener;
+import com.codenvy.flux.watcher.core.Resource;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -45,43 +48,43 @@ public interface RepositoryProvider {
     boolean removeProject(String projectId);
 
     /**
-     * Returns the {@link com.codenvy.flux.watcher.core.spi.Resource} in the given project with the given relative path.
+     * Returns the {@link com.codenvy.flux.watcher.core.Resource} in the given project with the given relative path.
      *
      * @param projectId
      *         the project id.
      * @param path
-     *         the {@link com.codenvy.flux.watcher.core.spi.Resource} relative path.
-     * @return the {@link com.codenvy.flux.watcher.core.spi.Resource} or {@code null} if not found.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} relative path.
+     * @return the {@link com.codenvy.flux.watcher.core.Resource} or {@code null} if not found.
      * @throws java.lang.NullPointerException
      *         if {@code projectId} or {@code path} parameter is {@code null}.
      */
     Resource getResource(String projectId, String path);
 
     /**
-     * Creates the given {@link com.codenvy.flux.watcher.core.spi.Resource}.
+     * Creates the given {@link com.codenvy.flux.watcher.core.Resource}.
      *
      * @param resource
-     *         the {@link com.codenvy.flux.watcher.core.spi.Resource} to be created.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} to be created.
      * @throws java.lang.NullPointerException
      *         if {@code resource} parameter is {@code null}.
      */
     void createResource(Resource resource);
 
     /**
-     * Deletes the given {@link com.codenvy.flux.watcher.core.spi.Resource}.
+     * Deletes the given {@link com.codenvy.flux.watcher.core.Resource}.
      *
      * @param resource
-     *         the {@link com.codenvy.flux.watcher.core.spi.Resource} to be deleted.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} to be deleted.
      * @throws java.lang.NullPointerException
      *         if {@code resource} parameter is {@code null}.
      */
     void deleteResource(Resource resource);
 
     /**
-     * Adds a {@link com.codenvy.flux.watcher.core.spi.RepositoryListener}.
+     * Adds a {@link com.codenvy.flux.watcher.core.RepositoryListener}.
      *
      * @param listener
-     *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryListener} to add.
+     *         the {@link com.codenvy.flux.watcher.core.RepositoryListener} to add.
      * @return {@code true} if the listener was not already added, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code listener} parameter is {@code null}.
@@ -89,10 +92,10 @@ public interface RepositoryProvider {
     boolean addRepositoryListener(RepositoryListener listener);
 
     /**
-     * Removes a {@link com.codenvy.flux.watcher.core.spi.RepositoryListener}.
+     * Removes a {@link com.codenvy.flux.watcher.core.RepositoryListener}.
      *
      * @param listener
-     *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryListener} to remove.
+     *         the {@link com.codenvy.flux.watcher.core.RepositoryListener} to remove.
      * @return {@code true} if the listener exists, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code listener} parameter is {@code null}.

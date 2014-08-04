@@ -10,10 +10,10 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventType;
-import com.codenvy.flux.watcher.core.spi.Resource;
+import com.codenvy.flux.watcher.core.RepositoryEvent;
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
+import com.codenvy.flux.watcher.core.RepositoryEventType;
+import com.codenvy.flux.watcher.core.Resource;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
@@ -29,9 +29,9 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_CREATED;
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_DELETED;
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_MODIFIED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_CREATED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_DELETED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_MODIFIED;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -66,7 +66,7 @@ public class FileSystemWatchService extends Thread {
      * @param repository
      *         the {@link FileSystemRepository} instance.
      * @param repositoryEventBus
-     *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryEvent} bus.
+     *         the {@link com.codenvy.flux.watcher.core.RepositoryEvent} bus.
      * @throws java.lang.NullPointerException
      *         if {@code repository} parameter is {@code null}.
      */
@@ -203,11 +203,11 @@ public class FileSystemWatchService extends Thread {
 
     /**
      * Converts a {@link java.nio.file.WatchEvent} {@link java.nio.file.WatchEvent.Kind} to a {@link
-     * com.codenvy.flux.watcher.core.spi.RepositoryEventType}.
+     * com.codenvy.flux.watcher.core.RepositoryEventType}.
      *
      * @param kind
      *         the {@link java.nio.file.WatchEvent.Kind} to convert.
-     * @return the corresponding {@link com.codenvy.flux.watcher.core.spi.RepositoryEventType} or {@code null} if none.
+     * @return the corresponding {@link com.codenvy.flux.watcher.core.RepositoryEventType} or {@code null} if none.
      */
     private RepositoryEventType kindToRepositoryEventType(Kind<?> kind) {
         if (kind == ENTRY_CREATE) {
@@ -223,7 +223,7 @@ public class FileSystemWatchService extends Thread {
     }
 
     /**
-     * Converts the given {@link java.nio.file.Path} to a {@link com.codenvy.flux.watcher.core.spi.Resource}.
+     * Converts the given {@link java.nio.file.Path} to a {@link com.codenvy.flux.watcher.core.Resource}.
      *
      * @param kind
      *         the {@link java.nio.file.WatchEvent.Kind}.
@@ -231,7 +231,7 @@ public class FileSystemWatchService extends Thread {
      *         the watchable {@link java.nio.file.Path}.
      * @param resourcePath
      *         the {@link java.nio.file.Path} to the {@code watchablePath}.
-     * @return the corresponding {@link com.codenvy.flux.watcher.core.spi.Resource} instance or {@code null} if conversion is impossible.
+     * @return the corresponding {@link com.codenvy.flux.watcher.core.Resource} instance or {@code null} if conversion is impossible.
      * @throws java.lang.NullPointerException
      *         if {@code kind}, {@code watchablePath} or {@code resourcePath} parameter is {@code null}.
      * @throws java.lang.IllegalArgumentException

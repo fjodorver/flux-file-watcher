@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.watcher.core.spi;
+package com.codenvy.flux.watcher.core;
 
 /**
  * Type of the event sent by a repository.

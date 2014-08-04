@@ -11,9 +11,9 @@
 package com.codenvy.flux.watcher.fs;
 
 
-import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
-import com.codenvy.flux.watcher.core.spi.Resource;
+import com.codenvy.flux.watcher.core.Resource;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -25,8 +25,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Calendar;
 
-import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FILE;
-import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FOLDER;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.FOLDER;
 import static com.codenvy.flux.watcher.fs.TestConstants.PROJECT_ID;
 import static com.codenvy.flux.watcher.fs.TestConstants.PROJECT_PATH;
 import static com.codenvy.flux.watcher.fs.TestConstants.RELATIVE_PROJECT_HELLO_FILE_PATH;

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.watcher.core.spi;
+package com.codenvy.flux.watcher.core;
 
 /**
  * Listener used to be notified for {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} events.
@@ -20,7 +20,7 @@ public interface RepositoryListener {
      * Called when an events is fired by the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider}.
      *
      * @param event
-     *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryEvent} instance, never {@code null}.
+     *         the {@link RepositoryEvent} instance, never {@code null}.
      */
     void onEvent(RepositoryEvent event);
 }

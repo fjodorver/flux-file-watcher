@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.watcher.core.spi;
+package com.codenvy.flux.watcher.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -16,20 +16,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Event sent when a modification is done on a repository.
  *
  * @author Kevin Pollet
- * @see com.codenvy.flux.watcher.core.spi.RepositoryEventType
- * @see com.codenvy.flux.watcher.core.spi.Resource
+ * @see RepositoryEventType
+ * @see Resource
  */
 public class RepositoryEvent {
     private final RepositoryEventType type;
     private final Resource            resource;
 
     /**
-     * Constructs an instance of {@link com.codenvy.flux.watcher.core.spi.RepositoryEvent}.
+     * Constructs an instance of {@link RepositoryEvent}.
      *
      * @param type
-     *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryEventType}.
+     *         the {@link RepositoryEventType}.
      * @param resource
-     *         the {@link com.codenvy.flux.watcher.core.spi.Resource} source of the event.
+     *         the {@link Resource} source of the event.
      * @throws java.lang.NullPointerException
      *         if {@code type} or {@code resource} parameter is {@code null}.
      */
@@ -39,18 +39,18 @@ public class RepositoryEvent {
     }
 
     /**
-     * Returns the {@link com.codenvy.flux.watcher.core.spi.RepositoryEventType} of this event.
+     * Returns the {@link RepositoryEventType} of this event.
      *
-     * @return the {@link com.codenvy.flux.watcher.core.spi.RepositoryEventType}, never {@code null}.
+     * @return the {@link RepositoryEventType}, never {@code null}.
      */
     public RepositoryEventType type() {
         return type;
     }
 
     /**
-     * Returns the {@link com.codenvy.flux.watcher.core.spi.Resource} source this event.
+     * Returns the {@link Resource} source this event.
      *
-     * @return the {@link com.codenvy.flux.watcher.core.spi.Resource}, never {@code null}.
+     * @return the {@link Resource}, never {@code null}.
      */
     public Resource resource() {
         return resource;

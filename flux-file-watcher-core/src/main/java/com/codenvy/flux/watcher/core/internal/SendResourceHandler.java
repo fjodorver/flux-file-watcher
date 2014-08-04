@@ -14,7 +14,7 @@ import com.codenvy.flux.watcher.core.Message;
 import com.codenvy.flux.watcher.core.MessageHandler;
 import com.codenvy.flux.watcher.core.MessageTypes;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
-import com.codenvy.flux.watcher.core.spi.Resource;
+import com.codenvy.flux.watcher.core.Resource;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +32,7 @@ import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TIMESTAMP;
 import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TYPE;
 import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_RESPONSE;
 import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_REQUEST;
-import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FILE;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**

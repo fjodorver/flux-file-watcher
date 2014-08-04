@@ -14,11 +14,11 @@ import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Helper providing methods to work with {@link com.codenvy.flux.watcher.core.spi.Resource}.
+ * Helper providing methods to work with {@link com.codenvy.flux.watcher.core.Resource}.
  *
  * @author Kevin Pollet
  */
@@ -36,10 +36,10 @@ public final class ResourceHelper {
     }
 
     /**
-     * Calculates the sha1 for the given {@link com.codenvy.flux.watcher.core.spi.Resource.ResourceType} and content.
+     * Calculates the sha1 for the given {@link com.codenvy.flux.watcher.core.Resource.ResourceType} and content.
      *
      * @param type
-     *         the {@link com.codenvy.flux.watcher.core.spi.Resource.ResourceType}.
+     *         the {@link com.codenvy.flux.watcher.core.Resource.ResourceType}.
      * @param content
      *         the content might be {@code null}.
      * @return the sha1 as an hexadecimal {@link String}, never {@code null}.

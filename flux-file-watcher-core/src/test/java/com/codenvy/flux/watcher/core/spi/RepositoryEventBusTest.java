@@ -10,21 +10,27 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.spi;
 
+import com.codenvy.flux.watcher.core.RepositoryEvent;
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
+import com.codenvy.flux.watcher.core.RepositoryEventTypes;
+import com.codenvy.flux.watcher.core.RepositoryListener;
+import com.codenvy.flux.watcher.core.Resource;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
 
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_CREATED;
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_DELETED;
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_MODIFIED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_CREATED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_DELETED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_MODIFIED;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * {@link com.codenvy.flux.watcher.core.spi.RepositoryEventBus} tests
+ * {@link com.codenvy.flux.watcher.core.RepositoryEventBus} tests
  *
  * @author Kevin Pollet
  */

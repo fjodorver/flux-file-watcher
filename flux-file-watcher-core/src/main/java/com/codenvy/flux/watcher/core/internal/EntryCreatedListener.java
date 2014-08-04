@@ -12,10 +12,10 @@ package com.codenvy.flux.watcher.core.internal;
 
 import com.codenvy.flux.watcher.core.FluxConnector;
 import com.codenvy.flux.watcher.core.Message;
-import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventTypes;
-import com.codenvy.flux.watcher.core.spi.RepositoryListener;
-import com.codenvy.flux.watcher.core.spi.Resource;
+import com.codenvy.flux.watcher.core.RepositoryEvent;
+import com.codenvy.flux.watcher.core.RepositoryEventTypes;
+import com.codenvy.flux.watcher.core.RepositoryListener;
+import com.codenvy.flux.watcher.core.Resource;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +29,7 @@ import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_PATH;
 import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TIMESTAMP;
 import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TYPE;
 import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CREATED;
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_CREATED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_CREATED;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**

@@ -12,8 +12,6 @@ package com.codenvy.flux.watcher.core;
 
 import com.codenvy.flux.watcher.core.internal.EntryCreatedListener;
 import com.codenvy.flux.watcher.core.internal.SendResourceHandler;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
-import com.codenvy.flux.watcher.core.spi.RepositoryListener;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
