@@ -30,12 +30,12 @@ public class FluxRepositoryModule extends AbstractModule {
 
 
         // message handler bindings
-        final Multibinder<MessageHandler> messageHandlerBinder = Multibinder.newSetBinder(binder(), MessageHandler.class);
-        messageHandlerBinder.addBinding().to(GetResourceRequestHandler.class);
-        messageHandlerBinder.addBinding().to(GetProjectRequestHandler.class);
+        final Multibinder<MessageHandler> messageHandlers = Multibinder.newSetBinder(binder(), MessageHandler.class);
+        messageHandlers.addBinding().to(GetResourceRequestHandler.class);
+        messageHandlers.addBinding().to(GetProjectRequestHandler.class);
 
         // repository listener bindings
-        final Multibinder<RepositoryListener> repositoryListenerBinder = Multibinder.newSetBinder(binder(), RepositoryListener.class);
-        repositoryListenerBinder.addBinding().to(EntryCreatedListener.class);
+        final Multibinder<RepositoryListener> repositoryListeners = Multibinder.newSetBinder(binder(), RepositoryListener.class);
+        repositoryListeners.addBinding().to(EntryCreatedListener.class);
     }
 }
