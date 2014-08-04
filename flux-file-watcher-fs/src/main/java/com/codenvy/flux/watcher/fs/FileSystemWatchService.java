@@ -11,6 +11,7 @@
 package com.codenvy.flux.watcher.fs;
 
 import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
+import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.spi.RepositoryEventType;
 import com.codenvy.flux.watcher.core.spi.Resource;
 import com.google.common.collect.BiMap;
@@ -55,6 +56,7 @@ public final class FileSystemWatchService extends Thread {
     private final BiMap<WatchKey, Path> watchKeys;
     private final Object                watchKeysMutex;
     private final FileSystemRepository  repository;
+    private final RepositoryEventBus    repositoryEventBus;
 
     /**
      * Constructs an instance of {@link FileSystemWatchService}.
@@ -62,14 +64,17 @@ public final class FileSystemWatchService extends Thread {
      * @param fileSystem
      *         the {@link java.nio.file.FileSystem} to watch.
      * @param repository
-     *         the {@link com.codenvy.flux.watcher.fs.FileSystemRepository} instance.
+     *         the {@link FileSystemRepository} instance.
+     * @param repositoryEventBus
+     *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryEvent} bus.
      * @throws java.lang.NullPointerException
      *         if {@code repository} parameter is {@code null}.
      */
-    FileSystemWatchService(FileSystem fileSystem, FileSystemRepository repository) {
+    FileSystemWatchService(FileSystem fileSystem, FileSystemRepository repository, RepositoryEventBus repositoryEventBus) {
         this.repository = checkNotNull(repository);
         this.watchKeys = HashBiMap.create();
         this.watchKeysMutex = new Object();
+        this.repositoryEventBus = repositoryEventBus;
 
         try {
 
@@ -179,7 +184,7 @@ public final class FileSystemWatchService extends Thread {
                     final RepositoryEventType repositoryEventType = kindToRepositoryEventType(pathEvent.kind());
                     final Resource resource = pathToResource(pathEvent.kind(), watchablePath, pathEvent.context());
                     if (repositoryEventType != null && resource != null) {
-                        repository.fireRepositoryEvent(new RepositoryEvent(repositoryEventType, resource));
+                        repositoryEventBus.fireRepositoryEvent(new RepositoryEvent(repositoryEventType, resource));
                     }
                 }
 
@@ -257,7 +262,8 @@ public final class FileSystemWatchService extends Thread {
                     if (exists) {
                         final boolean isDirectory = isDirectory(absoluteResourcePath);
                         return isDirectory ? Resource.newFolder(projectId, relativeProjectResourcePath, timestamp)
-                                           : Resource.newFile(projectId, relativeProjectResourcePath, timestamp, readAllBytes(absoluteResourcePath));
+                                           : Resource
+                                       .newFile(projectId, relativeProjectResourcePath, timestamp, readAllBytes(absoluteResourcePath));
 
                     } else {
                         return Resource.newUnknown(projectId, relativeProjectResourcePath, timestamp);

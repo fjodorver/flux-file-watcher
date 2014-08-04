@@ -10,24 +10,33 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
-
+import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.mockito.Mockito.mock;
+
 /**
- * {@link com.codenvy.flux.watcher.core.FluxRepository} tests.
+ * Tests Google Guice bootstrap.
  *
  * @author Kevin Pollet
  */
-public class FluxRepositoryTest {
+public final class BootstrapTest {
     @Test
     public void testBootstrap() {
-        final Injector injector = Guice.createInjector(new FluxModule(), new DummyModule());
-        final FluxRepository repository = injector.getInstance(FluxRepository.class);
+        final Injector injector = Guice.createInjector(new FluxModule(), new TestModule());
 
-        Assert.assertNotNull(repository);
+        Assert.assertNotNull(injector.getInstance(FluxRepository.class));
+    }
+
+    public static class TestModule extends AbstractModule {
+        @Override
+        protected void configure() {
+            bind(RepositoryProvider.class).toInstance(mock(RepositoryProvider.class));
+        }
     }
 }

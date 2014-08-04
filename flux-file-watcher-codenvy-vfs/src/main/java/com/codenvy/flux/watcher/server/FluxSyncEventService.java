@@ -16,6 +16,7 @@ import com.codenvy.api.project.server.ProjectService;
 import com.codenvy.api.project.shared.dto.ProjectDescriptor;
 import com.codenvy.api.vfs.server.observation.VirtualFileEvent;
 import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
+import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.spi.RepositoryEventType;
 import com.codenvy.flux.watcher.core.spi.Resource;
 import com.google.inject.Inject;
@@ -27,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Service notifying Flux repository about publishing of VFS events in Codenvy.
  *
@@ -34,18 +37,15 @@ import javax.annotation.PreDestroy;
  */
 @Singleton
 public class FluxSyncEventService {
-
     private static final Logger LOG = LoggerFactory.getLogger(FluxSyncEventService.class);
 
     private final EventService                      eventService;
     private final EventSubscriber<VirtualFileEvent> subscriber;
-    //private final VFSRepository             repository;
 
     @Inject
-    FluxSyncEventService(EventService eventService, VFSRepository repository, ProjectService projectService) {
+    FluxSyncEventService(EventService eventService, VFSRepository repository, RepositoryEventBus repositoryEventBus, ProjectService projectService) {
         this.eventService = eventService;
-        this.subscriber = new VirtualFileEventSubscriber(repository, projectService);
-        //this.repositoryProvider = repository;
+        this.subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectService);
     }
 
     @PostConstruct
@@ -62,55 +62,52 @@ public class FluxSyncEventService {
      * Subscriber receiving notification events from Codenvy VFS.
      */
     public class VirtualFileEventSubscriber implements EventSubscriber<VirtualFileEvent> {
+        private final ProjectService     projectService;
+        private final RepositoryEventBus repositoryEventBus;
 
-        private VFSRepository  repository;
-        private ProjectService projectService;
-
-        public VirtualFileEventSubscriber(VFSRepository repository, ProjectService projectService) {
-            this.repository = repository;
-            this.projectService = projectService;
+        public VirtualFileEventSubscriber(RepositoryEventBus repositoryEventBus, ProjectService projectService) {
+            this.repositoryEventBus = checkNotNull(repositoryEventBus);
+            this.projectService = checkNotNull(projectService);
         }
 
         @Override
         public void onEvent(VirtualFileEvent event) {
-            if (repository != null) {
-                VirtualFileEvent.ChangeType eventType = event.getType();
-                RepositoryEventType repoType = null;
-                if ((eventType == VirtualFileEvent.ChangeType.CREATED) || (eventType == VirtualFileEvent.ChangeType.MOVED)
-                    || (eventType == VirtualFileEvent.ChangeType.RENAMED)) {
-                    repoType = RepositoryEventType.ENTRY_CREATED;
-                } else if (eventType == VirtualFileEvent.ChangeType.CONTENT_UPDATED) {
-                    repoType = RepositoryEventType.ENTRY_MODIFIED;
-                } else if (eventType == VirtualFileEvent.ChangeType.DELETED) {
-                    repoType = RepositoryEventType.ENTRY_DELETED;
-                }
-
-                RepositoryEvent repoEvent = null;
-                if (repoType != null) {
-                    Resource resource = null;
-                    String eventWorkspace = event.getWorkspaceId();
-                    String eventPath = event.getPath();
-                    ProjectDescriptor project = null;
-                    try {
-                        project = projectService.getProject(eventWorkspace, eventPath);
-                    } catch (Exception e) {
-                        LOG.error(e.getMessage());
-                    }
-                    String eventProject = project.getName();
-                    // TODO get file/folder modification time from VFS and set as timestamp
-                    long timestamp = project.getModificationDate();
-
-                    if (event.isFolder()) {
-                        resource = Resource.newFolder(eventProject, eventPath, timestamp);
-                    } else {
-                        // TODO get file content from where?
-                        resource = Resource.newFile(eventProject, eventPath, timestamp, new byte[0]);
-                    }
-                    repoEvent = new RepositoryEvent(repoType, resource);
-                }
-
-                repository.fireRepositoryEvent(repoEvent);
+            VirtualFileEvent.ChangeType eventType = event.getType();
+            RepositoryEventType repoType = null;
+            if ((eventType == VirtualFileEvent.ChangeType.CREATED) || (eventType == VirtualFileEvent.ChangeType.MOVED)
+                || (eventType == VirtualFileEvent.ChangeType.RENAMED)) {
+                repoType = RepositoryEventType.ENTRY_CREATED;
+            } else if (eventType == VirtualFileEvent.ChangeType.CONTENT_UPDATED) {
+                repoType = RepositoryEventType.ENTRY_MODIFIED;
+            } else if (eventType == VirtualFileEvent.ChangeType.DELETED) {
+                repoType = RepositoryEventType.ENTRY_DELETED;
             }
+
+            RepositoryEvent repoEvent = null;
+            if (repoType != null) {
+                Resource resource = null;
+                String eventWorkspace = event.getWorkspaceId();
+                String eventPath = event.getPath();
+                ProjectDescriptor project = null;
+                try {
+                    project = projectService.getProject(eventWorkspace, eventPath);
+                } catch (Exception e) {
+                    LOG.error(e.getMessage());
+                }
+                String eventProject = project.getName();
+                // TODO get file/folder modification time from VFS and set as timestamp
+                long timestamp = project.getModificationDate();
+
+                if (event.isFolder()) {
+                    resource = Resource.newFolder(eventProject, eventPath, timestamp);
+                } else {
+                    // TODO get file content from where?
+                    resource = Resource.newFile(eventProject, eventPath, timestamp, new byte[0]);
+                }
+                repoEvent = new RepositoryEvent(repoType, resource);
+            }
+
+            repositoryEventBus.fireRepositoryEvent(repoEvent);
         }
     }
 }

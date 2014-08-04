@@ -10,13 +10,10 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventTypes;
+import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.spi.RepositoryListener;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 import com.codenvy.flux.watcher.core.spi.Resource;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 
 import javax.inject.Singleton;
@@ -28,17 +25,13 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FOLDER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.notNull;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.createDirectory;
 import static java.nio.file.Files.createFile;
@@ -60,15 +53,15 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class FileSystemRepository implements RepositoryProvider {
     private final ConcurrentMap<String, Path> projects;
     private final FileSystemWatchService      watchService;
-    private final Set<RepositoryListener>     repositoryListeners;
     private final FileSystem                  fileSystem;
+    private final RepositoryEventBus          repositoryEventBus;
 
     @Inject
-    public FileSystemRepository(FileSystem fileSystem, Set<RepositoryListener> repositoryListeners) {
+    public FileSystemRepository(FileSystem fileSystem, RepositoryEventBus repositoryEventBus) {
         this.fileSystem = fileSystem;
         this.projects = new ConcurrentHashMap<>();
-        this.watchService = new FileSystemWatchService(fileSystem, this);
-        this.repositoryListeners = new CopyOnWriteArraySet<>(repositoryListeners);
+        this.watchService = new FileSystemWatchService(fileSystem, this, repositoryEventBus);
+        this.repositoryEventBus = repositoryEventBus;
 
         // start the watch service
         this.watchService.start();
@@ -184,14 +177,12 @@ public class FileSystemRepository implements RepositoryProvider {
 
     @Override
     public boolean addRepositoryListener(RepositoryListener listener) {
-        checkNotNull(listener);
-        return repositoryListeners.add(listener);
+        return repositoryEventBus.addRepositoryListener(listener);
     }
 
     @Override
     public boolean removeRepositoryListener(RepositoryListener listener) {
-        checkNotNull(listener);
-        return repositoryListeners.remove(listener);
+        return repositoryEventBus.addRepositoryListener(listener);
     }
 
     @Override
@@ -205,25 +196,5 @@ public class FileSystemRepository implements RepositoryProvider {
 
     public Map<String, Path> projects() {
         return unmodifiableMap(projects);
-    }
-
-    public void fireRepositoryEvent(final RepositoryEvent event) {
-        checkNotNull(event);
-
-        final Set<RepositoryListener> filteredRepositoryListeners = FluentIterable
-                .from(repositoryListeners)
-                .filter(notNull())
-                .filter(new Predicate<RepositoryListener>() {
-                    @Override
-                    public boolean apply(RepositoryListener listener) {
-                        final RepositoryEventTypes repositoryEventTypes = listener.getClass().getAnnotation(RepositoryEventTypes.class);
-                        return Arrays.asList(repositoryEventTypes.value()).contains(event.type());
-                    }
-                })
-                .toSet();
-
-        for (RepositoryListener oneRepositoryListener : filteredRepositoryListeners) {
-            oneRepositoryListener.onEvent(event);
-        }
     }
 }

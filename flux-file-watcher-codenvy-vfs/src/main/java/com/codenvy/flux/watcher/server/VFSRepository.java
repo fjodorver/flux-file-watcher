@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import com.codenvy.api.project.server.ProjectService;
 import com.codenvy.api.project.shared.dto.ProjectDescriptor;
 import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
+import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.spi.RepositoryEventTypes;
 import com.codenvy.flux.watcher.core.spi.RepositoryListener;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
@@ -37,15 +38,14 @@ import com.google.inject.Inject;
  * @author Stéphane Tournié
  */
 public class VFSRepository implements RepositoryProvider {
-    
-    private final Set<RepositoryListener> repositoryListeners;
     private final ProjectService          projectService;
     private final ConcurrentMap<String, String> projects;
+    private final RepositoryEventBus repositoryEventBus;
 
     @Inject
-    public VFSRepository(ProjectService projectService) {
-        this.repositoryListeners = new CopyOnWriteArraySet<>();
+    public VFSRepository(ProjectService projectService, RepositoryEventBus repositoryEventBus) {
         this.projectService = projectService;
+        this.repositoryEventBus = repositoryEventBus;
         this.projects = new ConcurrentHashMap<>();
     }
 
@@ -129,14 +129,12 @@ public class VFSRepository implements RepositoryProvider {
 
     @Override
     public boolean addRepositoryListener(RepositoryListener listener) {
-        checkNotNull(listener);
-        return repositoryListeners.add(listener);
+        return repositoryEventBus.addRepositoryListener(listener);
     }
 
     @Override
     public boolean removeRepositoryListener(RepositoryListener listener) {
-        checkNotNull(listener);
-        return repositoryListeners.remove(listener);
+        return repositoryEventBus.addRepositoryListener(listener);
     }
 
     @Override
@@ -146,19 +144,5 @@ public class VFSRepository implements RepositoryProvider {
             return clazz.cast(this);
         }
         throw new IllegalArgumentException("Repository provider cannot be unwrapped to '" + clazz.getName() + "'");
-    }
-
-    void fireRepositoryEvent(RepositoryEvent event) {
-        final Set<RepositoryListener> filteredListeners = new HashSet<>();
-        for (RepositoryListener oneRepositoryListener : repositoryListeners) {
-            final RepositoryEventTypes repositoryEventTypes = oneRepositoryListener.getClass().getAnnotation(RepositoryEventTypes.class);
-            if (Arrays.asList(repositoryEventTypes.value()).contains(event.type())) {
-                filteredListeners.add(oneRepositoryListener);
-            }
-        }
-        // send event to flux repository
-        for (RepositoryListener oneRepositoryListener : filteredListeners) {
-            oneRepositoryListener.onEvent(event);
-        }
     }
 }

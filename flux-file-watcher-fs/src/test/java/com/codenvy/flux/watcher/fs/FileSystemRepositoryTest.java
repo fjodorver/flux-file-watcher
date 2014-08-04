@@ -11,9 +11,7 @@
 package com.codenvy.flux.watcher.fs;
 
 
-import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
-import com.codenvy.flux.watcher.core.spi.RepositoryEventTypes;
-import com.codenvy.flux.watcher.core.spi.RepositoryListener;
+import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 import com.codenvy.flux.watcher.core.spi.Resource;
 
@@ -26,11 +24,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashSet;
 
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_CREATED;
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_DELETED;
-import static com.codenvy.flux.watcher.core.spi.RepositoryEventType.ENTRY_MODIFIED;
 import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FILE;
 import static com.codenvy.flux.watcher.core.spi.Resource.ResourceType.FOLDER;
 import static com.codenvy.flux.watcher.fs.TestConstants.PROJECT_ID;
@@ -44,10 +38,7 @@ import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.nio.file.Files.isDirectory;
 import static java.nio.file.Files.readAllBytes;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * {@link com.codenvy.flux.watcher.fs.FileSystemRepository} tests.
@@ -59,7 +50,8 @@ public final class FileSystemRepositoryTest extends AbstractTest {
 
     @Before
     public void beforeTest() throws IOException {
-        fileSystemRepository = new FileSystemRepository(fileSystem(), new HashSet<RepositoryListener>());
+        final RepositoryEventBus repositoryEventBusMock = mock(RepositoryEventBus.class);
+        fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBusMock);
 
         final int numberOfProjects = fileSystemRepository.projects().size();
         final boolean isAdded = fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
@@ -239,16 +231,6 @@ public final class FileSystemRepositoryTest extends AbstractTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testAddRepositoryListenerWithNullListener() {
-        fileSystemRepository.addRepositoryListener(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testRemoveRepositoryListenerWithNullListener() {
-        fileSystemRepository.removeRepositoryListener(null);
-    }
-
-    @Test(expected = NullPointerException.class)
     public void testUnwrapWithNullClass() {
         fileSystemRepository.unwrap(null);
     }
@@ -264,101 +246,5 @@ public final class FileSystemRepositoryTest extends AbstractTest {
 
         Assert.assertNotNull(repositoryProvider);
         Assert.assertSame(fileSystemRepository, repositoryProvider);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testFireRepositoryEventWithNullEvent() {
-        fileSystemRepository.fireRepositoryEvent(null);
-    }
-
-    @Test
-    public void testFireRepositoryEvent() {
-        final EntryCreatedListener entryCreatedListener = new EntryCreatedListener();
-        fileSystemRepository.addRepositoryListener(entryCreatedListener);
-
-        final EntryModifiedListener entryModifiedListener = new EntryModifiedListener();
-        fileSystemRepository.addRepositoryListener(entryModifiedListener);
-
-        final EntryDeletedListener entryDeletedListener = new EntryDeletedListener();
-        fileSystemRepository.addRepositoryListener(entryDeletedListener);
-
-        final EntryCreatedAndModifiedListener entryCreatedAndModifiedListener = new EntryCreatedAndModifiedListener();
-        fileSystemRepository.addRepositoryListener(entryCreatedAndModifiedListener);
-
-        fireAllEventTypes();
-
-        verify(entryCreatedListener.mock, times(1)).onEvent(any(RepositoryEvent.class));
-        verify(entryModifiedListener.mock, times(1)).onEvent(any(RepositoryEvent.class));
-        verify(entryDeletedListener.mock, times(1)).onEvent(any(RepositoryEvent.class));
-        verify(entryCreatedAndModifiedListener.mock, times(2)).onEvent(any(RepositoryEvent.class));
-    }
-
-    private void fireAllEventTypes() {
-        final Resource resource = Resource.newFolder(PROJECT_ID, RELATIVE_PROJECT_SRC_FOLDER_PATH, System.currentTimeMillis());
-
-        final RepositoryEvent entryCreatedEvent = new RepositoryEvent(ENTRY_CREATED, resource);
-        fileSystemRepository.fireRepositoryEvent(entryCreatedEvent);
-
-        final RepositoryEvent entryDeletedEvent = new RepositoryEvent(ENTRY_DELETED, resource);
-        fileSystemRepository.fireRepositoryEvent(entryDeletedEvent);
-
-        final RepositoryEvent entryModifiedEvent = new RepositoryEvent(ENTRY_MODIFIED, resource);
-        fileSystemRepository.fireRepositoryEvent(entryModifiedEvent);
-    }
-
-    @RepositoryEventTypes(ENTRY_CREATED)
-    public static class EntryCreatedListener implements RepositoryListener {
-        private final RepositoryListener mock;
-
-        public EntryCreatedListener() {
-            this.mock = mock(RepositoryListener.class);
-        }
-
-        @Override
-        public void onEvent(RepositoryEvent event) {
-            mock.onEvent(event);
-        }
-    }
-
-    @RepositoryEventTypes(ENTRY_DELETED)
-    public static class EntryDeletedListener implements RepositoryListener {
-        private final RepositoryListener mock;
-
-        public EntryDeletedListener() {
-            this.mock = mock(RepositoryListener.class);
-        }
-
-        @Override
-        public void onEvent(RepositoryEvent event) {
-            mock.onEvent(event);
-        }
-    }
-
-    @RepositoryEventTypes(ENTRY_MODIFIED)
-    public static class EntryModifiedListener implements RepositoryListener {
-        private final RepositoryListener mock;
-
-        public EntryModifiedListener() {
-            this.mock = mock(RepositoryListener.class);
-        }
-
-        @Override
-        public void onEvent(RepositoryEvent event) {
-            mock.onEvent(event);
-        }
-    }
-
-    @RepositoryEventTypes({ENTRY_CREATED, ENTRY_MODIFIED})
-    public static class EntryCreatedAndModifiedListener implements RepositoryListener {
-        private final RepositoryListener mock;
-
-        public EntryCreatedAndModifiedListener() {
-            this.mock = mock(RepositoryListener.class);
-        }
-
-        @Override
-        public void onEvent(RepositoryEvent event) {
-            mock.onEvent(event);
-        }
     }
 }

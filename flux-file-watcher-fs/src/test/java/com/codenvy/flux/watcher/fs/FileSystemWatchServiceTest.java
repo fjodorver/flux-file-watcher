@@ -11,6 +11,7 @@
 package com.codenvy.flux.watcher.fs;
 
 import com.codenvy.flux.watcher.core.spi.RepositoryEvent;
+import com.codenvy.flux.watcher.core.spi.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.spi.RepositoryEventType;
 import com.codenvy.flux.watcher.core.spi.RepositoryEventTypes;
 import com.codenvy.flux.watcher.core.spi.RepositoryListener;
@@ -27,8 +28,8 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -72,10 +73,11 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
         final Map<String, Path> projects = new HashMap<>();
         projects.put(PROJECT_ID, fileSystem().getPath(PROJECT_PATH));
 
+        final RepositoryEventBus repositoryEventBusMock = mock(RepositoryEventBus.class);
         final FileSystemRepository fileSystemRepositoryMock = mock(FileSystemRepository.class);
         when(fileSystemRepositoryMock.projects()).thenReturn(projects);
 
-        fileSystemWatchService = new FileSystemWatchService(fileSystem(), fileSystemRepositoryMock);
+        fileSystemWatchService = new FileSystemWatchService(fileSystem(), fileSystemRepositoryMock, repositoryEventBusMock);
     }
 
     @Test(expected = NullPointerException.class)
@@ -207,10 +209,11 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testWatchEntryCreateFile() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final EntryCreatedListener entryCreatedListener = new EntryCreatedListener(countDownLatch);
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), new HashSet<RepositoryListener>());
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
+        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
-        fileSystemRepository.addRepositoryListener(entryCreatedListener);
+        repositoryEventBus.addRepositoryListener(entryCreatedListener);
 
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_HELLO_FILE_PATH);
         createFile(absoluteFilePath);
@@ -231,10 +234,11 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testWatchEntryCreateFolder() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final EntryCreatedListener entryCreatedListener = new EntryCreatedListener(countDownLatch);
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), new HashSet<RepositoryListener>());
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
+        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
-        fileSystemRepository.addRepositoryListener(entryCreatedListener);
+        repositoryEventBus.addRepositoryListener(entryCreatedListener);
 
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_MAIN_FOLDER_PATH);
         createDirectory(absoluteFilePath);
@@ -255,10 +259,11 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testWatchEntryModifyFile() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final EntryModifiedListener entryModifiedListener = new EntryModifiedListener(countDownLatch);
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), new HashSet<RepositoryListener>());
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
+        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
-        fileSystemRepository.addRepositoryListener(entryModifiedListener);
+        repositoryEventBus.addRepositoryListener(entryModifiedListener);
 
         final String content = "README";
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH);
@@ -280,10 +285,11 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testWatchEntryDeleteFile() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final EntryDeletedListener entryDeletedListener = new EntryDeletedListener(countDownLatch);
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), new HashSet<RepositoryListener>());
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
+        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
-        fileSystemRepository.addRepositoryListener(entryDeletedListener);
+        repositoryEventBus.addRepositoryListener(entryDeletedListener);
 
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH);
         delete(absoluteFilePath);
@@ -303,10 +309,11 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testWatchEntryDeleteFolder() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final EntryDeletedListener entryDeletedListener = new EntryDeletedListener(countDownLatch);
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), new HashSet<RepositoryListener>());
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
+        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
-        fileSystemRepository.addRepositoryListener(entryDeletedListener);
+        repositoryEventBus.addRepositoryListener(entryDeletedListener);
 
         final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
         delete(absoluteFolderPath);
@@ -326,10 +333,11 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testUnwatch() throws IOException, InterruptedException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final EntryDeletedListener entryDeletedListener = new EntryDeletedListener(countDownLatch);
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), new HashSet<RepositoryListener>());
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
+        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
-        fileSystemRepository.addRepositoryListener(entryDeletedListener);
+        repositoryEventBus.addRepositoryListener(entryDeletedListener);
         fileSystemRepository.removeProject(PROJECT_ID);
 
         final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);

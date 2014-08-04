@@ -16,6 +16,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Event sent when a modification is done on a repository.
  *
  * @author Kevin Pollet
+ * @see com.codenvy.flux.watcher.core.spi.RepositoryEventType
+ * @see com.codenvy.flux.watcher.core.spi.Resource
  */
 public final class RepositoryEvent {
     private final RepositoryEventType type;
