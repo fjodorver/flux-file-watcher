@@ -12,11 +12,16 @@ package com.codenvy.flux.watcher.core;
 
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
 import java.util.UUID;
 
+import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
+import static com.codenvy.flux.watcher.core.MessageType.PROJECT_CONNECTED;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -95,7 +100,18 @@ public class FluxRepository {
      *         if {@code projectId} or {@code path} parameter is {@code null}.
      */
     public boolean addProject(String projectId, String path) {
-        return repositoryProvider.addProject(checkNotNull(projectId), checkNotNull(path));
+        final boolean isAdded = repositoryProvider.addProject(checkNotNull(projectId), checkNotNull(path));
+        try {
+
+            final JSONObject content = new JSONObject().put(PROJECT.value(), projectId);
+            final Message message = new Message(PROJECT_CONNECTED, content);
+            fluxConnector.broadcastMessage(message);
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+        return isAdded;
     }
 
     /**

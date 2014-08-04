@@ -12,8 +12,8 @@ package com.codenvy.flux.watcher.fs;
 
 import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.RepositoryListener;
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 import com.codenvy.flux.watcher.core.Resource;
+import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 import com.google.inject.Inject;
 
 import javax.inject.Singleton;
@@ -25,7 +25,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -39,7 +41,9 @@ import static java.nio.file.Files.delete;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.nio.file.Files.isDirectory;
+import static java.nio.file.Files.readAllBytes;
 import static java.nio.file.Files.setLastModifiedTime;
+import static java.nio.file.Files.walkFileTree;
 import static java.nio.file.Files.write;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -95,6 +99,45 @@ public class FileSystemRepository implements RepositoryProvider {
     }
 
     @Override
+    public Set<Resource> getProjectResources(final String projectId) {
+        checkNotNull(projectId);
+        checkArgument(projects.containsKey(projectId));
+
+        final Set<Resource> resources = new HashSet<>();
+        final Path projectPath = projects.get(projectId);
+        try {
+
+            walkFileTree(projectPath, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    final long timestamp = getLastModifiedTime(dir).toMillis();
+                    final String relativeResourcePath = projectPath.relativize(dir).toString();
+
+                    resources.add(Resource.newFolder(projectId, relativeResourcePath, timestamp));
+
+                    return CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    final long timestamp = getLastModifiedTime(file).toMillis();
+                    final String relativeResourcePath = projectPath.relativize(file).toString();
+                    final byte[] content = readAllBytes(file);
+
+                    resources.add(Resource.newFile(projectId, relativeResourcePath, timestamp, content));
+
+                    return CONTINUE;
+                }
+            });
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return resources;
+    }
+
+    @Override
     public Resource getResource(String projectId, String path) {
         checkNotNull(projectId);
         checkNotNull(path);
@@ -108,7 +151,7 @@ public class FileSystemRepository implements RepositoryProvider {
                     final long timestamp = getLastModifiedTime(resourcePath).toMillis();
 
                     return isDirectory ? Resource.newFolder(projectId, path, timestamp)
-                                       : Resource.newFile(projectId, path, timestamp, Files.readAllBytes(resourcePath));
+                                       : Resource.newFile(projectId, path, timestamp, readAllBytes(resourcePath));
 
                 } catch (IOException e) {
                     throw new RuntimeException(e);

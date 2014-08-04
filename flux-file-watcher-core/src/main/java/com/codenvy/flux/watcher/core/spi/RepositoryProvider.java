@@ -13,6 +13,8 @@ package com.codenvy.flux.watcher.core.spi;
 import com.codenvy.flux.watcher.core.RepositoryListener;
 import com.codenvy.flux.watcher.core.Resource;
 
+import java.util.Set;
+
 /**
  * Interface implemented by a repository.
  *
@@ -44,6 +46,19 @@ public interface RepositoryProvider {
      *         if {@code projectId} parameter is {@code null}.
      */
     boolean removeProject(String projectId);
+
+    /**
+     * Returns all {@link com.codenvy.flux.watcher.core.Resource} of the given project.
+     *
+     * @param projectId
+     *         the project id.
+     * @return the {@link com.codenvy.flux.watcher.core.Resource} {@link java.util.Set}, never {@code null}.
+     * @throws java.lang.NullPointerException
+     *         if {@code projectId} parameter is {@code null}.
+     * @throws java.lang.IllegalArgumentException
+     *         if project doesn't exist.
+     */
+    Set<Resource> getProjectResources(String projectId);
 
     /**
      * Returns the {@link com.codenvy.flux.watcher.core.Resource} in the given project with the given relative path.

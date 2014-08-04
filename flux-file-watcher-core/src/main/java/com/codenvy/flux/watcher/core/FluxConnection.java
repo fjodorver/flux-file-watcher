@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import static com.codenvy.flux.watcher.core.Message.Fields.CHANNEL;
+import static com.codenvy.flux.watcher.core.Message.Fields.CONNECTED_TO_CHANNEL;
 import static com.codenvy.flux.watcher.core.Message.Fields.USERNAME;
 import static com.codenvy.flux.watcher.core.MessageType.CONNECT_TO_CHANNEL;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -79,10 +81,25 @@ public class FluxConnection {
                 public void onConnect() {
                     try {
 
-                        final JSONObject message = new JSONObject();
-                        message.put("channel", credentials.username());
+                        final JSONObject content = new JSONObject().put(CHANNEL.value(), credentials.username());
+                        socket.emit(CONNECT_TO_CHANNEL.value(), new IOAcknowledge() {
+                            @Override
+                            public void ack(Object... objects) {
+                                if (objects.length == 1 && objects[0] instanceof JSONObject) {
+                                    final JSONObject ack = (JSONObject)objects[0];
+                                    try {
 
-                        sendMessage(new Message(CONNECT_TO_CHANNEL, message));
+                                        if (ack.has(CONNECTED_TO_CHANNEL.value()) && ack.getBoolean(CONNECTED_TO_CHANNEL.value())) {
+                                            return;
+                                        }
+
+                                    } catch (JSONException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                                socket.disconnect();
+                            }
+                        }, content);
 
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
@@ -99,6 +116,7 @@ public class FluxConnection {
 
                 }
 
+                //TODO in flux implementation the username is checked, what to do?
                 @Override
                 public void on(String messageType, IOAcknowledge ioAcknowledge, Object... objects) {
                     final Set<MessageHandler> messageHandlers = getMessageHandlersFor(messageType);
@@ -172,7 +190,7 @@ public class FluxConnection {
             }
         }
 
-        socket.emit(message.type().value(), message);
+        socket.emit(message.type().value(), message.content());
     }
 
     private Set<MessageHandler> getMessageHandlersFor(final String messageType) {

@@ -13,6 +13,7 @@ package com.codenvy.flux.watcher.server;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.ByteArrayInputStream;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -69,6 +70,11 @@ public class VFSRepository implements RepositoryProvider {
         
         final String projectPath = projects.remove(projectId);
         return projectPath != null;
+    }
+
+    @Override
+    public Set<Resource> getProjectResources(String projectId) {
+        return null;
     }
 
     @Override

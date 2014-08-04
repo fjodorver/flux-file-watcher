@@ -23,15 +23,16 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
-import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT_NAME;
+import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.Message.Fields.REQUEST_SENDER_ID;
-import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_CONTENT;
-import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_HASH;
-import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_PATH;
-import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_TIMESTAMP;
-import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_TYPE;
-import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_RESPONSE;
+import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
+import static com.codenvy.flux.watcher.core.Message.Fields.CONTENT;
+import static com.codenvy.flux.watcher.core.Message.Fields.HASH;
+import static com.codenvy.flux.watcher.core.Message.Fields.PATH;
+import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
+import static com.codenvy.flux.watcher.core.Message.Fields.TYPE;
 import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_REQUEST;
+import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_RESPONSE;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,11 +43,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Singleton
 @MessageTypes(GET_RESOURCE_REQUEST)
-public class SendResourceHandler implements MessageHandler {
+public class GetResourceRequestHandler implements MessageHandler {
     private final RepositoryProvider repositoryProvider;
 
     /**
-     * Constructs an instance of {@link com.codenvy.flux.watcher.core.internal.SendResourceHandler}.
+     * Constructs an instance of {@link GetResourceRequestHandler}.
      *
      * @param repositoryProvider
      *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider}.
@@ -54,7 +55,7 @@ public class SendResourceHandler implements MessageHandler {
      *         if {@code repositoryProvider} parameter is {@code null}.
      */
     @Inject
-    public SendResourceHandler(RepositoryProvider repositoryProvider) {
+    GetResourceRequestHandler(RepositoryProvider repositoryProvider) {
         this.repositoryProvider = checkNotNull(repositoryProvider);
     }
 
@@ -63,30 +64,31 @@ public class SendResourceHandler implements MessageHandler {
         try {
 
             final JSONObject request = message.content();
-            final int callbackID = request.getInt(CALLBACK_ID.value());
-            final String requestSenderID = request.getString(REQUEST_SENDER_ID.value());
-            final String projectName = request.getString(PROJECT_NAME.value());
-            final String resourcePath = request.getString(RESOURCE_PATH.value());
+            final int callbackId = request.getInt(CALLBACK_ID.value());
+            final String requestSenderId = request.getString(REQUEST_SENDER_ID.value());
+            final String projectName = request.getString(PROJECT.value());
+            final String resourcePath = request.getString(RESOURCE.value());
 
             // we ask the repository to retrieve the resource
             final Resource resource = repositoryProvider.getResource(projectName, resourcePath);
 
             // we send the resource only if the timestamp are equals or no timestamp is specified
-            if (!request.has(RESOURCE_TIMESTAMP.value()) || request.getLong(RESOURCE_TIMESTAMP.value()) == resource.timestamp()) {
-                final JSONObject response = new JSONObject();
-                response.put(CALLBACK_ID.value(), callbackID);
-                response.put(REQUEST_SENDER_ID.value(), requestSenderID);
-                response.put(PROJECT_NAME.value(), projectName);
-                response.put(RESOURCE_PATH.value(), resourcePath);
-                response.put(RESOURCE_TIMESTAMP.value(), resource.timestamp());
-                response.put(RESOURCE_HASH.value(), resource.hash());
-                response.put(RESOURCE_TYPE.value(), resource.type().name().toLowerCase());
+            if (!request.has(TIMESTAMP.value()) || request.getLong(TIMESTAMP.value()) == resource.timestamp()) {
+                final JSONObject content = new JSONObject()
+                        .put(CALLBACK_ID.value(), callbackId)
+                        .put(REQUEST_SENDER_ID.value(), requestSenderId)
+                        .put(PROJECT.value(), projectName)
+                        .put(PATH.value(), resourcePath)
+                        .put(TIMESTAMP.value(), resource.timestamp())
+                        .put(HASH.value(), resource.hash())
+                        .put(TYPE.value(), resource.type().name().toLowerCase());
+
                 if (resource.type() == FILE) {
-                    response.put(RESOURCE_CONTENT.value(), new String(resource.content()));
+                    content.put(CONTENT.value(), new String(resource.content()));
                 }
 
                 message.source()
-                       .sendMessage(new Message(GET_PROJECT_RESPONSE, response));
+                       .sendMessage(new Message(GET_RESOURCE_RESPONSE, content));
             }
 
         } catch (JSONException e) {

@@ -92,12 +92,16 @@ public class Message {
         USERNAME("username"),
         CALLBACK_ID("callback_id"),
         REQUEST_SENDER_ID("requestSenderID"),
-        PROJECT_NAME("project"),
-        RESOURCE_PATH("resource"),
-        RESOURCE_TYPE("type"),
-        RESOURCE_TIMESTAMP("timestamp"),
-        RESOURCE_HASH("hash"),
-        RESOURCE_CONTENT("content");
+        PROJECT("project"),
+        FILES("files"),
+        PATH("path"),
+        RESOURCE("resource"),
+        TYPE("type"),
+        TIMESTAMP("timestamp"),
+        HASH("hash"),
+        CONTENT("content"),
+        CHANNEL("channel"),
+        CONNECTED_TO_CHANNEL("connectedToChannel");
 
         private final String value;
 

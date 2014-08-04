@@ -24,7 +24,8 @@ public enum MessageType {
     GET_RESOURCE_RESPONSE("getResourceResponse"),
     RESOURCE_CREATED("resourceCreated"),
     RESOURCE_CHANGED("resourceChanged"),
-    RESOURCE_DELETED("resourceDeleted");
+    RESOURCE_DELETED("resourceDeleted"),
+    PROJECT_CONNECTED("projectConnected");
 
     private final String value;
 
