@@ -10,7 +10,7 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.FluxModule;
+import com.codenvy.flux.watcher.core.FluxRepositoryModule;
 import com.codenvy.flux.watcher.core.FluxRepository;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -26,7 +26,7 @@ import org.junit.Test;
 public final class BootstrapTest {
     @Test
     public void testBootstrap() {
-        final Injector injector = Guice.createInjector(new FluxModule(), new FileSystemRepositoryTestModule());
+        final Injector injector = Guice.createInjector(new FluxRepositoryModule(), new FileSystemRepositoryTestModule());
 
         Assert.assertNotNull(injector.getInstance(FluxRepository.class));
     }

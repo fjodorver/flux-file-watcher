@@ -16,10 +16,11 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
 /**
+ * Guice bindings for {@link com.codenvy.flux.watcher.core.FluxRepositoryModule}.
+ *
  * @author Kevin Pollet
  */
-//TODO how integrate flux authentication?
-public class FluxModule extends AbstractModule {
+public class FluxRepositoryModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(FluxRepository.class);
@@ -27,11 +28,11 @@ public class FluxModule extends AbstractModule {
         bind(RepositoryEventBus.class);
 
 
-        // message handlers binding
+        // message handler bindings
         final Multibinder<MessageHandler> messageHandlerBinder = Multibinder.newSetBinder(binder(), MessageHandler.class);
         messageHandlerBinder.addBinding().to(SendResourceHandler.class);
 
-        // repository listeners binding
+        // repository listener bindings
         final Multibinder<RepositoryListener> repositoryListenerBinder = Multibinder.newSetBinder(binder(), RepositoryListener.class);
         repositoryListenerBinder.addBinding().to(EntryCreatedListener.class);
     }

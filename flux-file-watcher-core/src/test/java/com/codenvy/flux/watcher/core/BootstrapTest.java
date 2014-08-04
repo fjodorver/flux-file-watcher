@@ -28,7 +28,7 @@ import static org.mockito.Mockito.mock;
 public final class BootstrapTest {
     @Test
     public void testBootstrap() {
-        final Injector injector = Guice.createInjector(new FluxModule(), new TestModule());
+        final Injector injector = Guice.createInjector(new FluxRepositoryModule(), new TestModule());
 
         Assert.assertNotNull(injector.getInstance(FluxRepository.class));
     }
