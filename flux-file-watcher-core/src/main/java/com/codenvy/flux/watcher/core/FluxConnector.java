@@ -40,7 +40,7 @@ public class FluxConnector {
      *         if {@code messageHandlersProvider} is {@code null}.
      */
     @Inject
-    public FluxConnector(Provider<Set<MessageHandler>> messageHandlersProvider) {
+    FluxConnector(Provider<Set<MessageHandler>> messageHandlersProvider) {
         this.messageHandlersProvider = checkNotNull(messageHandlersProvider);
         this.connections = new ConcurrentHashMap<>();
     }

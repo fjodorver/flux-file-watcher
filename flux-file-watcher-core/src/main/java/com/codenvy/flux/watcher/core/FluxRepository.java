@@ -41,7 +41,7 @@ public class FluxRepository {
      *         if {@code fluxConnector} or {@code repositoryProvider} parameter is {@code null}.
      */
     @Inject
-    public FluxRepository(FluxConnector fluxConnector, RepositoryProvider repositoryProvider) {
+    FluxRepository(FluxConnector fluxConnector, RepositoryProvider repositoryProvider) {
         this.id = new Long(UUID.randomUUID().getMostSignificantBits()).intValue();
         this.fluxConnector = checkNotNull(fluxConnector);
         this.repositoryProvider = checkNotNull(repositoryProvider);
