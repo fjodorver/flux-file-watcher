@@ -23,11 +23,11 @@ import org.json.JSONObject;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.codenvy.flux.watcher.core.MessageFields.PROJECT_NAME;
-import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_HASH;
-import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_PATH;
-import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TIMESTAMP;
-import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TYPE;
+import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT_NAME;
+import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_HASH;
+import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_PATH;
+import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_TIMESTAMP;
+import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_TYPE;
 import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CREATED;
 import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_CREATED;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -62,11 +62,11 @@ public class EntryCreatedListener implements RepositoryListener {
             final Resource createdResource = event.resource();
 
             final JSONObject message = new JSONObject();
-            message.put(PROJECT_NAME, createdResource.projectId());
-            message.put(RESOURCE_PATH, createdResource.path());
-            message.put(RESOURCE_TIMESTAMP, createdResource.timestamp());
-            message.put(RESOURCE_HASH, createdResource.hash());
-            message.put(RESOURCE_TYPE, createdResource.type().name().toLowerCase());
+            message.put(PROJECT_NAME.value(), createdResource.projectId());
+            message.put(RESOURCE_PATH.value(), createdResource.path());
+            message.put(RESOURCE_TIMESTAMP.value(), createdResource.timestamp());
+            message.put(RESOURCE_HASH.value(), createdResource.hash());
+            message.put(RESOURCE_TYPE.value(), createdResource.type().name().toLowerCase());
 
             // broadcast message to all connections
             fluxConnector.broadcastMessage(new Message(RESOURCE_CREATED, message));

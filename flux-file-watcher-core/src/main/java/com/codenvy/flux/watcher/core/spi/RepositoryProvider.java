@@ -13,8 +13,6 @@ package com.codenvy.flux.watcher.core.spi;
 import com.codenvy.flux.watcher.core.RepositoryListener;
 import com.codenvy.flux.watcher.core.Resource;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * Interface implemented by a repository.
  *

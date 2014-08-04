@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import static com.codenvy.flux.watcher.core.MessageFields.USERNAME;
+import static com.codenvy.flux.watcher.core.Message.Fields.USERNAME;
 import static com.codenvy.flux.watcher.core.MessageType.CONNECT_TO_CHANNEL;
 import static com.google.common.base.Predicates.notNull;
 import static java.util.Collections.emptySet;
@@ -113,9 +113,9 @@ public class FluxConnection {
 
     public void sendMessage(Message message) {
         final JSONObject content = message.content();
-        if (!content.has(USERNAME)) {
+        if (!content.has(USERNAME.value())) {
             try {
-                content.put(USERNAME, credentials.username());
+                content.put(USERNAME.value(), credentials.username());
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }

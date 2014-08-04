@@ -13,8 +13,8 @@ package com.codenvy.flux.watcher.core.internal;
 import com.codenvy.flux.watcher.core.Message;
 import com.codenvy.flux.watcher.core.MessageHandler;
 import com.codenvy.flux.watcher.core.MessageTypes;
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 import com.codenvy.flux.watcher.core.Resource;
+import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,14 +22,14 @@ import org.json.JSONObject;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.codenvy.flux.watcher.core.MessageFields.CALLBACK_ID;
-import static com.codenvy.flux.watcher.core.MessageFields.PROJECT_NAME;
-import static com.codenvy.flux.watcher.core.MessageFields.REQUEST_SENDER_ID;
-import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_CONTENT;
-import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_HASH;
-import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_PATH;
-import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TIMESTAMP;
-import static com.codenvy.flux.watcher.core.MessageFields.RESOURCE_TYPE;
+import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
+import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT_NAME;
+import static com.codenvy.flux.watcher.core.Message.Fields.REQUEST_SENDER_ID;
+import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_CONTENT;
+import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_HASH;
+import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_PATH;
+import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_TIMESTAMP;
+import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE_TYPE;
 import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_RESPONSE;
 import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_REQUEST;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
@@ -63,26 +63,26 @@ public class SendResourceHandler implements MessageHandler {
         try {
 
             final JSONObject request = message.content();
-            final int callbackID = request.getInt(CALLBACK_ID);
-            final String requestSenderID = request.getString(REQUEST_SENDER_ID);
-            final String projectName = request.getString(PROJECT_NAME);
-            final String resourcePath = request.getString(RESOURCE_PATH);
+            final int callbackID = request.getInt(CALLBACK_ID.value());
+            final String requestSenderID = request.getString(REQUEST_SENDER_ID.value());
+            final String projectName = request.getString(PROJECT_NAME.value());
+            final String resourcePath = request.getString(RESOURCE_PATH.value());
 
             // we ask the repository to retrieve the resource
             final Resource resource = repositoryProvider.getResource(projectName, resourcePath);
 
             // we send the resource only if the timestamp are equals or no timestamp is specified
-            if (!request.has(RESOURCE_TIMESTAMP) || request.getLong(RESOURCE_TIMESTAMP) == resource.timestamp()) {
+            if (!request.has(RESOURCE_TIMESTAMP.value()) || request.getLong(RESOURCE_TIMESTAMP.value()) == resource.timestamp()) {
                 final JSONObject response = new JSONObject();
-                response.put(CALLBACK_ID, callbackID);
-                response.put(REQUEST_SENDER_ID, requestSenderID);
-                response.put(PROJECT_NAME, projectName);
-                response.put(RESOURCE_PATH, resourcePath);
-                response.put(RESOURCE_TIMESTAMP, resource.timestamp());
-                response.put(RESOURCE_HASH, resource.hash());
-                response.put(RESOURCE_TYPE, resource.type().name().toLowerCase());
+                response.put(CALLBACK_ID.value(), callbackID);
+                response.put(REQUEST_SENDER_ID.value(), requestSenderID);
+                response.put(PROJECT_NAME.value(), projectName);
+                response.put(RESOURCE_PATH.value(), resourcePath);
+                response.put(RESOURCE_TIMESTAMP.value(), resource.timestamp());
+                response.put(RESOURCE_HASH.value(), resource.hash());
+                response.put(RESOURCE_TYPE.value(), resource.type().name().toLowerCase());
                 if (resource.type() == FILE) {
-                    response.put(RESOURCE_CONTENT, new String(resource.content()));
+                    response.put(RESOURCE_CONTENT.value(), new String(resource.content()));
                 }
 
                 message.source()
