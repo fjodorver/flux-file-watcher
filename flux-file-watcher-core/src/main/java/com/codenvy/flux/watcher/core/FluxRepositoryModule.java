@@ -12,6 +12,7 @@ package com.codenvy.flux.watcher.core;
 
 import com.codenvy.flux.watcher.core.internal.EntryCreatedListener;
 import com.codenvy.flux.watcher.core.internal.EntryDeletedListener;
+import com.codenvy.flux.watcher.core.internal.EntryModifiedListener;
 import com.codenvy.flux.watcher.core.internal.GetProjectRequestHandler;
 import com.codenvy.flux.watcher.core.internal.GetResourceRequestHandler;
 import com.codenvy.flux.watcher.core.internal.ResourceCreatedHandler;
@@ -41,5 +42,6 @@ public class FluxRepositoryModule extends AbstractModule {
         final Multibinder<RepositoryListener> repositoryListeners = Multibinder.newSetBinder(binder(), RepositoryListener.class);
         repositoryListeners.addBinding().to(EntryCreatedListener.class);
         repositoryListeners.addBinding().to(EntryDeletedListener.class);
+        repositoryListeners.addBinding().to(EntryModifiedListener.class);
     }
 }
