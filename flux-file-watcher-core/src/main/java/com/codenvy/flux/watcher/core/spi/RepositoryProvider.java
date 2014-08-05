@@ -22,6 +22,17 @@ import java.util.Set;
  */
 public interface RepositoryProvider {
     /**
+     * Returns if the repository contains the given project.
+     *
+     * @param projectId
+     *         the project id.
+     * @return {@code true} if the repository contains the given project, {@code false} otherwise.
+     * @throws java.lang.NullPointerException
+     *         if {@code projectId} parameter is {@code null}.
+     */
+    boolean isProject(String projectId);
+
+    /**
      * Add a project to the repository implementation.
      *
      * @param projectId

@@ -72,6 +72,11 @@ public class FileSystemRepository implements RepositoryProvider {
     }
 
     @Override
+    public boolean isProject(String projectId) {
+        return projects.containsKey(checkNotNull(projectId));
+    }
+
+    @Override
     public boolean addProject(String projectId, String projectPath) {
         checkNotNull(projectId);
         checkNotNull(projectPath);
