@@ -93,11 +93,11 @@ public class FileSystemWatchService extends Thread {
      * @throws java.lang.NullPointerException
      *         if {@code path} parameter is {@code null}.
      * @throws java.lang.IllegalArgumentException
-     *         if the given {@code path} is a file or cannot be found.
+     *         if the given {@code path} is a file, cannot be found or is not absolute.
      */
     public void watch(Path path) {
         checkNotNull(path);
-        checkArgument(exists(path) && isDirectory(path));
+        checkArgument(exists(path) && isDirectory(path) && path.isAbsolute());
 
         synchronized (watchKeysMutex) {
             try {
@@ -127,11 +127,11 @@ public class FileSystemWatchService extends Thread {
      * @throws java.lang.NullPointerException
      *         if {@code path} parameter is {@code null}.
      * @throws java.lang.IllegalArgumentException
-     *         if the given {@code path} is a file or cannot be found.
+     *         if the given {@code path} is a file, cannot be found or is not absolute.
      */
     public void unwatch(Path path) {
         checkNotNull(path);
-        checkArgument(exists(path) && isDirectory(path));
+        checkArgument(exists(path) && isDirectory(path) && path.isAbsolute());
 
         synchronized (watchKeysMutex) {
             try {
@@ -171,18 +171,20 @@ public class FileSystemWatchService extends Thread {
                 }
 
                 for (WatchEvent<?> oneEvent : watchKey.pollEvents()) {
+                    final Path watchablePath = (Path)watchKey.watchable();
                     final WatchEvent<Path> pathEvent = cast(oneEvent);
+                    final Path resourcePath = watchablePath.resolve(pathEvent.context());
+
                     if (oneEvent.kind() == OVERFLOW) {
                         continue;
                     }
 
-                    if (isDirectory(pathEvent.context()) && oneEvent.kind() == ENTRY_CREATE) {
-                        watch(pathEvent.context());
+                    if (oneEvent.kind() == ENTRY_CREATE && isDirectory(resourcePath)) {
+                        watch(resourcePath);
                     }
 
-                    final Path watchablePath = (Path)watchKey.watchable();
                     final RepositoryEventType repositoryEventType = kindToRepositoryEventType(pathEvent.kind());
-                    final Resource resource = pathToResource(pathEvent.kind(), watchablePath, pathEvent.context());
+                    final Resource resource = pathToResource(pathEvent.kind(), resourcePath);
                     if (repositoryEventType != null && resource != null) {
                         repositoryEventBus.fireRepositoryEvent(new RepositoryEvent(repositoryEventType, resource));
                     }
@@ -227,46 +229,43 @@ public class FileSystemWatchService extends Thread {
      *
      * @param kind
      *         the {@link java.nio.file.WatchEvent.Kind}.
-     * @param watchablePath
-     *         the watchable {@link java.nio.file.Path}.
      * @param resourcePath
-     *         the {@link java.nio.file.Path} to the {@code watchablePath}.
+     *         the absolute resource {@link java.nio.file.Path}.
      * @return the corresponding {@link com.codenvy.flux.watcher.core.Resource} instance or {@code null} if conversion is impossible.
      * @throws java.lang.NullPointerException
-     *         if {@code kind}, {@code watchablePath} or {@code resourcePath} parameter is {@code null}.
+     *         if {@code kind} or {@code resourcePath} parameter is {@code null}.
      * @throws java.lang.IllegalArgumentException
-     *         if the {@code kind} is not {@link java.nio.file.StandardWatchEventKinds#ENTRY_DELETE} and the resource doesn't exist.
+     *         if {@code kind} is not {@link java.nio.file.StandardWatchEventKinds#ENTRY_DELETE} and the resource doesn't exist or
+     *         {@code resourcePath} is not absolute.
      */
-    private Resource pathToResource(Kind<Path> kind, Path watchablePath, Path resourcePath) {
+    private Resource pathToResource(Kind<Path> kind, Path resourcePath) {
         checkNotNull(kind);
-        checkNotNull(watchablePath);
         checkNotNull(resourcePath);
+        checkArgument(resourcePath.isAbsolute());
 
         try {
 
-            final Path absoluteResourcePath = watchablePath.resolve(resourcePath);
-            final boolean exists = exists(absoluteResourcePath);
+            final boolean exists = exists(resourcePath);
             checkArgument(kind == ENTRY_DELETE || exists);
 
 
-            final long timestamp = exists ? getLastModifiedTime(absoluteResourcePath).toMillis() : System.currentTimeMillis();
+            final long timestamp = exists ? getLastModifiedTime(resourcePath).toMillis() : System.currentTimeMillis();
 
             // TODO better?
             for (Map.Entry<String, Path> oneEntry : repository.projects().entrySet()) {
                 final String projectId = oneEntry.getKey();
                 final Path projectPath = oneEntry.getValue();
 
-                if (absoluteResourcePath.startsWith(oneEntry.getValue())) {
-                    final String relativeProjectResourcePath = projectPath.relativize(absoluteResourcePath).toString();
+                if (resourcePath.startsWith(oneEntry.getValue())) {
+                    final String relativeResourcePath = projectPath.relativize(resourcePath).toString();
 
                     if (exists) {
-                        final boolean isDirectory = isDirectory(absoluteResourcePath);
-                        return isDirectory ? Resource.newFolder(projectId, relativeProjectResourcePath, timestamp)
-                                           : Resource
-                                       .newFile(projectId, relativeProjectResourcePath, timestamp, readAllBytes(absoluteResourcePath));
+                        final boolean isDirectory = isDirectory(resourcePath);
+                        return isDirectory ? Resource.newFolder(projectId, relativeResourcePath, timestamp)
+                                           : Resource.newFile(projectId, relativeResourcePath, timestamp, readAllBytes(resourcePath));
 
                     } else {
-                        return Resource.newUnknown(projectId, relativeProjectResourcePath, timestamp);
+                        return Resource.newUnknown(projectId, relativeResourcePath, timestamp);
                     }
                 }
             }

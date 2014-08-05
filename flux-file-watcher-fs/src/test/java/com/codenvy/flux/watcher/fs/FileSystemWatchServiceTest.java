@@ -89,6 +89,11 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
         fileSystemWatchService.watch(fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testWatchWithNonAbsolutePath() {
+        fileSystemWatchService.watch(fileSystem().getPath(RELATIVE_PROJECT_README_FILE_PATH));
+    }
+
     @Test(expected = NullPointerException.class)
     public void testUnwatchWithNullPath() {
         fileSystemWatchService.unwatch(null);
@@ -102,6 +107,11 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     @Test(expected = IllegalArgumentException.class)
     public void testUnwatchWithFilePath() {
         fileSystemWatchService.unwatch(fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnwatchWithNonAbsolutePath() {
+        fileSystemWatchService.unwatch(fileSystem().getPath(RELATIVE_PROJECT_README_FILE_PATH));
     }
 
     @Test
@@ -151,29 +161,29 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
 
     @Test(expected = NullPointerException.class)
     public void testPathToResourceWithNullKind() throws Exception {
-        pathToResource(null, fileSystem().getPath("watchable"), fileSystem().getPath("foo"));
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testPathToResourceWithNullWatchablePath() throws Exception {
-        pathToResource(ENTRY_CREATE, null, fileSystem().getPath("foo"));
+        pathToResource(null, fileSystem().getPath("foo"));
     }
 
     @Test(expected = NullPointerException.class)
     public void testPathToResourceWithNullResourcePath() throws Exception {
-        pathToResource(ENTRY_CREATE, fileSystem().getPath("watchable"), null);
+        pathToResource(ENTRY_CREATE, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testPathToResourceWithCreateKindAndNonExistentResourcePath() throws Exception {
-        pathToResource(ENTRY_CREATE, fileSystem().getPath(PROJECT_PATH), fileSystem().getPath("foo"));
+        pathToResource(ENTRY_CREATE, fileSystem().getPath("foo"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPathToResourceWithRelativeResourcePath() throws Exception {
+        pathToResource(ENTRY_CREATE, fileSystem().getPath("foo"));
     }
 
     @Test
     public void testPathToResourceWithFolderPath() throws Exception {
         final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
         final Resource resource =
-                pathToResource(ENTRY_CREATE, fileSystem().getPath(PROJECT_PATH), fileSystem().getPath(RELATIVE_PROJECT_SRC_FOLDER_PATH));
+                pathToResource(ENTRY_CREATE, fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH));
 
         Assert.assertNotNull(resource);
         Assert.assertEquals(PROJECT_ID, resource.projectId());
@@ -188,7 +198,7 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testPathToResourceWithFilePath() throws Exception {
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH);
         final Resource resource =
-                pathToResource(ENTRY_CREATE, fileSystem().getPath(PROJECT_PATH), fileSystem().getPath(RELATIVE_PROJECT_README_FILE_PATH));
+                pathToResource(ENTRY_CREATE, fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH));
 
         Assert.assertNotNull(resource);
         Assert.assertEquals(PROJECT_ID, resource.projectId());
@@ -356,14 +366,13 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
         }
     }
 
-    private Resource pathToResource(Kind<Path> kind, Path watchablePath, Path resourcePath) throws Exception {
-        final Method pathToResourceMethod =
-                FileSystemWatchService.class.getDeclaredMethod("pathToResource", Kind.class, Path.class, Path.class);
+    private Resource pathToResource(Kind<Path> kind, Path resourcePath) throws Exception {
+        final Method pathToResourceMethod = FileSystemWatchService.class.getDeclaredMethod("pathToResource", Kind.class, Path.class);
         pathToResourceMethod.setAccessible(true);
 
         try {
 
-            return (Resource)pathToResourceMethod.invoke(fileSystemWatchService, kind, watchablePath, resourcePath);
+            return (Resource)pathToResourceMethod.invoke(fileSystemWatchService, kind, resourcePath);
 
         } catch (InvocationTargetException e) {
             throw Throwables.propagate(e.getCause());
