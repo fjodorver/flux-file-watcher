@@ -31,7 +31,6 @@ import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.Message.Fields.REQUEST_SENDER_ID;
 import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
 import static com.codenvy.flux.watcher.core.Message.Fields.TYPE;
-import static com.codenvy.flux.watcher.core.Message.Fields.USERNAME;
 import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_REQUEST;
 import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_RESPONSE;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -67,8 +66,6 @@ public class GetProjectRequestHandler implements MessageHandler {
             final int callbackId = request.getInt(CALLBACK_ID.value());
             final String requestSenderId = request.getString(REQUEST_SENDER_ID.value());
             final String projectName = request.getString(PROJECT.value());
-            final String username = request.getString(USERNAME.value());
-
 
             final JSONArray files = new JSONArray();
             for (Resource oneResource : repositoryProvider.getProjectResources(projectName)) {
@@ -82,7 +79,6 @@ public class GetProjectRequestHandler implements MessageHandler {
             final JSONObject content = new JSONObject()
                     .put(CALLBACK_ID.value(), callbackId)
                     .put(REQUEST_SENDER_ID.value(), requestSenderId)
-                    .put(USERNAME.value(), username)
                     .put(PROJECT.value(), projectName)
                     .put(FILES.value(), files);
 

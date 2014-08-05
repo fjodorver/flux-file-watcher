@@ -29,7 +29,6 @@ import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
 import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
 import static com.codenvy.flux.watcher.core.Message.Fields.TYPE;
-import static com.codenvy.flux.watcher.core.Message.Fields.USERNAME;
 import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_REQUEST;
 import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CREATED;
 import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_STORED;
@@ -68,7 +67,6 @@ public class ResourceCreatedHandler implements MessageHandler {
         try {
 
             final JSONObject request = message.content();
-            final String username = request.getString(USERNAME.value());
             final String projectName = request.getString(PROJECT.value());
             final String resourcePath = request.getString(RESOURCE.value());
             final long resourceTimestamp = request.getLong(TIMESTAMP.value());
@@ -85,7 +83,6 @@ public class ResourceCreatedHandler implements MessageHandler {
                         repositoryProvider.createResource(folder);
 
                         final JSONObject content = new JSONObject()
-                                .put(USERNAME.value(), username)
                                 .put(PROJECT.value(), projectName)
                                 .put(RESOURCE.value(), resourcePath)
                                 .put(TIMESTAMP.value(), resourceTimestamp)
@@ -98,7 +95,6 @@ public class ResourceCreatedHandler implements MessageHandler {
                     } else if (resourceType == FILE) {
                         final JSONObject content = new JSONObject()
                                 .put(CALLBACK_ID.value(), fluxRepository.id())
-                                .put(USERNAME.value(), username)
                                 .put(PROJECT.value(), projectName)
                                 .put(RESOURCE.value(), resourcePath)
                                 .put(TIMESTAMP.value(), resourceTimestamp)
