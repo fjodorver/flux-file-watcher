@@ -196,6 +196,27 @@ public class FileSystemRepository implements RepositoryProvider {
     }
 
     @Override
+    public void updateResource(Resource resource) {
+        checkNotNull(resource);
+        checkArgument(resource.type() == FILE);
+
+        final Path projectPath = projects.get(resource.projectId());
+        if (projectPath != null) {
+            final Path resourcePath = projectPath.resolve(resource.path());
+            if (exists(resourcePath)) {
+                try {
+
+                    write(resourcePath, resource.content());
+                    setLastModifiedTime(resourcePath, FileTime.from(resource.timestamp(), MILLISECONDS));
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+    @Override
     public void deleteResource(Resource resource) {
         checkNotNull(resource);
 

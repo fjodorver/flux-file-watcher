@@ -95,6 +95,18 @@ public interface RepositoryProvider {
     void createResource(Resource resource);
 
     /**
+     * Updates the given {@link com.codenvy.flux.watcher.core.Resource}.
+     *
+     * @param resource
+     *         the {@link com.codenvy.flux.watcher.core.Resource} to be updated.
+     * @throws java.lang.NullPointerException
+     *         if {@code resource} parameter is {@code null}.
+     * @throws java.lang.IllegalArgumentException
+     *         if {@code resource} parameter is not a file.
+     */
+    void updateResource(Resource resource);
+
+    /**
      * Deletes the given {@link com.codenvy.flux.watcher.core.Resource}.
      *
      * @param resource

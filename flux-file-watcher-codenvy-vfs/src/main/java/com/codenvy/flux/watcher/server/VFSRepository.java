@@ -116,6 +116,11 @@ public class VFSRepository implements RepositoryProvider {
     }
 
     @Override
+    public void updateResource(Resource resource) {
+
+    }
+
+    @Override
     public void deleteResource(Resource resource) {
         checkNotNull(resource);
         
