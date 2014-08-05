@@ -14,6 +14,7 @@ package com.codenvy.flux.watcher.fs;
 import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.Resource;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
+import com.google.common.collect.Sets;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Set;
 
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FOLDER;
@@ -104,6 +106,33 @@ public final class FileSystemRepositoryTest extends AbstractTest {
 
         Assert.assertFalse(isAdded);
         Assert.assertEquals(numberOfProjects, fileSystemRepository.projects().size());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testGetProjectResourcesWithNullProjectId() {
+        fileSystemRepository.getProjectResources(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetProjectResourcesWithNonExistentProjectId() {
+        fileSystemRepository.getProjectResources("foo");
+    }
+
+    @Test
+    public void testGetProjectResources() {
+        final Set<Resource> resources = fileSystemRepository.getProjectResources(PROJECT_ID);
+        final Set<String> paths = Sets.newHashSet(RELATIVE_PROJECT_SRC_FOLDER_PATH, RELATIVE_PROJECT_README_FILE_PATH);
+
+        Assert.assertNotNull(resources);
+        Assert.assertEquals(2, resources.size());
+
+        for (Resource oneResource : resources) {
+            if (paths.contains(oneResource.path())) {
+                paths.remove(oneResource.path());
+            }
+        }
+
+        Assert.assertTrue(paths.isEmpty());
     }
 
     @Test(expected = NullPointerException.class)

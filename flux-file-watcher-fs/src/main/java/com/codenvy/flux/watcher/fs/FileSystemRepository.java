@@ -110,10 +110,12 @@ public class FileSystemRepository implements RepositoryProvider {
             walkFileTree(projectPath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    final long timestamp = getLastModifiedTime(dir).toMillis();
-                    final String relativeResourcePath = projectPath.relativize(dir).toString();
+                    if (!dir.equals(projectPath)) {
+                        final long timestamp = getLastModifiedTime(dir).toMillis();
+                        final String relativeResourcePath = projectPath.relativize(dir).toString();
 
-                    resources.add(Resource.newFolder(projectId, relativeResourcePath, timestamp));
+                        resources.add(Resource.newFolder(projectId, relativeResourcePath, timestamp));
+                    }
 
                     return CONTINUE;
                 }
