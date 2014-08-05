@@ -10,8 +10,8 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.FluxRepositoryModule;
 import com.codenvy.flux.watcher.core.FluxRepository;
+import com.codenvy.flux.watcher.core.FluxRepositoryModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
