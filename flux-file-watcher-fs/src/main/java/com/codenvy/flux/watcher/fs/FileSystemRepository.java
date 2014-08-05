@@ -31,12 +31,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FOLDER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.createDirectory;
-import static java.nio.file.Files.createFile;
 import static java.nio.file.Files.delete;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getLastModifiedTime;
@@ -174,18 +174,19 @@ public class FileSystemRepository implements RepositoryProvider {
 
         final Path projectPath = projects.get(resource.projectId());
         if (projectPath != null) {
-            Path resourcePath = projectPath.resolve(resource.path());
+            final Path resourcePath = projectPath.resolve(resource.path());
             if (!exists(resourcePath)) {
                 try {
 
                     if (resource.type() == FOLDER) {
-                        resourcePath = createDirectory(resourcePath);
-                    } else {
-                        resourcePath = createFile(resourcePath);
-                        write(resourcePath, resource.content());
-                    }
+                        createDirectory(resourcePath);
+                        setLastModifiedTime(resourcePath, FileTime.from(resource.timestamp(), MILLISECONDS));
+                        watchService.watch(resourcePath);
 
-                    setLastModifiedTime(resourcePath, FileTime.from(resource.timestamp(), MILLISECONDS));
+                    } else if (resource.type() == FILE) {
+                        write(resourcePath, resource.content());
+                        setLastModifiedTime(resourcePath, FileTime.from(resource.timestamp(), MILLISECONDS));
+                    }
 
                 } catch (IOException e) {
                     throw new RuntimeException(e);
