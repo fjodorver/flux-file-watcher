@@ -23,12 +23,13 @@ import org.json.JSONObject;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.Message.Fields.HASH;
-import static com.codenvy.flux.watcher.core.Message.Fields.PATH;
+import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
+import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
 import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
 import static com.codenvy.flux.watcher.core.Message.Fields.TYPE;
 import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CREATED;
+import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_STORED;
 import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_CREATED;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -59,17 +60,16 @@ public class EntryCreatedListener implements RepositoryListener {
     public void onEvent(RepositoryEvent event) {
         try {
 
-            final Resource createdResource = event.resource();
-
+            final Resource resource = event.resource();
             final JSONObject content = new JSONObject()
-                    .put(PROJECT.value(), createdResource.projectId())
-                    .put(PATH.value(), createdResource.path())
-                    .put(TIMESTAMP.value(), createdResource.timestamp())
-                    .put(HASH.value(), createdResource.hash())
-                    .put(TYPE.value(), createdResource.type().name().toLowerCase());
+                    .put(PROJECT.value(), resource.projectId())
+                    .put(RESOURCE.value(), resource.path())
+                    .put(TIMESTAMP.value(), resource.timestamp())
+                    .put(HASH.value(), resource.hash())
+                    .put(TYPE.value(), resource.type().name().toLowerCase());
 
-            // broadcast message to all connections
             fluxConnector.broadcastMessage(new Message(RESOURCE_CREATED, content));
+            fluxConnector.broadcastMessage(new Message(RESOURCE_STORED, content));
 
         } catch (JSONException e) {
             throw new RuntimeException(e);
