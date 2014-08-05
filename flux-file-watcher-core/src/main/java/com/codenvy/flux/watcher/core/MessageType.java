@@ -23,6 +23,7 @@ public enum MessageType {
     GET_RESOURCE_REQUEST("getResourceRequest"),
     GET_RESOURCE_RESPONSE("getResourceResponse"),
     RESOURCE_CREATED("resourceCreated"),
+    RESOURCE_STORED("resourceStored"),
     RESOURCE_CHANGED("resourceChanged"),
     RESOURCE_DELETED("resourceDeleted"),
     PROJECT_CONNECTED("projectConnected");

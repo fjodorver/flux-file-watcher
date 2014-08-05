@@ -25,15 +25,16 @@ import javax.inject.Singleton;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
 import static com.codenvy.flux.watcher.core.Message.Fields.FILES;
-import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
-import static com.codenvy.flux.watcher.core.Message.Fields.REQUEST_SENDER_ID;
 import static com.codenvy.flux.watcher.core.Message.Fields.HASH;
 import static com.codenvy.flux.watcher.core.Message.Fields.PATH;
+import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
+import static com.codenvy.flux.watcher.core.Message.Fields.REQUEST_SENDER_ID;
 import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
 import static com.codenvy.flux.watcher.core.Message.Fields.TYPE;
 import static com.codenvy.flux.watcher.core.Message.Fields.USERNAME;
 import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_REQUEST;
 import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_RESPONSE;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#GET_PROJECT_REQUEST}.
@@ -55,7 +56,7 @@ public class GetProjectRequestHandler implements MessageHandler {
      */
     @Inject
     GetProjectRequestHandler(RepositoryProvider repositoryProvider) {
-        this.repositoryProvider = repositoryProvider;
+        this.repositoryProvider = checkNotNull(repositoryProvider);
     }
 
     @Override

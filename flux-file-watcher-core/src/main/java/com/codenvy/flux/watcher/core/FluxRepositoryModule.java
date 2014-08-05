@@ -13,6 +13,7 @@ package com.codenvy.flux.watcher.core;
 import com.codenvy.flux.watcher.core.internal.EntryCreatedListener;
 import com.codenvy.flux.watcher.core.internal.GetProjectRequestHandler;
 import com.codenvy.flux.watcher.core.internal.GetResourceRequestHandler;
+import com.codenvy.flux.watcher.core.internal.ResourceCreatedHandler;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
@@ -33,6 +34,7 @@ public class FluxRepositoryModule extends AbstractModule {
         final Multibinder<MessageHandler> messageHandlers = Multibinder.newSetBinder(binder(), MessageHandler.class);
         messageHandlers.addBinding().to(GetResourceRequestHandler.class);
         messageHandlers.addBinding().to(GetProjectRequestHandler.class);
+        messageHandlers.addBinding().to(ResourceCreatedHandler.class);
 
         // repository listener bindings
         final Multibinder<RepositoryListener> repositoryListeners = Multibinder.newSetBinder(binder(), RepositoryListener.class);
