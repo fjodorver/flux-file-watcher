@@ -25,7 +25,6 @@ import javax.inject.Singleton;
 import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
 import static com.codenvy.flux.watcher.core.Message.Fields.CONTENT;
 import static com.codenvy.flux.watcher.core.Message.Fields.HASH;
-import static com.codenvy.flux.watcher.core.Message.Fields.PATH;
 import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.Message.Fields.REQUEST_SENDER_ID;
 import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
@@ -78,7 +77,7 @@ public class GetResourceRequestHandler implements MessageHandler {
                         .put(CALLBACK_ID.value(), callbackId)
                         .put(REQUEST_SENDER_ID.value(), requestSenderId)
                         .put(PROJECT.value(), projectName)
-                        .put(PATH.value(), resourcePath)
+                        .put(RESOURCE.value(), resourcePath)
                         .put(TIMESTAMP.value(), resource.timestamp())
                         .put(HASH.value(), resource.hash())
                         .put(TYPE.value(), resource.type().name().toLowerCase());
