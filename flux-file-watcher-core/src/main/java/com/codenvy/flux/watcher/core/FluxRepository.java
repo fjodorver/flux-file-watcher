@@ -21,9 +21,9 @@ import javax.inject.Singleton;
 import java.net.URL;
 import java.util.UUID;
 
-import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
-import static com.codenvy.flux.watcher.core.MessageType.PROJECT_CONNECTED;
-import static com.codenvy.flux.watcher.core.MessageType.PROJECT_DISCONNECTED;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
+import static com.codenvy.flux.watcher.core.FluxMessageType.PROJECT_CONNECTED;
+import static com.codenvy.flux.watcher.core.FluxMessageType.PROJECT_DISCONNECTED;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -102,7 +102,7 @@ public class FluxRepository implements Repository {
             try {
 
                 final JSONObject content = new JSONObject().put(PROJECT.value(), projectId);
-                messageBus.sendMessages(new Message(PROJECT_CONNECTED, content));
+                messageBus.sendMessages(new FluxMessage(PROJECT_CONNECTED, content));
 
             } catch (JSONException e) {
                 throw new RuntimeException(e);
@@ -118,7 +118,7 @@ public class FluxRepository implements Repository {
             try {
 
                 final JSONObject content = new JSONObject().put(PROJECT.value(), projectId);
-                messageBus.sendMessages(new Message(PROJECT_DISCONNECTED, content));
+                messageBus.sendMessages(new FluxMessage(PROJECT_DISCONNECTED, content));
 
             } catch (JSONException e) {
                 throw new RuntimeException(e);

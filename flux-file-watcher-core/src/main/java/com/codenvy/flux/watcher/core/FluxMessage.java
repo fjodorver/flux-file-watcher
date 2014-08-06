@@ -19,65 +19,65 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Kevin Pollet
  */
-public class Message {
-    private final FluxConnection source;
-    private final MessageType    type;
-    private final JSONObject     content;
+public class FluxMessage {
+    private final FluxConnection  source;
+    private final FluxMessageType type;
+    private final JSONObject      content;
 
     /**
-     * Constructs an instance of {@link com.codenvy.flux.watcher.core.Message}.
+     * Constructs an instance of {@link FluxMessage}.
      *
      * @param type
-     *         the {@link com.codenvy.flux.watcher.core.MessageType}.
+     *         the {@link FluxMessageType}.
      * @param content
      *         the message {@link org.json.JSONObject} content.
      * @throws java.lang.NullPointerException
      *         if {@code type} or {@code content} parameter is {@code null}.
      */
-    public Message(MessageType type, JSONObject content) {
+    public FluxMessage(FluxMessageType type, JSONObject content) {
         this(null, type, content);
     }
 
     /**
-     * Constructs an instance of {@link com.codenvy.flux.watcher.core.Message}.
+     * Constructs an instance of {@link FluxMessage}.
      *
      * @param source
-     *         the {@code FluxConnection} where the {@link com.codenvy.flux.watcher.core.Message} comes from.
+     *         the {@code FluxConnection} where the {@link FluxMessage} comes from.
      * @param type
-     *         the {@link com.codenvy.flux.watcher.core.MessageType}.
+     *         the {@link FluxMessageType}.
      * @param content
      *         the message {@link org.json.JSONObject} content.
      * @throws java.lang.NullPointerException
      *         if {@code type} or {@code content} parameter is {@code null}.
      */
-    public Message(FluxConnection source, MessageType type, JSONObject content) {
+    public FluxMessage(FluxConnection source, FluxMessageType type, JSONObject content) {
         this.source = source;
         this.type = checkNotNull(type);
         this.content = checkNotNull(content);
     }
 
     /**
-     * Returns the {@code FluxConnection} where the {@link com.codenvy.flux.watcher.core.Message} comes from.
+     * Returns the {@code FluxConnection} where the {@link FluxMessage} comes from.
      *
-     * @return the {@code FluxConnection} where the {@link com.codenvy.flux.watcher.core.Message} comes from or {@code null} if none.
+     * @return the {@code FluxConnection} where the {@link FluxMessage} comes from or {@code null} if none.
      */
     public FluxConnection source() {
         return source;
     }
 
     /**
-     * Returns the {@link com.codenvy.flux.watcher.core.MessageType}.
+     * Returns the {@link FluxMessageType}.
      *
-     * @return the {@link com.codenvy.flux.watcher.core.MessageType}, never {@code null}.
+     * @return the {@link FluxMessageType}, never {@code null}.
      */
-    public MessageType type() {
+    public FluxMessageType type() {
         return type;
     }
 
     /**
-     * Returns the {@link com.codenvy.flux.watcher.core.Message} content.
+     * Returns the {@link FluxMessage} content.
      *
-     * @return the {@link com.codenvy.flux.watcher.core.Message} content, never {@code null}.
+     * @return the {@link FluxMessage} content, never {@code null}.
      */
     public JSONObject content() {
         return content;

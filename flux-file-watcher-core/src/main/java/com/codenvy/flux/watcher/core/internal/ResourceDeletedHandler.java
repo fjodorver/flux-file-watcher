@@ -10,10 +10,10 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
+import com.codenvy.flux.watcher.core.FluxMessageHandler;
+import com.codenvy.flux.watcher.core.FluxMessageTypes;
 import com.codenvy.flux.watcher.core.FluxRepository;
-import com.codenvy.flux.watcher.core.Message;
-import com.codenvy.flux.watcher.core.MessageHandler;
-import com.codenvy.flux.watcher.core.MessageTypes;
+import com.codenvy.flux.watcher.core.FluxMessage;
 import com.codenvy.flux.watcher.core.Resource;
 import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
 
@@ -22,21 +22,21 @@ import org.json.JSONObject;
 
 import javax.inject.Singleton;
 
-import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
-import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
-import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
-import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_DELETED;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.RESOURCE;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.TIMESTAMP;
+import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_DELETED;
 
 /**
- * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#RESOURCE_DELETED}.
+ * Handler replying to a {@link com.codenvy.flux.watcher.core.FluxMessageType#RESOURCE_DELETED}.
  *
  * @author Kevin Pollet
  */
 @Singleton
-@MessageTypes(RESOURCE_DELETED)
-public class ResourceDeletedHandler implements MessageHandler {
+@FluxMessageTypes(RESOURCE_DELETED)
+public class ResourceDeletedHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(Message message, FluxRepository repository) {
+    public void onMessage(FluxMessage message, FluxRepository repository) {
         final RepositoryResourceProvider repositoryResourceProvider = repository.repositoryResourceProvider();
 
         try {

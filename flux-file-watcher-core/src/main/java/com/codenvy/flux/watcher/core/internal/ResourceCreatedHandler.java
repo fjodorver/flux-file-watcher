@@ -10,10 +10,10 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
+import com.codenvy.flux.watcher.core.FluxMessage;
+import com.codenvy.flux.watcher.core.FluxMessageHandler;
+import com.codenvy.flux.watcher.core.FluxMessageTypes;
 import com.codenvy.flux.watcher.core.FluxRepository;
-import com.codenvy.flux.watcher.core.Message;
-import com.codenvy.flux.watcher.core.MessageHandler;
-import com.codenvy.flux.watcher.core.MessageTypes;
 import com.codenvy.flux.watcher.core.Resource;
 import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
 
@@ -22,29 +22,29 @@ import org.json.JSONObject;
 
 import javax.inject.Singleton;
 
-import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
-import static com.codenvy.flux.watcher.core.Message.Fields.HASH;
-import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
-import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
-import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
-import static com.codenvy.flux.watcher.core.Message.Fields.TYPE;
-import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_REQUEST;
-import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CREATED;
-import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_STORED;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CALLBACK_ID;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.HASH;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.RESOURCE;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.TIMESTAMP;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.TYPE;
+import static com.codenvy.flux.watcher.core.FluxMessageType.GET_RESOURCE_REQUEST;
+import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_CREATED;
+import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_STORED;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FOLDER;
 
 /**
- * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#RESOURCE_CREATED}.
+ * Handler replying to a {@link com.codenvy.flux.watcher.core.FluxMessageType#RESOURCE_CREATED}.
  *
  * @author Kevin Pollet
  */
 @Singleton
-@MessageTypes(RESOURCE_CREATED)
-public class ResourceCreatedHandler implements MessageHandler {
+@FluxMessageTypes(RESOURCE_CREATED)
+public class ResourceCreatedHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(Message message, FluxRepository repository) {
+    public void onMessage(FluxMessage message, FluxRepository repository) {
         final RepositoryResourceProvider repositoryResourceProvider = repository.repositoryResourceProvider();
 
         try {
@@ -73,7 +73,7 @@ public class ResourceCreatedHandler implements MessageHandler {
                                 .put(TYPE.value(), resourceType.name().toLowerCase());
 
                         message.source()
-                               .sendMessage(new Message(RESOURCE_STORED, content));
+                               .sendMessage(new FluxMessage(RESOURCE_STORED, content));
 
                     } else if (resourceType == FILE) {
                         final JSONObject content = new JSONObject()
@@ -85,7 +85,7 @@ public class ResourceCreatedHandler implements MessageHandler {
                                 .put(TYPE.value(), resourceType.name().toLowerCase());
 
                         message.source()
-                               .sendMessage(new Message(GET_RESOURCE_REQUEST, content));
+                               .sendMessage(new FluxMessage(GET_RESOURCE_REQUEST, content));
                     }
                 }
             }

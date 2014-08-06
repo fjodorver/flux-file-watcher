@@ -10,10 +10,10 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
+import com.codenvy.flux.watcher.core.FluxMessage;
+import com.codenvy.flux.watcher.core.FluxMessageHandler;
+import com.codenvy.flux.watcher.core.FluxMessageTypes;
 import com.codenvy.flux.watcher.core.FluxRepository;
-import com.codenvy.flux.watcher.core.Message;
-import com.codenvy.flux.watcher.core.MessageHandler;
-import com.codenvy.flux.watcher.core.MessageTypes;
 import com.codenvy.flux.watcher.core.Resource;
 
 import org.json.JSONArray;
@@ -22,27 +22,27 @@ import org.json.JSONObject;
 
 import javax.inject.Singleton;
 
-import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
-import static com.codenvy.flux.watcher.core.Message.Fields.FILES;
-import static com.codenvy.flux.watcher.core.Message.Fields.HASH;
-import static com.codenvy.flux.watcher.core.Message.Fields.PATH;
-import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
-import static com.codenvy.flux.watcher.core.Message.Fields.REQUEST_SENDER_ID;
-import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
-import static com.codenvy.flux.watcher.core.Message.Fields.TYPE;
-import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_REQUEST;
-import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_RESPONSE;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CALLBACK_ID;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.FILES;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.HASH;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PATH;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.REQUEST_SENDER_ID;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.TIMESTAMP;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.TYPE;
+import static com.codenvy.flux.watcher.core.FluxMessageType.GET_PROJECT_REQUEST;
+import static com.codenvy.flux.watcher.core.FluxMessageType.GET_PROJECT_RESPONSE;
 
 /**
- * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#GET_PROJECT_REQUEST}.
+ * Handler replying to a {@link com.codenvy.flux.watcher.core.FluxMessageType#GET_PROJECT_REQUEST}.
  *
  * @author Kevin Pollet
  */
 @Singleton
-@MessageTypes(GET_PROJECT_REQUEST)
-public class GetProjectRequestHandler implements MessageHandler {
+@FluxMessageTypes(GET_PROJECT_REQUEST)
+public class GetProjectRequestHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(Message message, FluxRepository repository) {
+    public void onMessage(FluxMessage message, FluxRepository repository) {
         try {
 
             final JSONObject request = message.content();
@@ -66,7 +66,7 @@ public class GetProjectRequestHandler implements MessageHandler {
                     .put(FILES.value(), files);
 
             message.source()
-                   .sendMessage(new Message(GET_PROJECT_RESPONSE, content));
+                   .sendMessage(new FluxMessage(GET_PROJECT_RESPONSE, content));
 
         } catch (JSONException e) {
             throw new RuntimeException(e);

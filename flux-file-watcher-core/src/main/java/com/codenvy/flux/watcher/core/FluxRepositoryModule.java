@@ -36,7 +36,7 @@ public class FluxRepositoryModule extends AbstractModule {
 
 
         // message handler bindings
-        final Multibinder<MessageHandler> messageHandlers = Multibinder.newSetBinder(binder(), MessageHandler.class);
+        final Multibinder<FluxMessageHandler> messageHandlers = Multibinder.newSetBinder(binder(), FluxMessageHandler.class);
         messageHandlers.addBinding().to(GetResourceRequestHandler.class);
         messageHandlers.addBinding().to(GetResourceResponseHandler.class);
         messageHandlers.addBinding().to(GetProjectRequestHandler.class);

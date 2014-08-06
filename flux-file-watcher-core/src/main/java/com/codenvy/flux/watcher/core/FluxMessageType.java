@@ -14,9 +14,9 @@ package com.codenvy.flux.watcher.core;
  * The types of Flux message.
  *
  * @author Kevin Pollet
- * @see com.codenvy.flux.watcher.core.Message
+ * @see FluxMessage
  */
-public enum MessageType {
+public enum FluxMessageType {
     CONNECT_TO_CHANNEL("connectToChannel"),
     GET_PROJECT_REQUEST("getProjectRequest"),
     GET_PROJECT_RESPONSE("getProjectResponse"),
@@ -32,25 +32,25 @@ public enum MessageType {
     private final String value;
 
     /**
-     * Constructs an instance of {@link com.codenvy.flux.watcher.core.MessageType}.
+     * Constructs an instance of {@link FluxMessageType}.
      *
      * @param value
-     *         the {@link com.codenvy.flux.watcher.core.MessageType} value.
+     *         the {@link FluxMessageType} value.
      */
-    MessageType(String value) {
+    FluxMessageType(String value) {
         this.value = value;
     }
 
     /**
-     * Returns the {@link com.codenvy.flux.watcher.core.MessageType} corresponding to the given value.
+     * Returns the {@link FluxMessageType} corresponding to the given value.
      *
      * @param value
-     *         the {@link com.codenvy.flux.watcher.core.MessageType} value.
-     * @return the {@link com.codenvy.flux.watcher.core.MessageType} corresponding to the given value or {@code null} if none.
+     *         the {@link FluxMessageType} value.
+     * @return the {@link FluxMessageType} corresponding to the given value or {@code null} if none.
      */
-    public static MessageType fromType(String value) {
-        final MessageType[] messageTypes = MessageType.values();
-        for (MessageType oneMessageType : messageTypes) {
+    public static FluxMessageType fromType(String value) {
+        final FluxMessageType[] messageTypes = FluxMessageType.values();
+        for (FluxMessageType oneMessageType : messageTypes) {
             if (oneMessageType.value.equals(value)) {
                 return oneMessageType;
             }
@@ -59,9 +59,9 @@ public enum MessageType {
     }
 
     /**
-     * Returns the {@link com.codenvy.flux.watcher.core.MessageType} value.
+     * Returns the {@link FluxMessageType} value.
      *
-     * @return the {@link com.codenvy.flux.watcher.core.MessageType} value, never {@code null}.
+     * @return the {@link FluxMessageType} value, never {@code null}.
      */
     public String value() {
         return value;

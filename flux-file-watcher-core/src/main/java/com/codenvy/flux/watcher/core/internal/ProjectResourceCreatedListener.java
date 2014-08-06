@@ -10,8 +10,8 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
+import com.codenvy.flux.watcher.core.FluxMessage;
 import com.codenvy.flux.watcher.core.FluxMessageBus;
-import com.codenvy.flux.watcher.core.Message;
 import com.codenvy.flux.watcher.core.RepositoryEvent;
 import com.codenvy.flux.watcher.core.RepositoryEventTypes;
 import com.codenvy.flux.watcher.core.RepositoryListener;
@@ -23,13 +23,13 @@ import org.json.JSONObject;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.codenvy.flux.watcher.core.Message.Fields.HASH;
-import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
-import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
-import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
-import static com.codenvy.flux.watcher.core.Message.Fields.TYPE;
-import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CREATED;
-import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_STORED;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.HASH;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.RESOURCE;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.TIMESTAMP;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.TYPE;
+import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_CREATED;
+import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_STORED;
 import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_CREATED;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -68,7 +68,7 @@ public class ProjectResourceCreatedListener implements RepositoryListener {
                     .put(HASH.value(), resource.hash())
                     .put(TYPE.value(), resource.type().name().toLowerCase());
 
-            messageBus.sendMessages(new Message(RESOURCE_CREATED, content), new Message(RESOURCE_STORED, content));
+            messageBus.sendMessages(new FluxMessage(RESOURCE_CREATED, content), new FluxMessage(RESOURCE_STORED, content));
 
         } catch (JSONException e) {
             throw new RuntimeException(e);

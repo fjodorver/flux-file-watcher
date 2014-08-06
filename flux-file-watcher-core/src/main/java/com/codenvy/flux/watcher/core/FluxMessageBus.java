@@ -38,20 +38,20 @@ import static java.util.Collections.emptySet;
 public class FluxMessageBus {
     private final ConcurrentMap<URL, FluxConnection> connections;
     private final Provider<FluxRepository>           repository;
-    private final Set<MessageHandler>                messageHandlers;
+    private final Set<FluxMessageHandler>            messageHandlers;
 
     /**
      * Constructs an instance of {@link com.codenvy.flux.watcher.core.FluxMessageBus}.
      *
      * @param messageHandlers
-     *         the {@link com.codenvy.flux.watcher.core.MessageHandler} to register.
+     *         the {@link FluxMessageHandler} to register.
      * @param repository
      *         the {@link com.codenvy.flux.watcher.core.FluxRepository} provider instance.
      * @throws java.lang.NullPointerException
      *         if {@code messageHandlers} is {@code null}.
      */
     @Inject
-    FluxMessageBus(Set<MessageHandler> messageHandlers, Provider<FluxRepository> repository) {
+    FluxMessageBus(Set<FluxMessageHandler> messageHandlers, Provider<FluxRepository> repository) {
         this.repository = repository;
         this.messageHandlers = new CopyOnWriteArraySet<>(checkNotNull(messageHandlers));
         this.connections = new ConcurrentHashMap<>();
@@ -101,28 +101,28 @@ public class FluxMessageBus {
     }
 
     /**
-     * Adds a {@link com.codenvy.flux.watcher.core.MessageHandler}.
+     * Adds a {@link FluxMessageHandler}.
      *
      * @param handler
-     *         the {@link com.codenvy.flux.watcher.core.MessageHandler} to add.
+     *         the {@link FluxMessageHandler} to add.
      * @return {@code true} if the {@code handler} is not already added, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code handler} parameter is {@code null}.
      */
-    public boolean addMessageHandler(MessageHandler handler) {
+    public boolean addMessageHandler(FluxMessageHandler handler) {
         return messageHandlers.add(checkNotNull(handler));
     }
 
     /**
-     * Removes a {@link com.codenvy.flux.watcher.core.MessageHandler}.
+     * Removes a {@link FluxMessageHandler}.
      *
      * @param handler
-     *         the {@link com.codenvy.flux.watcher.core.MessageHandler} to remove.
+     *         the {@link FluxMessageHandler} to remove.
      * @return {@code true} if the {@code handler} was already added, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code handler} parameter is {@code null}.
      */
-    public boolean removeMessageHandler(MessageHandler handler) {
+    public boolean removeMessageHandler(FluxMessageHandler handler) {
         return messageHandlers.remove(checkNotNull(handler));
     }
 
@@ -130,14 +130,14 @@ public class FluxMessageBus {
      * Broadcast messages to all opened {@link com.codenvy.flux.watcher.core.FluxConnection}.
      *
      * @param messages
-     *         the {@link com.codenvy.flux.watcher.core.Message} to broadcast.
+     *         the {@link FluxMessage} to broadcast.
      * @throws java.lang.NullPointerException
      *         if {@code messages} parameter is {@code null}.
      */
-    public void sendMessages(Message... messages) {
+    public void sendMessages(FluxMessage... messages) {
         checkNotNull(messages);
 
-        for (Message oneMessage : messages) {
+        for (FluxMessage oneMessage : messages) {
             checkNotNull(oneMessage);
 
             for (FluxConnection oneConnection : connections.values()) {
@@ -147,7 +147,7 @@ public class FluxMessageBus {
     }
 
     /**
-     * Fires the given {@link com.codenvy.flux.watcher.core.Message} to all {@link com.codenvy.flux.watcher.core.MessageHandler}
+     * Fires the given {@link FluxMessage} to all {@link FluxMessageHandler}
      * registered.
      *
      * @param message
@@ -155,21 +155,21 @@ public class FluxMessageBus {
      * @throws java.lang.NullPointerException
      *         if {@code message} parameter is {@code null}.
      */
-    public void messageReceived(Message message) {
+    public void messageReceived(FluxMessage message) {
         checkNotNull(message);
 
-        final Set<MessageHandler> messageHandlers = getMessageHandlersFor(message.type().value());
-        for (MessageHandler oneMessageHandler : messageHandlers) {
+        final Set<FluxMessageHandler> messageHandlers = getMessageHandlersFor(message.type().value());
+        for (FluxMessageHandler oneMessageHandler : messageHandlers) {
             oneMessageHandler.onMessage(message, repository.get());
         }
     }
 
-    private Set<MessageHandler> getMessageHandlersFor(final String messageType) {
+    private Set<FluxMessageHandler> getMessageHandlersFor(final String messageType) {
         return FluentIterable.from(messageHandlers)
                              .filter(notNull())
-                             .filter(new Predicate<MessageHandler>() {
+                             .filter(new Predicate<FluxMessageHandler>() {
                                  @Override
-                                 public boolean apply(MessageHandler messageHandler) {
+                                 public boolean apply(FluxMessageHandler messageHandler) {
                                      final Set<String> supportedTypes = getMessageTypesFor(messageHandler);
                                      return supportedTypes.contains(messageType);
                                  }
@@ -177,17 +177,17 @@ public class FluxMessageBus {
                              .toSet();
     }
 
-    private Set<String> getMessageTypesFor(MessageHandler messageHandler) {
-        final MessageTypes types = messageHandler.getClass().getAnnotation(MessageTypes.class);
+    private Set<String> getMessageTypesFor(FluxMessageHandler messageHandler) {
+        final FluxMessageTypes types = messageHandler.getClass().getAnnotation(FluxMessageTypes.class);
         if (types == null) {
             return emptySet();
         }
 
         return FluentIterable.from(Arrays.asList(types.value()))
                              .filter(Predicates.notNull())
-                             .transform(new Function<MessageType, String>() {
+                             .transform(new Function<FluxMessageType, String>() {
                                  @Override
-                                 public String apply(MessageType messageType) {
+                                 public String apply(FluxMessageType messageType) {
                                      return messageType.value();
                                  }
                              })

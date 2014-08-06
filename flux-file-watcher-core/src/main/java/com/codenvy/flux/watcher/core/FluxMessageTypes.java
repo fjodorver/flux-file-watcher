@@ -17,20 +17,20 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Annotation used to indicate which {@link com.codenvy.flux.watcher.core.MessageType} the {@link
- * com.codenvy.flux.watcher.core.MessageHandler} can handle.
+ * Annotation used to indicate which {@link FluxMessageType} the {@link
+ * FluxMessageHandler} can handle.
  *
  * @author Kevin Pollet
  */
 @Target(TYPE)
 @Retention(RUNTIME)
-public @interface MessageTypes {
+public @interface FluxMessageTypes {
     /**
-     * Returns the {@link com.codenvy.flux.watcher.core.MessageType}  the {@link
-     * com.codenvy.flux.watcher.core.MessageHandler} can handle.
+     * Returns the {@link FluxMessageType}  the {@link
+     * FluxMessageHandler} can handle.
      *
-     * @return the {@link com.codenvy.flux.watcher.core.MessageType}  the {@link
-     * com.codenvy.flux.watcher.core.MessageHandler} can handle.
+     * @return the {@link FluxMessageType}  the {@link
+     * FluxMessageHandler} can handle.
      */
-    MessageType[] value();
+    FluxMessageType[] value();
 }

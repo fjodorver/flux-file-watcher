@@ -10,34 +10,34 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
+import com.codenvy.flux.watcher.core.FluxMessageHandler;
+import com.codenvy.flux.watcher.core.FluxMessageTypes;
 import com.codenvy.flux.watcher.core.FluxRepository;
-import com.codenvy.flux.watcher.core.Message;
-import com.codenvy.flux.watcher.core.MessageHandler;
-import com.codenvy.flux.watcher.core.MessageTypes;
+import com.codenvy.flux.watcher.core.FluxMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.inject.Singleton;
 
-import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
-import static com.codenvy.flux.watcher.core.Message.Fields.HASH;
-import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
-import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
-import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
-import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_REQUEST;
-import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CHANGED;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CALLBACK_ID;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.HASH;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.RESOURCE;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.TIMESTAMP;
+import static com.codenvy.flux.watcher.core.FluxMessageType.GET_RESOURCE_REQUEST;
+import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_CHANGED;
 
 /**
- * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#RESOURCE_CHANGED}.
+ * Handler replying to a {@link com.codenvy.flux.watcher.core.FluxMessageType#RESOURCE_CHANGED}.
  *
  * @author Kevin Pollet
  */
 @Singleton
-@MessageTypes(RESOURCE_CHANGED)
-public class ResourceChangedHandler implements MessageHandler {
+@FluxMessageTypes(RESOURCE_CHANGED)
+public class ResourceChangedHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(Message message, FluxRepository repository) {
+    public void onMessage(FluxMessage message, FluxRepository repository) {
         try {
 
             final JSONObject request = message.content();
@@ -55,7 +55,7 @@ public class ResourceChangedHandler implements MessageHandler {
                         .put(HASH.value(), resourceHash);
 
                 message.source()
-                       .sendMessage(new Message(GET_RESOURCE_REQUEST, content));
+                       .sendMessage(new FluxMessage(GET_RESOURCE_REQUEST, content));
             }
 
         } catch (JSONException e) {

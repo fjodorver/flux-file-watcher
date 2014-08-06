@@ -20,10 +20,10 @@ import org.json.JSONObject;
 
 import java.net.URL;
 
-import static com.codenvy.flux.watcher.core.Message.Fields.CHANNEL;
-import static com.codenvy.flux.watcher.core.Message.Fields.CONNECTED_TO_CHANNEL;
-import static com.codenvy.flux.watcher.core.Message.Fields.USERNAME;
-import static com.codenvy.flux.watcher.core.MessageType.CONNECT_TO_CHANNEL;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CHANNEL;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CONNECTED_TO_CHANNEL;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.USERNAME;
+import static com.codenvy.flux.watcher.core.FluxMessageType.CONNECT_TO_CHANNEL;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -109,9 +109,9 @@ public class FluxConnection {
                 //TODO in flux implementation the username is checked, what to do?
                 @Override
                 public void on(String name, IOAcknowledge ioAcknowledge, Object... objects) {
-                    final MessageType messageType = MessageType.fromType(name);
+                    final FluxMessageType messageType = FluxMessageType.fromType(name);
                     if (messageType != null && objects.length > 0 && objects[0] instanceof JSONObject) {
-                        final Message message = new Message(FluxConnection.this, messageType, (JSONObject)objects[0]);
+                        final FluxMessage message = new FluxMessage(FluxConnection.this, messageType, (JSONObject)objects[0]);
                         messageBus.messageReceived(message);
                     }
                 }
@@ -135,14 +135,14 @@ public class FluxConnection {
     }
 
     /**
-     * Sends a {@link com.codenvy.flux.watcher.core.Message} on this connection
+     * Sends a {@link FluxMessage} on this connection
      *
      * @param message
-     *         the {@link com.codenvy.flux.watcher.core.Message} instance to send.
+     *         the {@link FluxMessage} instance to send.
      * @throws java.lang.NullPointerException
      *         if {@code message} parameter is {@code null}.
      */
-    public void sendMessage(Message message) {
+    public void sendMessage(FluxMessage message) {
         checkNotNull(message);
 
         final JSONObject content = message.content();
