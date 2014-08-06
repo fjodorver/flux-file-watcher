@@ -10,6 +10,7 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.spi;
 
+import com.codenvy.flux.watcher.core.Repository;
 import com.codenvy.flux.watcher.core.RepositoryListener;
 import com.codenvy.flux.watcher.core.Resource;
 
@@ -20,44 +21,7 @@ import java.util.Set;
  *
  * @author Kevin Pollet
  */
-public interface RepositoryProvider {
-    /**
-     * Returns whether the repository has the given project.
-     *
-     * @param projectId
-     *         the project id.
-     * @return {@code true} if the repository has the given project, {@code false} otherwise.
-     * @throws java.lang.NullPointerException
-     *         if {@code projectId} parameter is {@code null}.
-     */
-    boolean hasProject(String projectId);
-
-    /**
-     * Add a project to the repository.
-     *
-     * @param projectId
-     *         the project id.
-     * @param projectPath
-     *         the absolute project path.
-     * @return {@code true} if project was not already added and {@code projectPath} exists, {@code false} otherwise.
-     * @throws java.lang.NullPointerException
-     *         if {@code projectId} or {@code projectPath} parameter is {@code null}.
-     * @throws java.lang.IllegalArgumentException
-     *         if the given {@code projectPath} is not a directory, not absolute or doesn't exist.
-     */
-    boolean addProject(String projectId, String projectPath);
-
-    /**
-     * Remove a project from the repository.
-     *
-     * @param projectId
-     *         the project id.
-     * @return {@code true} if project has been removed, {@code false} otherwise.
-     * @throws java.lang.NullPointerException
-     *         if {@code projectId} parameter is {@code null}.
-     */
-    boolean removeProject(String projectId);
-
+public interface RepositoryProvider extends Repository {
     /**
      * Returns all {@link com.codenvy.flux.watcher.core.Resource} of the given project.
      *

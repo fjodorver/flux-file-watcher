@@ -22,17 +22,18 @@ import java.util.UUID;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.MessageType.PROJECT_CONNECTED;
+import static com.codenvy.flux.watcher.core.MessageType.PROJECT_DISCONNECTED;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Represents a Flux repository.
+ * Represents a Flux repository which adds Flux connectivity capabilities to a regular repository.
  *
  * @author Kevin Pollet
  */
 @Singleton
-public class FluxRepository {
+public class FluxRepository implements Repository {
     private final int                id;
-    private final RepositoryProvider repositoryProvider;
+    private final RepositoryProvider repository;
     private final FluxConnector      fluxConnector;
 
     /**
@@ -40,16 +41,16 @@ public class FluxRepository {
      *
      * @param fluxConnector
      *         the {@link com.codenvy.flux.watcher.core.FluxConnector} instance.
-     * @param repositoryProvider
+     * @param repository
      *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} instance.
      * @throws java.lang.NullPointerException
-     *         if {@code fluxConnector} or {@code repositoryProvider} parameter is {@code null}.
+     *         if {@code fluxConnector} or {@code repository} parameter is {@code null}.
      */
     @Inject
-    FluxRepository(FluxConnector fluxConnector, RepositoryProvider repositoryProvider) {
+    FluxRepository(FluxConnector fluxConnector, RepositoryProvider repository) {
         this.id = new Long(UUID.randomUUID().getMostSignificantBits()).intValue();
         this.fluxConnector = checkNotNull(fluxConnector);
-        this.repositoryProvider = checkNotNull(repositoryProvider);
+        this.repository = checkNotNull(repository);
     }
 
     /**
@@ -88,43 +89,41 @@ public class FluxRepository {
         fluxConnector.disconnect(checkNotNull(serverURL));
     }
 
-    /**
-     * Adds a project to this {@link com.codenvy.flux.watcher.core.FluxRepository} instance.
-     *
-     * @param projectId
-     *         the project unique id.
-     * @param path
-     *         the project path.
-     * @return {@code true} if project was not already added and path exists, {@code false} otherwise.
-     * @throws java.lang.NullPointerException
-     *         if {@code projectId} or {@code path} parameter is {@code null}.
-     */
-    public boolean addProject(String projectId, String path) {
-        final boolean isAdded = repositoryProvider.addProject(checkNotNull(projectId), checkNotNull(path));
-        try {
+    @Override
+    public boolean hasProject(String projectId) {
+        return repository.hasProject(projectId);
+    }
 
-            final JSONObject content = new JSONObject().put(PROJECT.value(), projectId);
-            final Message message = new Message(PROJECT_CONNECTED, content);
-            fluxConnector.broadcastMessage(message);
+    @Override
+    public boolean addProject(String projectId, String projectPath) {
+        final boolean isAdded = repository.addProject(projectId, projectPath);
+        if (isAdded) {
+            try {
 
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+                final JSONObject content = new JSONObject().put(PROJECT.value(), projectId);
+                fluxConnector.broadcastMessage(new Message(PROJECT_CONNECTED, content));
+
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
-
         return isAdded;
     }
 
-    /**
-     * Removes a project from this {@link com.codenvy.flux.watcher.core.FluxRepository} instance.
-     *
-     * @param projectId
-     *         the project unique id.
-     * @return {@code true} if project was already added, {@code false} otherwise.
-     * @throws java.lang.NullPointerException
-     *         if {@code projectId} or {@code path} parameter is {@code null}.
-     */
+    @Override
     public boolean removeProject(String projectId) {
-        return repositoryProvider.removeProject(checkNotNull(projectId));
+        final boolean isRemoved = repository.removeProject(projectId);
+        if (isRemoved) {
+            try {
+
+                final JSONObject content = new JSONObject().put(PROJECT.value(), projectId);
+                fluxConnector.broadcastMessage(new Message(PROJECT_DISCONNECTED, content));
+
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return isRemoved;
     }
 
     /**
@@ -133,7 +132,7 @@ public class FluxRepository {
      * @return the underlying {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} instance, never {@code null}.
      */
     public RepositoryProvider underlyingRepository() {
-        return repositoryProvider;
+        return repository;
     }
 
     /**
