@@ -11,7 +11,6 @@
 package com.codenvy.flux.watcher.fs;
 
 import com.codenvy.flux.watcher.core.RepositoryEventBus;
-import com.codenvy.flux.watcher.core.RepositoryListener;
 import com.codenvy.flux.watcher.core.Resource;
 import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 import com.google.inject.Inject;
@@ -248,13 +247,8 @@ public class FileSystemRepository implements RepositoryProvider {
     }
 
     @Override
-    public boolean addRepositoryListener(RepositoryListener listener) {
-        return repositoryEventBus.addRepositoryListener(listener);
-    }
-
-    @Override
-    public boolean removeRepositoryListener(RepositoryListener listener) {
-        return repositoryEventBus.addRepositoryListener(listener);
+    public RepositoryEventBus eventBus() {
+        return repositoryEventBus;
     }
 
     @Override

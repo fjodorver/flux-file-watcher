@@ -137,13 +137,8 @@ public class VFSRepository implements RepositoryProvider {
     }
 
     @Override
-    public boolean addRepositoryListener(RepositoryListener listener) {
-        return repositoryEventBus.addRepositoryListener(listener);
-    }
-
-    @Override
-    public boolean removeRepositoryListener(RepositoryListener listener) {
-        return repositoryEventBus.addRepositoryListener(listener);
+    public RepositoryEventBus eventBus() {
+        return repositoryEventBus;
     }
 
     @Override

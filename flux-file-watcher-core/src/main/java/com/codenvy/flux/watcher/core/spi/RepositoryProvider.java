@@ -11,7 +11,7 @@
 package com.codenvy.flux.watcher.core.spi;
 
 import com.codenvy.flux.watcher.core.Repository;
-import com.codenvy.flux.watcher.core.RepositoryListener;
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.Resource;
 
 import java.util.Set;
@@ -81,26 +81,11 @@ public interface RepositoryProvider extends Repository {
     void deleteResource(Resource resource);
 
     /**
-     * Adds a {@link com.codenvy.flux.watcher.core.RepositoryListener}.
+     * Returns the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}.
      *
-     * @param listener
-     *         the {@link com.codenvy.flux.watcher.core.RepositoryListener} to add.
-     * @return {@code true} if the listener was not already added, {@code false} otherwise.
-     * @throws java.lang.NullPointerException
-     *         if {@code listener} parameter is {@code null}.
+     * @return the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}, never {@code null}
      */
-    boolean addRepositoryListener(RepositoryListener listener);
-
-    /**
-     * Removes a {@link com.codenvy.flux.watcher.core.RepositoryListener}.
-     *
-     * @param listener
-     *         the {@link com.codenvy.flux.watcher.core.RepositoryListener} to remove.
-     * @return {@code true} if the listener has been removed, {@code false} otherwise.
-     * @throws java.lang.NullPointerException
-     *         if {@code listener} parameter is {@code null}.
-     */
-    boolean removeRepositoryListener(RepositoryListener listener);
+    RepositoryEventBus eventBus();
 
     /**
      * Unwrap the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} to access implementation specific methods.

@@ -272,6 +272,11 @@ public final class FileSystemRepositoryTest extends AbstractTest {
         Assert.assertFalse(exists(absoluteFilePath));
     }
 
+    @Test
+    public void testEventBus() {
+        Assert.assertNotNull(fileSystemRepository.eventBus());
+    }
+
     @Test(expected = NullPointerException.class)
     public void testUnwrapWithNullClass() {
         fileSystemRepository.unwrap(null);
