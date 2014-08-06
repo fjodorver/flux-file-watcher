@@ -69,7 +69,7 @@ public class GetResourceResponseHandler implements MessageHandler {
             final String resourceHash = request.getString(HASH.value());
             final String resourceContent = request.getString(CONTENT.value());
 
-            if (repositoryProvider.isProject(projectName)) {
+            if (repositoryProvider.hasProject(projectName)) {
                 final ResourceType resourceType = ResourceType.valueOf(request.getString(TYPE.value()).toUpperCase());
 
                 if (resourceType == FILE) {

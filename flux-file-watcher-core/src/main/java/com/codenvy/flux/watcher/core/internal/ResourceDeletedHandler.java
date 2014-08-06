@@ -63,7 +63,7 @@ public class ResourceDeletedHandler implements MessageHandler {
             final String resourcePath = request.getString(RESOURCE.value());
             final long resourceTimestamp = request.getLong(TIMESTAMP.value());
 
-            if (repositoryProvider.isProject(projectName)) {
+            if (repositoryProvider.hasProject(projectName)) {
                 final Resource resource = Resource.newUnknown(projectName, resourcePath, resourceTimestamp);
                 repositoryProvider.deleteResource(resource);
             }

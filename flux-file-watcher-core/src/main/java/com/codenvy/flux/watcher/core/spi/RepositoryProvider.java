@@ -22,37 +22,37 @@ import java.util.Set;
  */
 public interface RepositoryProvider {
     /**
-     * Returns if the repository contains the given project.
+     * Returns whether the repository has the given project.
      *
      * @param projectId
      *         the project id.
-     * @return {@code true} if the repository contains the given project, {@code false} otherwise.
+     * @return {@code true} if the repository has the given project, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code projectId} parameter is {@code null}.
      */
-    boolean isProject(String projectId);
+    boolean hasProject(String projectId);
 
     /**
-     * Add a project to the repository implementation.
+     * Add a project to the repository.
      *
      * @param projectId
      *         the project id.
      * @param projectPath
-     *         the absolute project projectPath.
-     * @return {@code true} if project was not already added and projectPath exists, {@code false} otherwise.
+     *         the absolute project path.
+     * @return {@code true} if project was not already added and {@code projectPath} exists, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code projectId} or {@code projectPath} parameter is {@code null}.
      * @throws java.lang.IllegalArgumentException
-     *         if the given {@code projectPath} is not a directory, doesn't exist or is not absolute.
+     *         if the given {@code projectPath} is not a directory, not absolute or doesn't exist.
      */
     boolean addProject(String projectId, String projectPath);
 
     /**
-     * Remove a project from the repository implementation.
+     * Remove a project from the repository.
      *
      * @param projectId
      *         the project id.
-     * @return {@code true} if project exists, {@code false} otherwise.
+     * @return {@code true} if project has been removed, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code projectId} parameter is {@code null}.
      */
@@ -72,17 +72,17 @@ public interface RepositoryProvider {
     Set<Resource> getProjectResources(String projectId);
 
     /**
-     * Returns the {@link com.codenvy.flux.watcher.core.Resource} in the given project with the given relative path.
+     * Returns the {@link com.codenvy.flux.watcher.core.Resource} in the given project with the given relative resourcePath.
      *
      * @param projectId
      *         the project id.
-     * @param path
-     *         the {@link com.codenvy.flux.watcher.core.Resource} relative path.
+     * @param resourcePath
+     *         the {@link com.codenvy.flux.watcher.core.Resource} relative resourcePath.
      * @return the {@link com.codenvy.flux.watcher.core.Resource} or {@code null} if not found.
      * @throws java.lang.NullPointerException
-     *         if {@code projectId} or {@code path} parameter is {@code null}.
+     *         if {@code projectId} or {@code resourcePath} parameter is {@code null}.
      */
-    Resource getResource(String projectId, String path);
+    Resource getResource(String projectId, String resourcePath);
 
     /**
      * Creates the given {@link com.codenvy.flux.watcher.core.Resource}.
@@ -132,7 +132,7 @@ public interface RepositoryProvider {
      *
      * @param listener
      *         the {@link com.codenvy.flux.watcher.core.RepositoryListener} to remove.
-     * @return {@code true} if the listener exists, {@code false} otherwise.
+     * @return {@code true} if the listener has been removed, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code listener} parameter is {@code null}.
      */

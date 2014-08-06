@@ -72,7 +72,7 @@ public class ResourceCreatedHandler implements MessageHandler {
             final long resourceTimestamp = request.getLong(TIMESTAMP.value());
             final String resourceHash = request.getString(HASH.value());
 
-            if (repositoryProvider.isProject(projectName)) {
+            if (repositoryProvider.hasProject(projectName)) {
 
                 if (repositoryProvider.getResource(projectName, resourcePath) == null) {
 

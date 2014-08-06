@@ -66,20 +66,20 @@ public final class FileSystemRepositoryTest extends AbstractTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testIsProjectWithNullProjectId() {
-        fileSystemRepository.isProject(null);
+    public void testHasProjectWithNullProjectId() {
+        fileSystemRepository.hasProject(null);
     }
 
     @Test
-    public void testIsProjectWithNonExistentProjectId() {
-        final boolean isProject = fileSystemRepository.isProject("foo");
+    public void testHasProjectWithNonExistentProjectId() {
+        final boolean isProject = fileSystemRepository.hasProject("foo");
 
         Assert.assertFalse(isProject);
     }
 
     @Test
-    public void testIsProject() {
-        final boolean isProject = fileSystemRepository.isProject(PROJECT_ID);
+    public void testHasProject() {
+        final boolean isProject = fileSystemRepository.hasProject(PROJECT_ID);
 
         Assert.assertTrue(isProject);
     }

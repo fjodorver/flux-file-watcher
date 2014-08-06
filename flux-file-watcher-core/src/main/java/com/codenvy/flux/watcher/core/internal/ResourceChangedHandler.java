@@ -66,7 +66,7 @@ public class ResourceChangedHandler implements MessageHandler {
             final long resourceTimestamp = request.getLong(TIMESTAMP.value());
             final String resourceHash = request.getString(HASH.value());
 
-            if (repositoryProvider.isProject(projectName)) {
+            if (repositoryProvider.hasProject(projectName)) {
                 final JSONObject content = new JSONObject()
                         .put(CALLBACK_ID.value(), fluxRepository.id())
                         .put(PROJECT.value(), projectName)

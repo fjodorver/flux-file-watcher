@@ -44,7 +44,7 @@ public class VFSRepository implements RepositoryProvider {
     }
 
     @Override
-    public boolean isProject(String projectId) {
+    public boolean hasProject(String projectId) {
         return projects.containsKey(checkNotNull(projectId));
     }
 
@@ -83,9 +83,9 @@ public class VFSRepository implements RepositoryProvider {
     }
 
     @Override
-    public Resource getResource(String projectId, String path) {
+    public Resource getResource(String projectId, String resourcePath) {
         checkNotNull(projectId);
-        checkNotNull(path);
+        checkNotNull(resourcePath);
         
         final String projectPath = projects.get(projectId);
         if (projectPath != null) {
