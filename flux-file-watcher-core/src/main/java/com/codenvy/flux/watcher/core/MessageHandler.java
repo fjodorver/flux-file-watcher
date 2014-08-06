@@ -22,6 +22,8 @@ public interface MessageHandler {
      *
      * @param message
      *         the {@link com.codenvy.flux.watcher.core.Message} instance, never {@code null}.
+     * @param repository
+     *         the {@link com.codenvy.flux.watcher.core.FluxRepository} instance, never {@code null}.
      */
-    void onMessage(Message message);
+    void onMessage(Message message, FluxRepository repository);
 }

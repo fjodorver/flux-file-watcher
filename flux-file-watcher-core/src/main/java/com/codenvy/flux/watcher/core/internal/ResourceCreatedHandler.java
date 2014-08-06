@@ -20,8 +20,6 @@ import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
@@ -36,7 +34,6 @@ import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_STORED;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FOLDER;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#RESOURCE_CREATED}.
@@ -46,24 +43,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 @MessageTypes(RESOURCE_CREATED)
 public class ResourceCreatedHandler implements MessageHandler {
-    private final Provider<FluxRepository> repository;
-
-    /**
-     * Constructs an instance of {@link com.codenvy.flux.watcher.core.internal.ResourceCreatedHandler}.
-     *
-     * @param repository
-     *         the FluxRepository instance.
-     * @throws java.lang.NullPointerException
-     *         if {@code repository} parameter is {@code null}.
-     */
-    @Inject
-    ResourceCreatedHandler(Provider<FluxRepository> repository) {
-        this.repository = checkNotNull(repository);
-    }
-
     @Override
-    public void onMessage(Message message) {
-        final RepositoryResourceProvider repositoryResourceProvider = repository.get().repositoryResourceProvider();
+    public void onMessage(Message message, FluxRepository repository) {
+        final RepositoryResourceProvider repositoryResourceProvider = repository.repositoryResourceProvider();
 
         try {
 
@@ -73,7 +55,7 @@ public class ResourceCreatedHandler implements MessageHandler {
             final long resourceTimestamp = request.getLong(TIMESTAMP.value());
             final String resourceHash = request.getString(HASH.value());
 
-            if (repository.get().hasProject(projectName)) {
+            if (repository.hasProject(projectName)) {
 
                 if (repositoryResourceProvider.getResource(projectName, resourcePath) == null) {
 
@@ -95,7 +77,7 @@ public class ResourceCreatedHandler implements MessageHandler {
 
                     } else if (resourceType == FILE) {
                         final JSONObject content = new JSONObject()
-                                .put(CALLBACK_ID.value(), repository.get().id())
+                                .put(CALLBACK_ID.value(), repository.id())
                                 .put(PROJECT.value(), projectName)
                                 .put(RESOURCE.value(), resourcePath)
                                 .put(TIMESTAMP.value(), resourceTimestamp)

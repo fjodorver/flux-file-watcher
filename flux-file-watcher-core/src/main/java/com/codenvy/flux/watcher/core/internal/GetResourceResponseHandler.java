@@ -20,8 +20,6 @@ import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.CONTENT;
@@ -34,7 +32,6 @@ import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_RESPONSE;
 import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_STORED;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#GET_RESOURCE_RESPONSE}.
@@ -44,24 +41,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 @MessageTypes(GET_RESOURCE_RESPONSE)
 public class GetResourceResponseHandler implements MessageHandler {
-    private final Provider<FluxRepository> repository;
-
-    /**
-     * Constructs an instance of {@link com.codenvy.flux.watcher.core.internal.GetResourceResponseHandler}.
-     *
-     * @param repository
-     *         the {@link com.codenvy.flux.watcher.core.FluxRepository}.
-     * @throws NullPointerException
-     *         if {@code repository} parameter is {@code null}.
-     */
-    @Inject
-    GetResourceResponseHandler(Provider<FluxRepository> repository) {
-        this.repository = checkNotNull(repository);
-    }
-
     @Override
-    public void onMessage(Message message) {
-        final RepositoryResourceProvider repositoryResourceProvider = repository.get().repositoryResourceProvider();
+    public void onMessage(Message message, FluxRepository repository) {
+        final RepositoryResourceProvider repositoryResourceProvider = repository.repositoryResourceProvider();
 
         try {
 
@@ -72,7 +54,7 @@ public class GetResourceResponseHandler implements MessageHandler {
             final String resourceHash = request.getString(HASH.value());
             final String resourceContent = request.getString(CONTENT.value());
 
-            if (repository.get().hasProject(projectName)) {
+            if (repository.hasProject(projectName)) {
                 final ResourceType resourceType = ResourceType.valueOf(request.getString(TYPE.value()).toUpperCase());
 
                 if (resourceType == FILE) {

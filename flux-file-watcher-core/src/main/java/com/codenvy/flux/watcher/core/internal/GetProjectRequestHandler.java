@@ -20,8 +20,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
@@ -34,7 +32,6 @@ import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
 import static com.codenvy.flux.watcher.core.Message.Fields.TYPE;
 import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_REQUEST;
 import static com.codenvy.flux.watcher.core.MessageType.GET_PROJECT_RESPONSE;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#GET_PROJECT_REQUEST}.
@@ -44,23 +41,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 @MessageTypes(GET_PROJECT_REQUEST)
 public class GetProjectRequestHandler implements MessageHandler {
-    private final Provider<FluxRepository> repository;
-
-    /**
-     * Constructs an instance of {@link com.codenvy.flux.watcher.core.internal.GetProjectRequestHandler}.
-     *
-     * @param repository
-     *         the {@link com.codenvy.flux.watcher.core.FluxRepository} instance.
-     * @throws java.lang.NullPointerException
-     *         if {@code repository} parameter is {@code null}.
-     */
-    @Inject
-    GetProjectRequestHandler(Provider<FluxRepository> repository) {
-        this.repository = checkNotNull(repository);
-    }
-
     @Override
-    public void onMessage(Message message) {
+    public void onMessage(Message message, FluxRepository repository) {
         try {
 
             final JSONObject request = message.content();
@@ -69,7 +51,7 @@ public class GetProjectRequestHandler implements MessageHandler {
             final String projectName = request.getString(PROJECT.value());
 
             final JSONArray files = new JSONArray();
-            for (Resource oneResource : repository.get().repositoryResourceProvider().getProjectResources(projectName)) {
+            for (Resource oneResource : repository.repositoryResourceProvider().getProjectResources(projectName)) {
                 files.put(new JSONObject()
                                   .put(PATH.value(), oneResource.path())
                                   .put(TIMESTAMP.value(), oneResource.timestamp())

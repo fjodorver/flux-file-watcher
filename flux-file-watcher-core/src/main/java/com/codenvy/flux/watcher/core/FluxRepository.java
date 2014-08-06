@@ -136,13 +136,4 @@ public class FluxRepository implements Repository {
     public RepositoryResourceProvider repositoryResourceProvider() {
         return delegate.repositoryResourceProvider();
     }
-
-    /**
-     * Returns the {@link FluxMessageBus} instance.
-     *
-     * @return the {@link FluxMessageBus} instance, never {@code null}.
-     */
-    public FluxMessageBus fluxConnector() {
-        return messageBus;
-    }
 }

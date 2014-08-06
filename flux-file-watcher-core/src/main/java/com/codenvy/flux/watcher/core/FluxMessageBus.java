@@ -16,6 +16,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.net.URL;
 import java.util.Arrays;
@@ -36,18 +37,22 @@ import static java.util.Collections.emptySet;
 @Singleton
 public class FluxMessageBus {
     private final ConcurrentMap<URL, FluxConnection> connections;
+    private final Provider<FluxRepository>           repository;
     private final Set<MessageHandler>                messageHandlers;
 
     /**
-     * Constructs an instance of {@link FluxMessageBus}.
+     * Constructs an instance of {@link com.codenvy.flux.watcher.core.FluxMessageBus}.
      *
      * @param messageHandlers
      *         the {@link com.codenvy.flux.watcher.core.MessageHandler} to register.
+     * @param repository
+     *         the {@link com.codenvy.flux.watcher.core.FluxRepository} provider instance.
      * @throws java.lang.NullPointerException
      *         if {@code messageHandlers} is {@code null}.
      */
     @Inject
-    FluxMessageBus(Set<MessageHandler> messageHandlers) {
+    FluxMessageBus(Set<MessageHandler> messageHandlers, Provider<FluxRepository> repository) {
+        this.repository = repository;
         this.messageHandlers = new CopyOnWriteArraySet<>(checkNotNull(messageHandlers));
         this.connections = new ConcurrentHashMap<>();
     }
@@ -150,12 +155,12 @@ public class FluxMessageBus {
      * @throws java.lang.NullPointerException
      *         if {@code message} parameter is {@code null}.
      */
-    public void messageReceived(Message message) {
+    void messageReceived(Message message) {
         checkNotNull(message);
 
         final Set<MessageHandler> messageHandlers = getMessageHandlersFor(message.type().value());
         for (MessageHandler oneMessageHandler : messageHandlers) {
-            oneMessageHandler.onMessage(message);
+            oneMessageHandler.onMessage(message, repository.get());
         }
     }
 

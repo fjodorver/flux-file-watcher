@@ -18,8 +18,6 @@ import com.codenvy.flux.watcher.core.MessageTypes;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
@@ -29,7 +27,6 @@ import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
 import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
 import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_REQUEST;
 import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CHANGED;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#RESOURCE_CHANGED}.
@@ -39,23 +36,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 @MessageTypes(RESOURCE_CHANGED)
 public class ResourceChangedHandler implements MessageHandler {
-    private final Provider<FluxRepository> repository;
-
-    /**
-     * Constructs an instance of {@link com.codenvy.flux.watcher.core.internal.ResourceChangedHandler}.
-     *
-     * @param repository
-     *         the FluxRepository instance.
-     * @throws NullPointerException
-     *         if {@code repository} parameter is {@code null}.
-     */
-    @Inject
-    ResourceChangedHandler(Provider<FluxRepository> repository) {
-        this.repository = checkNotNull(repository);
-    }
-
     @Override
-    public void onMessage(Message message) {
+    public void onMessage(Message message, FluxRepository repository) {
         try {
 
             final JSONObject request = message.content();
@@ -64,17 +46,16 @@ public class ResourceChangedHandler implements MessageHandler {
             final long resourceTimestamp = request.getLong(TIMESTAMP.value());
             final String resourceHash = request.getString(HASH.value());
 
-            if (repository.get().hasProject(projectName)) {
+            if (repository.hasProject(projectName)) {
                 final JSONObject content = new JSONObject()
-                        .put(CALLBACK_ID.value(), repository.get().id())
+                        .put(CALLBACK_ID.value(), repository.id())
                         .put(PROJECT.value(), projectName)
                         .put(RESOURCE.value(), resourcePath)
                         .put(TIMESTAMP.value(), resourceTimestamp)
                         .put(HASH.value(), resourceHash);
 
-                repository.get()
-                          .fluxConnector()
-                          .sendMessages(new Message(GET_RESOURCE_REQUEST, content));
+                message.source()
+                       .sendMessage(new Message(GET_RESOURCE_REQUEST, content));
             }
 
         } catch (JSONException e) {

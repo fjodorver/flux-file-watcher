@@ -19,8 +19,6 @@ import com.codenvy.flux.watcher.core.Resource;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
@@ -34,7 +32,6 @@ import static com.codenvy.flux.watcher.core.Message.Fields.TYPE;
 import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_REQUEST;
 import static com.codenvy.flux.watcher.core.MessageType.GET_RESOURCE_RESPONSE;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#GET_RESOURCE_REQUEST}.
@@ -44,23 +41,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 @MessageTypes(GET_RESOURCE_REQUEST)
 public class GetResourceRequestHandler implements MessageHandler {
-    private final Provider<FluxRepository> repository;
-
-    /**
-     * Constructs an instance of {@link GetResourceRequestHandler}.
-     *
-     * @param repository
-     *         the {@link com.codenvy.flux.watcher.core.FluxRepository} instance.
-     * @throws java.lang.NullPointerException
-     *         if {@code repository} parameter is {@code null}.
-     */
-    @Inject
-    GetResourceRequestHandler(Provider<FluxRepository> repository) {
-        this.repository = checkNotNull(repository);
-    }
-
     @Override
-    public void onMessage(Message message) {
+    public void onMessage(Message message, FluxRepository repository) {
         try {
 
             final JSONObject request = message.content();
@@ -70,7 +52,7 @@ public class GetResourceRequestHandler implements MessageHandler {
             final String resourcePath = request.getString(RESOURCE.value());
 
             // we ask the repository to retrieve the resource
-            final Resource resource = repository.get().repositoryResourceProvider().getResource(projectName, resourcePath);
+            final Resource resource = repository.repositoryResourceProvider().getResource(projectName, resourcePath);
 
             // we send the resource only if the timestamp are equals or no timestamp is specified
             if (!request.has(TIMESTAMP.value()) || request.getLong(TIMESTAMP.value()) == resource.timestamp()) {

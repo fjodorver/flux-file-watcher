@@ -20,15 +20,12 @@ import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
 import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
 import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_DELETED;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Handler replying to a {@link com.codenvy.flux.watcher.core.MessageType#RESOURCE_DELETED}.
@@ -38,24 +35,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 @MessageTypes(RESOURCE_DELETED)
 public class ResourceDeletedHandler implements MessageHandler {
-    private final Provider<FluxRepository> repository;
-
-    /**
-     * Constructs an instance of {@link com.codenvy.flux.watcher.core.internal.ResourceDeletedHandler}.
-     *
-     * @param repository
-     *         the FluxRepository instance.
-     * @throws NullPointerException
-     *         if {@code repository} parameter is {@code null}.
-     */
-    @Inject
-    ResourceDeletedHandler(Provider<FluxRepository> repository) {
-        this.repository = checkNotNull(repository);
-    }
-
     @Override
-    public void onMessage(Message message) {
-        final RepositoryResourceProvider repositoryResourceProvider = repository.get().repositoryResourceProvider();
+    public void onMessage(Message message, FluxRepository repository) {
+        final RepositoryResourceProvider repositoryResourceProvider = repository.repositoryResourceProvider();
 
         try {
 
@@ -64,7 +46,7 @@ public class ResourceDeletedHandler implements MessageHandler {
             final String resourcePath = request.getString(RESOURCE.value());
             final long resourceTimestamp = request.getLong(TIMESTAMP.value());
 
-            if (repository.get().hasProject(projectName)) {
+            if (repository.hasProject(projectName)) {
                 final Resource resource = Resource.newUnknown(projectName, resourcePath, resourceTimestamp);
                 repositoryResourceProvider.deleteResource(resource);
             }
