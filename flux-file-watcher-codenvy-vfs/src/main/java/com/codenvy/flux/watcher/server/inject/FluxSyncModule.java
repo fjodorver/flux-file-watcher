@@ -25,6 +25,6 @@ public class FluxSyncModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(FluxSyncEventService.class);
-        //bind(RepositoryProvider.class).to(VFSRepository.class).in(Singleton.class);
+        //bind(RepositoryResourceProvider.class).to(VFSRepository.class).in(Singleton.class);
     }
 }

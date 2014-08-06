@@ -10,12 +10,12 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
-import com.codenvy.flux.watcher.core.internal.EntryCreatedListener;
-import com.codenvy.flux.watcher.core.internal.EntryDeletedListener;
-import com.codenvy.flux.watcher.core.internal.EntryModifiedListener;
 import com.codenvy.flux.watcher.core.internal.GetProjectRequestHandler;
 import com.codenvy.flux.watcher.core.internal.GetResourceRequestHandler;
 import com.codenvy.flux.watcher.core.internal.GetResourceResponseHandler;
+import com.codenvy.flux.watcher.core.internal.ProjectResourceCreatedListener;
+import com.codenvy.flux.watcher.core.internal.ProjectResourceDeletedListener;
+import com.codenvy.flux.watcher.core.internal.ProjectResourceModifiedListener;
 import com.codenvy.flux.watcher.core.internal.ResourceChangedHandler;
 import com.codenvy.flux.watcher.core.internal.ResourceCreatedHandler;
 import com.codenvy.flux.watcher.core.internal.ResourceDeletedHandler;
@@ -31,7 +31,7 @@ public class FluxRepositoryModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(FluxRepository.class);
-        bind(FluxConnector.class);
+        bind(FluxMessageBus.class);
         bind(RepositoryEventBus.class);
 
 
@@ -46,8 +46,8 @@ public class FluxRepositoryModule extends AbstractModule {
 
         // repository listener bindings
         final Multibinder<RepositoryListener> repositoryListeners = Multibinder.newSetBinder(binder(), RepositoryListener.class);
-        repositoryListeners.addBinding().to(EntryCreatedListener.class);
-        repositoryListeners.addBinding().to(EntryDeletedListener.class);
-        repositoryListeners.addBinding().to(EntryModifiedListener.class);
+        repositoryListeners.addBinding().to(ProjectResourceCreatedListener.class);
+        repositoryListeners.addBinding().to(ProjectResourceDeletedListener.class);
+        repositoryListeners.addBinding().to(ProjectResourceModifiedListener.class);
     }
 }

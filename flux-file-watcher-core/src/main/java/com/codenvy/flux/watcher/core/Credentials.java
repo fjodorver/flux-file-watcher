@@ -13,7 +13,7 @@ package com.codenvy.flux.watcher.core;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Credentials used to connect to the Flux server.
+ * Credentials used to connect to a Flux server.
  *
  * @author Kevin Pollet
  */
@@ -22,7 +22,7 @@ public class Credentials {
     private final String token;
 
     /**
-     * Constructs an instance of {@link Credentials}.
+     * Constructs an instance of {@link com.codenvy.flux.watcher.core.Credentials}.
      *
      * @param username
      *         the username.
@@ -34,7 +34,7 @@ public class Credentials {
     }
 
     /**
-     * Constructs an instance of {@link Credentials}.
+     * Constructs an instance of {@link com.codenvy.flux.watcher.core.Credentials}.
      *
      * @param username
      *         the username.
@@ -51,7 +51,7 @@ public class Credentials {
     /**
      * Returns the username.
      *
-     * @return the username.
+     * @return the username never {@code null}.
      */
     public String username() {
         return username;

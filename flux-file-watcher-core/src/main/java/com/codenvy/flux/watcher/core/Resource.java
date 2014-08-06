@@ -18,7 +18,7 @@ import static com.codenvy.flux.watcher.core.Resource.ResourceType.UNKNOWN;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Represents a resource in a repository.
+ * Represents a project resource in a repository.
  *
  * @author Kevin Pollet
  */

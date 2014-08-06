@@ -41,7 +41,7 @@ public final class ResourceHelper {
      * @param type
      *         the {@link com.codenvy.flux.watcher.core.Resource.ResourceType}.
      * @param content
-     *         the content might be {@code null}.
+     *         the content, might be {@code null}.
      * @return the sha1 as an hexadecimal {@link String}, never {@code null}.
      */
     public static String sha1Hash(ResourceType type, byte[] content) {

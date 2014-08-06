@@ -11,16 +11,16 @@
 package com.codenvy.flux.watcher.core;
 
 /**
- * Listener used to be notified for {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} events.
+ * Listener used to be notified for {@link com.codenvy.flux.watcher.core.spi.Repository} events.
  *
  * @author Kevin Pollet
  */
 public interface RepositoryListener {
     /**
-     * Called when an events is fired by the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider}.
+     * Called when an events is fired by a {@link com.codenvy.flux.watcher.core.spi.Repository}.
      *
      * @param event
-     *         the {@link RepositoryEvent} instance, never {@code null}.
+     *         the {@link com.codenvy.flux.watcher.core.RepositoryEvent} instance, never {@code null}.
      */
     void onEvent(RepositoryEvent event);
 }

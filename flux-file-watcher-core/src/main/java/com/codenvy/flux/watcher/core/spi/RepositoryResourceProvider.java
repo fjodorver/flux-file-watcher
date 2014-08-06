@@ -10,18 +10,16 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.spi;
 
-import com.codenvy.flux.watcher.core.Repository;
-import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.Resource;
 
 import java.util.Set;
 
 /**
- * Interface implemented by a repository.
+ * Interface implemented by a {@link com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider}.
  *
  * @author Kevin Pollet
  */
-public interface RepositoryProvider extends Repository {
+public interface RepositoryResourceProvider {
     /**
      * Returns all {@link com.codenvy.flux.watcher.core.Resource} of the given project.
      *
@@ -79,26 +77,4 @@ public interface RepositoryProvider extends Repository {
      *         if {@code resource} parameter is {@code null}.
      */
     void deleteResource(Resource resource);
-
-    /**
-     * Returns the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}.
-     *
-     * @return the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}, never {@code null}
-     */
-    RepositoryEventBus eventBus();
-
-    /**
-     * Unwrap the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} to access implementation specific methods.
-     *
-     * @param clazz
-     *         the type to unwrap to.
-     * @param <T>
-     *         the type to unwrap to.
-     * @return the unwrapped {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} implementation.
-     * @throws java.lang.NullPointerException
-     *         if {@code clazz} parameter is {@code null}.
-     * @throws java.lang.IllegalArgumentException
-     *         if the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} cannot be unwrapped to the given type.
-     */
-    <T> T unwrap(Class<T> clazz);
 }

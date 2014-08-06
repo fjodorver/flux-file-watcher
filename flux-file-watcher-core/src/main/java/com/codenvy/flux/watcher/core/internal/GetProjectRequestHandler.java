@@ -10,17 +10,18 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
+import com.codenvy.flux.watcher.core.FluxRepository;
 import com.codenvy.flux.watcher.core.Message;
 import com.codenvy.flux.watcher.core.MessageHandler;
 import com.codenvy.flux.watcher.core.MessageTypes;
 import com.codenvy.flux.watcher.core.Resource;
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
@@ -43,19 +44,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 @MessageTypes(GET_PROJECT_REQUEST)
 public class GetProjectRequestHandler implements MessageHandler {
-    private final RepositoryProvider repositoryProvider;
+    private final Provider<FluxRepository> repository;
 
     /**
      * Constructs an instance of {@link com.codenvy.flux.watcher.core.internal.GetProjectRequestHandler}.
      *
-     * @param repositoryProvider
-     *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} instance.
+     * @param repository
+     *         the {@link com.codenvy.flux.watcher.core.FluxRepository} instance.
      * @throws java.lang.NullPointerException
-     *         if {@code repositoryProvider} parameter is {@code null}.
+     *         if {@code repository} parameter is {@code null}.
      */
     @Inject
-    GetProjectRequestHandler(RepositoryProvider repositoryProvider) {
-        this.repositoryProvider = checkNotNull(repositoryProvider);
+    GetProjectRequestHandler(Provider<FluxRepository> repository) {
+        this.repository = checkNotNull(repository);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class GetProjectRequestHandler implements MessageHandler {
             final String projectName = request.getString(PROJECT.value());
 
             final JSONArray files = new JSONArray();
-            for (Resource oneResource : repositoryProvider.getProjectResources(projectName)) {
+            for (Resource oneResource : repository.get().repositoryResourceProvider().getProjectResources(projectName)) {
                 files.put(new JSONObject()
                                   .put(PATH.value(), oneResource.path())
                                   .put(TIMESTAMP.value(), oneResource.timestamp())

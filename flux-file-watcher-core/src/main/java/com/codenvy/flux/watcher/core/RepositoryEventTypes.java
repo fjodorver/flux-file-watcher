@@ -17,8 +17,8 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Annotation used on a {@link RepositoryListener} to specify the {@link
- * RepositoryEventType} it listens.
+ * Annotation used on a {@link com.codenvy.flux.watcher.core.RepositoryListener} to specify the {@link
+ * com.codenvy.flux.watcher.core.RepositoryEventType} it listens.
  *
  * @author Kevin Pollet
  */

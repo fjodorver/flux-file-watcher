@@ -10,7 +10,7 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
-import com.codenvy.flux.watcher.core.FluxConnector;
+import com.codenvy.flux.watcher.core.FluxMessageBus;
 import com.codenvy.flux.watcher.core.Message;
 import com.codenvy.flux.watcher.core.RepositoryEvent;
 import com.codenvy.flux.watcher.core.RepositoryEventTypes;
@@ -23,34 +23,37 @@ import org.json.JSONObject;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static com.codenvy.flux.watcher.core.Message.Fields.HASH;
 import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
 import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
-import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_DELETED;
-import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_DELETED;
+import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CHANGED;
+import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_STORED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_MODIFIED;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Listener sending a message to flux connections when a resource is deleted in the repository.
+ * Listener sending a message to flux connections when a project resource is modified in the repository.
  *
  * @author Kevin Pollet
  */
 @Singleton
-@RepositoryEventTypes(ENTRY_DELETED)
-public class EntryDeletedListener implements RepositoryListener {
-    private final FluxConnector fluxConnector;
+@RepositoryEventTypes(PROJECT_RESOURCE_MODIFIED)
+public class ProjectResourceModifiedListener implements RepositoryListener {
+    private final FluxMessageBus messageBus;
 
     /**
-     * Constructs an instance of {@code EntryDeletedListener}.
+     * Constructs an instance of {@code ProjectResourceModifiedListener}.
      *
-     * @param fluxConnector
-     *         the {@link com.codenvy.flux.watcher.core.FluxConnector}.
+     * @param messageBus
+     *         the {@link com.codenvy.flux.watcher.core.FluxMessageBus}.
      * @throws NullPointerException
-     *         if {@code fluxConnector} parameter is {@code null}.
+     *         if {@code messageBus} parameter is {@code null}.
      */
     @Inject
-    EntryDeletedListener(FluxConnector fluxConnector) {
-        this.fluxConnector = checkNotNull(fluxConnector);
+    ProjectResourceModifiedListener(FluxMessageBus messageBus) {
+        this.messageBus = checkNotNull(messageBus);
     }
 
     @Override
@@ -58,12 +61,15 @@ public class EntryDeletedListener implements RepositoryListener {
         try {
 
             final Resource resource = event.resource();
-            final JSONObject content = new JSONObject()
-                    .put(PROJECT.value(), resource.projectId())
-                    .put(RESOURCE.value(), resource.path())
-                    .put(TIMESTAMP.value(), resource.timestamp());
+            if (resource.type() == FILE) {
+                final JSONObject content = new JSONObject()
+                        .put(PROJECT.value(), resource.projectId())
+                        .put(RESOURCE.value(), resource.path())
+                        .put(TIMESTAMP.value(), resource.timestamp())
+                        .put(HASH.value(), resource.hash());
 
-            fluxConnector.broadcastMessage(new Message(RESOURCE_DELETED, content));
+                messageBus.sendMessages(new Message(RESOURCE_CHANGED, content), new Message(RESOURCE_STORED, content));
+            }
 
         } catch (JSONException e) {
             throw new RuntimeException(e);

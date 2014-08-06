@@ -29,9 +29,9 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 
-import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_CREATED;
-import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_DELETED;
-import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_MODIFIED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_CREATED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_DELETED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_MODIFIED;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -213,13 +213,13 @@ public class FileSystemWatchService extends Thread {
      */
     private RepositoryEventType kindToRepositoryEventType(Kind<?> kind) {
         if (kind == ENTRY_CREATE) {
-            return ENTRY_CREATED;
+            return PROJECT_RESOURCE_CREATED;
         }
         if (kind == ENTRY_MODIFY) {
-            return ENTRY_MODIFIED;
+            return PROJECT_RESOURCE_MODIFIED;
         }
         if (kind == ENTRY_DELETE) {
-            return ENTRY_DELETED;
+            return PROJECT_RESOURCE_DELETED;
         }
         return null;
     }

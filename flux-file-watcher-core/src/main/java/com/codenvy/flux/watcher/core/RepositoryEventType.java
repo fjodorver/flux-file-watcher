@@ -11,12 +11,12 @@
 package com.codenvy.flux.watcher.core;
 
 /**
- * Type of the event sent by a repository.
+ * Type of events sent by a {@link com.codenvy.flux.watcher.core.spi.Repository}.
  *
  * @author Kevin Pollet
  */
 public enum RepositoryEventType {
-    ENTRY_CREATED,
-    ENTRY_MODIFIED,
-    ENTRY_DELETED
+    PROJECT_RESOURCE_CREATED,
+    PROJECT_RESOURCE_MODIFIED,
+    PROJECT_RESOURCE_DELETED
 }

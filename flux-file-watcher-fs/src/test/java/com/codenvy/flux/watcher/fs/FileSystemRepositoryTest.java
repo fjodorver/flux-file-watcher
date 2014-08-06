@@ -13,7 +13,6 @@ package com.codenvy.flux.watcher.fs;
 
 import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.Resource;
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
 import com.google.common.collect.Sets;
 
 import org.junit.After;
@@ -275,23 +274,5 @@ public final class FileSystemRepositoryTest extends AbstractTest {
     @Test
     public void testEventBus() {
         Assert.assertNotNull(fileSystemRepository.eventBus());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testUnwrapWithNullClass() {
-        fileSystemRepository.unwrap(null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testUnwrapWithNonAssignableClass() {
-        fileSystemRepository.unwrap(String.class);
-    }
-
-    @Test
-    public void testUnwrap() {
-        final RepositoryProvider repositoryProvider = fileSystemRepository.unwrap(RepositoryProvider.class);
-
-        Assert.assertNotNull(repositoryProvider);
-        Assert.assertSame(fileSystemRepository, repositoryProvider);
     }
 }

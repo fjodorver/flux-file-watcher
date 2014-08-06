@@ -21,9 +21,9 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_CREATED;
-import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_DELETED;
-import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_MODIFIED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_CREATED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_DELETED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_MODIFIED;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -82,13 +82,13 @@ public final class RepositoryEventBusTest {
     private void fireAllEventTypes() {
         final Resource resource = Resource.newFolder("codenvy-project-id", "src", System.currentTimeMillis());
 
-        final RepositoryEvent entryCreatedEvent = new RepositoryEvent(ENTRY_CREATED, resource);
+        final RepositoryEvent entryCreatedEvent = new RepositoryEvent(PROJECT_RESOURCE_CREATED, resource);
         repositoryEventBus.fireRepositoryEvent(entryCreatedEvent);
 
-        final RepositoryEvent entryDeletedEvent = new RepositoryEvent(ENTRY_DELETED, resource);
+        final RepositoryEvent entryDeletedEvent = new RepositoryEvent(PROJECT_RESOURCE_DELETED, resource);
         repositoryEventBus.fireRepositoryEvent(entryDeletedEvent);
 
-        final RepositoryEvent entryModifiedEvent = new RepositoryEvent(ENTRY_MODIFIED, resource);
+        final RepositoryEvent entryModifiedEvent = new RepositoryEvent(PROJECT_RESOURCE_MODIFIED, resource);
         repositoryEventBus.fireRepositoryEvent(entryModifiedEvent);
     }
 
@@ -106,19 +106,19 @@ public final class RepositoryEventBusTest {
     }
 
 
-    @RepositoryEventTypes(ENTRY_CREATED)
+    @RepositoryEventTypes(PROJECT_RESOURCE_CREATED)
     public static class EntryCreatedListener extends AbstractRepositoryListener {
     }
 
-    @RepositoryEventTypes(ENTRY_DELETED)
+    @RepositoryEventTypes(PROJECT_RESOURCE_DELETED)
     public static class EntryDeletedListener extends AbstractRepositoryListener {
     }
 
-    @RepositoryEventTypes(ENTRY_MODIFIED)
+    @RepositoryEventTypes(PROJECT_RESOURCE_MODIFIED)
     public static class EntryModifiedListener extends AbstractRepositoryListener {
     }
 
-    @RepositoryEventTypes({ENTRY_CREATED, ENTRY_MODIFIED})
+    @RepositoryEventTypes({PROJECT_RESOURCE_CREATED, PROJECT_RESOURCE_MODIFIED})
     public static class EntryCreatedAndModifiedListener extends AbstractRepositoryListener {
     }
 }

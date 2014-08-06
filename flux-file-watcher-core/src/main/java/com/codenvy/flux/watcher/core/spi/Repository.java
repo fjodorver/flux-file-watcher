@@ -8,7 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.watcher.core;
+package com.codenvy.flux.watcher.core.spi;
+
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
 
 /**
  * Contract of a Repository.
@@ -52,4 +54,18 @@ public interface Repository {
      *         if {@code projectId} parameter is {@code null}.
      */
     boolean removeProject(String projectId);
+
+    /**
+     * Returns the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}.
+     *
+     * @return the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}, never {@code null}
+     */
+    RepositoryEventBus eventBus();
+
+    /**
+     * Returns the {@link com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider}.
+     *
+     * @return the {@link com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider}, never {@code null}.
+     */
+    RepositoryResourceProvider repositoryResourceProvider();
 }

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
+import com.codenvy.flux.watcher.core.spi.Repository;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
@@ -26,7 +26,7 @@ import java.nio.file.FileSystems;
 public class FileSystemRepositoryModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(RepositoryProvider.class).to(FileSystemRepository.class);
+        bind(Repository.class).to(FileSystemRepository.class);
     }
 
     @Singleton

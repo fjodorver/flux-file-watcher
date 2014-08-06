@@ -15,12 +15,13 @@ import com.codenvy.flux.watcher.core.Message;
 import com.codenvy.flux.watcher.core.MessageHandler;
 import com.codenvy.flux.watcher.core.MessageTypes;
 import com.codenvy.flux.watcher.core.Resource;
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
+import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.CALLBACK_ID;
@@ -45,25 +46,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 @MessageTypes(RESOURCE_CREATED)
 public class ResourceCreatedHandler implements MessageHandler {
-    private final FluxRepository     fluxRepository;
-    private final RepositoryProvider repositoryProvider;
+    private final Provider<FluxRepository> repository;
 
     /**
      * Constructs an instance of {@link com.codenvy.flux.watcher.core.internal.ResourceCreatedHandler}.
      *
-     * @param fluxRepository
+     * @param repository
      *         the FluxRepository instance.
      * @throws java.lang.NullPointerException
-     *         if {@code fluxRepository} parameter is {@code null}.
+     *         if {@code repository} parameter is {@code null}.
      */
     @Inject
-    ResourceCreatedHandler(FluxRepository fluxRepository) {
-        this.fluxRepository = checkNotNull(fluxRepository);
-        this.repositoryProvider = fluxRepository.underlyingRepository();
+    ResourceCreatedHandler(Provider<FluxRepository> repository) {
+        this.repository = checkNotNull(repository);
     }
 
     @Override
     public void onMessage(Message message) {
+        final RepositoryResourceProvider repositoryResourceProvider = repository.get().repositoryResourceProvider();
+
         try {
 
             final JSONObject request = message.content();
@@ -72,15 +73,15 @@ public class ResourceCreatedHandler implements MessageHandler {
             final long resourceTimestamp = request.getLong(TIMESTAMP.value());
             final String resourceHash = request.getString(HASH.value());
 
-            if (repositoryProvider.hasProject(projectName)) {
+            if (repository.get().hasProject(projectName)) {
 
-                if (repositoryProvider.getResource(projectName, resourcePath) == null) {
+                if (repositoryResourceProvider.getResource(projectName, resourcePath) == null) {
 
                     final ResourceType resourceType = ResourceType.valueOf(request.getString(TYPE.value()).toUpperCase());
                     if (resourceType == FOLDER) {
                         final Resource folder = Resource.newFolder(projectName, resourcePath, resourceTimestamp);
 
-                        repositoryProvider.createResource(folder);
+                        repositoryResourceProvider.createResource(folder);
 
                         final JSONObject content = new JSONObject()
                                 .put(PROJECT.value(), projectName)
@@ -94,7 +95,7 @@ public class ResourceCreatedHandler implements MessageHandler {
 
                     } else if (resourceType == FILE) {
                         final JSONObject content = new JSONObject()
-                                .put(CALLBACK_ID.value(), fluxRepository.id())
+                                .put(CALLBACK_ID.value(), repository.get().id())
                                 .put(PROJECT.value(), projectName)
                                 .put(RESOURCE.value(), resourcePath)
                                 .put(TIMESTAMP.value(), resourceTimestamp)

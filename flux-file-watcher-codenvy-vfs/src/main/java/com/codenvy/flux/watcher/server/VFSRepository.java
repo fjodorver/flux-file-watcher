@@ -10,31 +10,31 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.server;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.codenvy.api.project.server.ProjectService;
+import com.codenvy.api.project.shared.dto.ProjectDescriptor;
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
+import com.codenvy.flux.watcher.core.Resource;
+import com.codenvy.flux.watcher.core.Resource.ResourceType;
+import com.codenvy.flux.watcher.core.spi.Repository;
+import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
+import com.google.inject.Inject;
 
 import java.io.ByteArrayInputStream;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.codenvy.api.project.server.ProjectService;
-import com.codenvy.api.project.shared.dto.ProjectDescriptor;
-import com.codenvy.flux.watcher.core.RepositoryEventBus;
-import com.codenvy.flux.watcher.core.RepositoryListener;
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
-import com.codenvy.flux.watcher.core.Resource;
-import com.codenvy.flux.watcher.core.Resource.ResourceType;
-import com.google.inject.Inject;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} implementation.
+ * {@link com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider} implementation.
  *
  * @author Stéphane Tournié
  */
-public class VFSRepository implements RepositoryProvider {
-    private final ProjectService          projectService;
+public class VFSRepository implements RepositoryResourceProvider, Repository {
+    private final ProjectService                projectService;
     private final ConcurrentMap<String, String> projects;
-    private final RepositoryEventBus repositoryEventBus;
+    private final RepositoryEventBus            repositoryEventBus;
 
     @Inject
     public VFSRepository(ProjectService projectService, RepositoryEventBus repositoryEventBus) {
@@ -72,7 +72,7 @@ public class VFSRepository implements RepositoryProvider {
     @Override
     public boolean removeProject(String projectId) {
         checkNotNull(projectId);
-        
+
         final String projectPath = projects.remove(projectId);
         return projectPath != null;
     }
@@ -86,7 +86,7 @@ public class VFSRepository implements RepositoryProvider {
     public Resource getResource(String projectId, String resourcePath) {
         checkNotNull(projectId);
         checkNotNull(resourcePath);
-        
+
         final String projectPath = projects.get(projectId);
         if (projectPath != null) {
             // TODO get file/folder from Codenvy VFS & return it as a Resource  
@@ -98,7 +98,7 @@ public class VFSRepository implements RepositoryProvider {
     @Override
     public void createResource(Resource resource) {
         checkNotNull(resource);
-        
+
         final String projectPath = projects.get(resource.projectId());
         if (projectPath != null) {
             try {
@@ -123,7 +123,7 @@ public class VFSRepository implements RepositoryProvider {
     @Override
     public void deleteResource(Resource resource) {
         checkNotNull(resource);
-        
+
         final String projectPath = projects.get(resource.projectId());
         if (projectPath != null) {
             // TODO check that resource.path() exists in codenvy VFS
@@ -142,11 +142,7 @@ public class VFSRepository implements RepositoryProvider {
     }
 
     @Override
-    public <T> T unwrap(Class<T> clazz) {
-        checkNotNull(clazz);
-        if (clazz.isAssignableFrom(this.getClass())) {
-            return clazz.cast(this);
-        }
-        throw new IllegalArgumentException("Repository provider cannot be unwrapped to '" + clazz.getName() + "'");
+    public RepositoryResourceProvider repositoryResourceProvider() {
+        return this;
     }
 }

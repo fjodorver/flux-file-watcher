@@ -12,7 +12,8 @@ package com.codenvy.flux.watcher.fs;
 
 import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.Resource;
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
+import com.codenvy.flux.watcher.core.spi.Repository;
+import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
 import com.google.inject.Inject;
 
 import javax.inject.Singleton;
@@ -48,12 +49,12 @@ import static java.util.Collections.unmodifiableMap;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
- * {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider} implementation backed by Java {@code FileSystem}.
+ * {@link com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider} implementation backed by Java {@code FileSystem}.
  *
  * @author Kevin Pollet
  */
 @Singleton
-public class FileSystemRepository implements RepositoryProvider {
+public class FileSystemRepository implements RepositoryResourceProvider, Repository {
     private final ConcurrentMap<String, Path> projects;
     private final FileSystemWatchService      watchService;
     private final FileSystem                  fileSystem;
@@ -251,16 +252,12 @@ public class FileSystemRepository implements RepositoryProvider {
         return repositoryEventBus;
     }
 
-    @Override
-    public <T> T unwrap(Class<T> clazz) {
-        checkNotNull(clazz);
-        if (clazz.isAssignableFrom(this.getClass())) {
-            return clazz.cast(this);
-        }
-        throw new IllegalArgumentException("Repository provider cannot be unwrapped to '" + clazz.getName() + "'");
-    }
-
     public Map<String, Path> projects() {
         return unmodifiableMap(projects);
+    }
+
+    @Override
+    public RepositoryResourceProvider repositoryResourceProvider() {
+        return this;
     }
 }

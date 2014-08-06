@@ -23,20 +23,20 @@ import static com.google.common.base.Predicates.notNull;
 import static java.util.Arrays.asList;
 
 /**
- * Event bus for the repository events.
+ * Event bus to listen and fire {@link com.codenvy.flux.watcher.core.spi.Repository} events.
  *
  * @author Kevin Pollet
- * @see RepositoryEvent
+ * @see com.codenvy.flux.watcher.core.RepositoryEvent
  */
 @Singleton
 public class RepositoryEventBus {
     private final Set<RepositoryListener> repositoryListeners;
 
     /**
-     * Constructs an instance of {@link RepositoryEventBus}.
+     * Constructs an instance of {@link com.codenvy.flux.watcher.core.RepositoryEventBus}.
      *
      * @param repositoryListeners
-     *         the repository listeners to register or {@code null} if none.
+     *         the repository listeners to register.
      * @throws java.lang.NullPointerException
      *         if {@code repositoryListeners} parameter is {@code null}.
      */
@@ -46,10 +46,10 @@ public class RepositoryEventBus {
     }
 
     /**
-     * Adds a {@link RepositoryListener}.
+     * Adds a {@link com.codenvy.flux.watcher.core.RepositoryListener}.
      *
      * @param listener
-     *         the {@link RepositoryListener} to add.
+     *         the {@link com.codenvy.flux.watcher.core.RepositoryListener} to add.
      * @return {@code true} if the listener was not already added, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code listener} parameter is {@code null}.
@@ -59,11 +59,11 @@ public class RepositoryEventBus {
     }
 
     /**
-     * Removes a {@link RepositoryListener}.
+     * Removes a {@link com.codenvy.flux.watcher.core.RepositoryListener}.
      *
      * @param listener
-     *         the {@link RepositoryListener} to remove.
-     * @return {@code true} if the listener exists, {@code false} otherwise.
+     *         the {@link com.codenvy.flux.watcher.core.RepositoryListener} to remove.
+     * @return {@code true} if the listener has been removed, {@code false} otherwise.
      * @throws java.lang.NullPointerException
      *         if {@code listener} parameter is {@code null}.
      */
@@ -72,13 +72,13 @@ public class RepositoryEventBus {
     }
 
     /**
-     * Fires a {@link RepositoryEvent} to all {@link RepositoryListener}
+     * Fires a {@link com.codenvy.flux.watcher.core.RepositoryEvent} to all {@link com.codenvy.flux.watcher.core.RepositoryListener}
      * registered.
      *
      * @param event
-     *         the {@link RepositoryEvent} to fire.
+     *         the {@link com.codenvy.flux.watcher.core.RepositoryEvent} to fire.
      * @throws java.lang.NullPointerException
-     *         if the {@code event} parameter is {@code null}.
+     *         if {@code event} parameter is {@code null}.
      */
     public void fireRepositoryEvent(final RepositoryEvent event) {
         checkNotNull(event);

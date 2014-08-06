@@ -43,7 +43,8 @@ public class FluxSyncEventService {
     private final EventSubscriber<VirtualFileEvent> subscriber;
 
     @Inject
-    FluxSyncEventService(EventService eventService, VFSRepository repository, RepositoryEventBus repositoryEventBus, ProjectService projectService) {
+    FluxSyncEventService(EventService eventService, VFSRepository repository, RepositoryEventBus repositoryEventBus,
+                         ProjectService projectService) {
         this.eventService = eventService;
         this.subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectService);
     }
@@ -76,11 +77,11 @@ public class FluxSyncEventService {
             RepositoryEventType repoType = null;
             if ((eventType == VirtualFileEvent.ChangeType.CREATED) || (eventType == VirtualFileEvent.ChangeType.MOVED)
                 || (eventType == VirtualFileEvent.ChangeType.RENAMED)) {
-                repoType = RepositoryEventType.ENTRY_CREATED;
+                repoType = RepositoryEventType.PROJECT_RESOURCE_CREATED;
             } else if (eventType == VirtualFileEvent.ChangeType.CONTENT_UPDATED) {
-                repoType = RepositoryEventType.ENTRY_MODIFIED;
+                repoType = RepositoryEventType.PROJECT_RESOURCE_MODIFIED;
             } else if (eventType == VirtualFileEvent.ChangeType.DELETED) {
-                repoType = RepositoryEventType.ENTRY_DELETED;
+                repoType = RepositoryEventType.PROJECT_RESOURCE_DELETED;
             }
 
             RepositoryEvent repoEvent = null;

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
+import com.codenvy.flux.watcher.core.spi.Repository;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -36,7 +36,7 @@ public final class BootstrapTest {
     public static class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(RepositoryProvider.class).toInstance(mock(RepositoryProvider.class));
+            bind(Repository.class).toInstance(mock(Repository.class));
         }
     }
 }

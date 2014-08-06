@@ -10,16 +10,18 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
+import com.codenvy.flux.watcher.core.FluxRepository;
 import com.codenvy.flux.watcher.core.Message;
 import com.codenvy.flux.watcher.core.MessageHandler;
 import com.codenvy.flux.watcher.core.MessageTypes;
 import com.codenvy.flux.watcher.core.Resource;
-import com.codenvy.flux.watcher.core.spi.RepositoryProvider;
+import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import static com.codenvy.flux.watcher.core.Message.Fields.CONTENT;
@@ -39,27 +41,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Kevin Pollet
  */
-//TODO check timestamp, hash?
 @Singleton
 @MessageTypes(GET_RESOURCE_RESPONSE)
 public class GetResourceResponseHandler implements MessageHandler {
-    private final RepositoryProvider repositoryProvider;
+    private final Provider<FluxRepository> repository;
 
     /**
      * Constructs an instance of {@link com.codenvy.flux.watcher.core.internal.GetResourceResponseHandler}.
      *
-     * @param repositoryProvider
-     *         the {@link com.codenvy.flux.watcher.core.spi.RepositoryProvider}.
+     * @param repository
+     *         the {@link com.codenvy.flux.watcher.core.FluxRepository}.
      * @throws NullPointerException
-     *         if {@code repositoryProvider} parameter is {@code null}.
+     *         if {@code repository} parameter is {@code null}.
      */
     @Inject
-    GetResourceResponseHandler(RepositoryProvider repositoryProvider) {
-        this.repositoryProvider = checkNotNull(repositoryProvider);
+    GetResourceResponseHandler(Provider<FluxRepository> repository) {
+        this.repository = checkNotNull(repository);
     }
 
     @Override
     public void onMessage(Message message) {
+        final RepositoryResourceProvider repositoryResourceProvider = repository.get().repositoryResourceProvider();
+
         try {
 
             final JSONObject request = message.content();
@@ -69,17 +72,17 @@ public class GetResourceResponseHandler implements MessageHandler {
             final String resourceHash = request.getString(HASH.value());
             final String resourceContent = request.getString(CONTENT.value());
 
-            if (repositoryProvider.hasProject(projectName)) {
+            if (repository.get().hasProject(projectName)) {
                 final ResourceType resourceType = ResourceType.valueOf(request.getString(TYPE.value()).toUpperCase());
 
                 if (resourceType == FILE) {
                     final Resource resource = Resource.newFile(projectName, resourcePath, resourceTimestamp, resourceContent.getBytes());
 
-                    if (repositoryProvider.getResource(projectName, resourcePath) == null) {
-                        repositoryProvider.createResource(resource);
+                    if (repositoryResourceProvider.getResource(projectName, resourcePath) == null) {
+                        repositoryResourceProvider.createResource(resource);
 
                     } else {
-                        repositoryProvider.updateResource(resource);
+                        repositoryResourceProvider.updateResource(resource);
                     }
 
                     final JSONObject content = new JSONObject()

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
-import com.codenvy.flux.watcher.core.FluxConnector;
+import com.codenvy.flux.watcher.core.FluxMessageBus;
 import com.codenvy.flux.watcher.core.Message;
 import com.codenvy.flux.watcher.core.RepositoryEvent;
 import com.codenvy.flux.watcher.core.RepositoryEventTypes;
@@ -27,34 +27,33 @@ import static com.codenvy.flux.watcher.core.Message.Fields.HASH;
 import static com.codenvy.flux.watcher.core.Message.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.Message.Fields.RESOURCE;
 import static com.codenvy.flux.watcher.core.Message.Fields.TIMESTAMP;
-import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CHANGED;
+import static com.codenvy.flux.watcher.core.Message.Fields.TYPE;
+import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_CREATED;
 import static com.codenvy.flux.watcher.core.MessageType.RESOURCE_STORED;
-import static com.codenvy.flux.watcher.core.RepositoryEventType.ENTRY_MODIFIED;
-import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_CREATED;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Listener sending a message to flux connections when a resource is modified in the repository.
+ * Listener sending a message to flux connections when a project resource is created in the repository.
  *
  * @author Kevin Pollet
  */
-//TODO check timestamp?
 @Singleton
-@RepositoryEventTypes(ENTRY_MODIFIED)
-public class EntryModifiedListener implements RepositoryListener {
-    private final FluxConnector fluxConnector;
+@RepositoryEventTypes(PROJECT_RESOURCE_CREATED)
+public class ProjectResourceCreatedListener implements RepositoryListener {
+    private final FluxMessageBus messageBus;
 
     /**
-     * Constructs an instance of {@code EntryModifiedListener}.
+     * Constructs an instance of {@code ProjectResourceCreatedListener}.
      *
-     * @param fluxConnector
-     *         the {@link com.codenvy.flux.watcher.core.FluxConnector}.
-     * @throws NullPointerException
-     *         if {@code fluxConnector} parameter is {@code null}.
+     * @param messageBus
+     *         the {@link com.codenvy.flux.watcher.core.FluxMessageBus}.
+     * @throws java.lang.NullPointerException
+     *         if {@code messageBus} parameter is {@code null}.
      */
     @Inject
-    EntryModifiedListener(FluxConnector fluxConnector) {
-        this.fluxConnector = checkNotNull(fluxConnector);
+    ProjectResourceCreatedListener(FluxMessageBus messageBus) {
+        this.messageBus = checkNotNull(messageBus);
     }
 
     @Override
@@ -62,16 +61,14 @@ public class EntryModifiedListener implements RepositoryListener {
         try {
 
             final Resource resource = event.resource();
-            if (resource.type() == FILE) {
-                final JSONObject content = new JSONObject()
-                        .put(PROJECT.value(), resource.projectId())
-                        .put(RESOURCE.value(), resource.path())
-                        .put(TIMESTAMP.value(), resource.timestamp())
-                        .put(HASH.value(), resource.hash());
+            final JSONObject content = new JSONObject()
+                    .put(PROJECT.value(), resource.projectId())
+                    .put(RESOURCE.value(), resource.path())
+                    .put(TIMESTAMP.value(), resource.timestamp())
+                    .put(HASH.value(), resource.hash())
+                    .put(TYPE.value(), resource.type().name().toLowerCase());
 
-                fluxConnector.broadcastMessage(new Message(RESOURCE_CHANGED, content));
-                fluxConnector.broadcastMessage(new Message(RESOURCE_STORED, content));
-            }
+            messageBus.sendMessages(new Message(RESOURCE_CREATED, content), new Message(RESOURCE_STORED, content));
 
         } catch (JSONException e) {
             throw new RuntimeException(e);

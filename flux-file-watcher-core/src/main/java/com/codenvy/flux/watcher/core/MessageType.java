@@ -22,11 +22,12 @@ public enum MessageType {
     GET_PROJECT_RESPONSE("getProjectResponse"),
     GET_RESOURCE_REQUEST("getResourceRequest"),
     GET_RESOURCE_RESPONSE("getResourceResponse"),
-    RESOURCE_CREATED("resourceCreated"),
-    RESOURCE_STORED("resourceStored"),
+    PROJECT_CONNECTED("projectConnected"),
+    PROJECT_DISCONNECTED("projectDisconnected"),
     RESOURCE_CHANGED("resourceChanged"),
+    RESOURCE_CREATED("resourceCreated"),
     RESOURCE_DELETED("resourceDeleted"),
-    PROJECT_CONNECTED("projectConnected");
+    RESOURCE_STORED("resourceStored");
 
     private final String value;
 
