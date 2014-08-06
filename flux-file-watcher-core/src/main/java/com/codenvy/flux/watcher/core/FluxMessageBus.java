@@ -15,16 +15,22 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 
+import org.json.JSONObject;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CALLBACK_ID;
+import static com.codenvy.flux.watcher.core.FluxMessageType.GET_PROJECT_RESPONSE;
+import static com.codenvy.flux.watcher.core.FluxMessageType.GET_RESOURCE_RESPONSE;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.notNull;
 import static java.util.Collections.emptySet;
@@ -36,6 +42,7 @@ import static java.util.Collections.emptySet;
  */
 @Singleton
 public class FluxMessageBus {
+    private final int                                id;
     private final ConcurrentMap<URL, FluxConnection> connections;
     private final Provider<FluxRepository>           repository;
     private final Set<FluxMessageHandler>            messageHandlers;
@@ -52,9 +59,19 @@ public class FluxMessageBus {
      */
     @Inject
     FluxMessageBus(Set<FluxMessageHandler> messageHandlers, Provider<FluxRepository> repository) {
+        this.id = Long.valueOf(UUID.randomUUID().getMostSignificantBits()).intValue();
         this.repository = repository;
         this.messageHandlers = new CopyOnWriteArraySet<>(checkNotNull(messageHandlers));
         this.connections = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Returns the {@link com.codenvy.flux.watcher.core.FluxMessageBus} unique id.
+     *
+     * @return the {@link com.codenvy.flux.watcher.core.FluxMessageBus} unique id.
+     */
+    public int id() {
+        return id;
     }
 
     /**
@@ -157,6 +174,13 @@ public class FluxMessageBus {
      */
     public void messageReceived(FluxMessage message) {
         checkNotNull(message);
+
+        if (message.type() == GET_RESOURCE_RESPONSE || message.type() == GET_PROJECT_RESPONSE) {
+            final JSONObject content = message.content();
+            if (content.has(CALLBACK_ID.value()) && content.optInt(CALLBACK_ID.value()) != id) {
+                return;
+            }
+        }
 
         final Set<FluxMessageHandler> messageHandlers = getMessageHandlersFor(message.type().value());
         for (FluxMessageHandler oneMessageHandler : messageHandlers) {

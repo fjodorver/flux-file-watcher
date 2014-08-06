@@ -10,17 +10,16 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
+import com.codenvy.flux.watcher.core.FluxMessage;
 import com.codenvy.flux.watcher.core.FluxMessageHandler;
 import com.codenvy.flux.watcher.core.FluxMessageTypes;
 import com.codenvy.flux.watcher.core.FluxRepository;
-import com.codenvy.flux.watcher.core.FluxMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.inject.Singleton;
 
-import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CALLBACK_ID;
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.HASH;
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.RESOURCE;
@@ -48,7 +47,6 @@ public class ResourceChangedHandler implements FluxMessageHandler {
 
             if (repository.hasProject(projectName)) {
                 final JSONObject content = new JSONObject()
-                        .put(CALLBACK_ID.value(), repository.id())
                         .put(PROJECT.value(), projectName)
                         .put(RESOURCE.value(), resourcePath)
                         .put(TIMESTAMP.value(), resourceTimestamp)

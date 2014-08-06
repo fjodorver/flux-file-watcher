@@ -33,7 +33,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Singleton
 public class FluxRepository implements Repository {
-    private final int            id;
     private final Repository     delegate;
     private final FluxMessageBus messageBus;
 
@@ -49,18 +48,8 @@ public class FluxRepository implements Repository {
      */
     @Inject
     FluxRepository(FluxMessageBus messageBus, Repository delegate) {
-        this.id = new Long(UUID.randomUUID().getMostSignificantBits()).intValue();
         this.messageBus = checkNotNull(messageBus);
         this.delegate = checkNotNull(delegate);
-    }
-
-    /**
-     * Returns the unique id of this {@link com.codenvy.flux.watcher.core.FluxRepository} instance.
-     *
-     * @return the unique id of this {@link com.codenvy.flux.watcher.core.FluxRepository} instance.
-     */
-    public int id() {
-        return id;
     }
 
     /**

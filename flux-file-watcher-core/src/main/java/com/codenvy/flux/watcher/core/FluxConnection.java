@@ -20,10 +20,13 @@ import org.json.JSONObject;
 
 import java.net.URL;
 
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CALLBACK_ID;
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CHANNEL;
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CONNECTED_TO_CHANNEL;
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.USERNAME;
 import static com.codenvy.flux.watcher.core.FluxMessageType.CONNECT_TO_CHANNEL;
+import static com.codenvy.flux.watcher.core.FluxMessageType.GET_PROJECT_REQUEST;
+import static com.codenvy.flux.watcher.core.FluxMessageType.GET_RESOURCE_REQUEST;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -146,12 +149,20 @@ public class FluxConnection {
         checkNotNull(message);
 
         final JSONObject content = message.content();
-        if (!content.has(USERNAME.value())) {
-            try {
+
+        try {
+            if (!content.has(USERNAME.value())) {
                 content.put(USERNAME.value(), credentials.username());
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
             }
+
+            if (!content.has(CALLBACK_ID.value())) {
+                if (message.type() == GET_RESOURCE_REQUEST || message.type() == GET_PROJECT_REQUEST) {
+                    content.put(CALLBACK_ID.value(), messageBus.id());
+                }
+            }
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
 
         socket.emit(message.type().value(), message.content());

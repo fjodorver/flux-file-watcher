@@ -22,7 +22,6 @@ import org.json.JSONObject;
 
 import javax.inject.Singleton;
 
-import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CALLBACK_ID;
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.HASH;
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.RESOURCE;
@@ -77,7 +76,6 @@ public class ResourceCreatedHandler implements FluxMessageHandler {
 
                     } else if (resourceType == FILE) {
                         final JSONObject content = new JSONObject()
-                                .put(CALLBACK_ID.value(), repository.id())
                                 .put(PROJECT.value(), projectName)
                                 .put(RESOURCE.value(), resourcePath)
                                 .put(TIMESTAMP.value(), resourceTimestamp)
