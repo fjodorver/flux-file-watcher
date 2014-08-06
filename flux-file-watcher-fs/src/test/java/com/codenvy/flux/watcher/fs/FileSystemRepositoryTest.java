@@ -273,6 +273,6 @@ public final class FileSystemRepositoryTest extends AbstractTest {
 
     @Test
     public void testEventBus() {
-        Assert.assertNotNull(fileSystemRepository.eventBus());
+        Assert.assertNotNull(fileSystemRepository.repositoryEventBus());
     }
 }

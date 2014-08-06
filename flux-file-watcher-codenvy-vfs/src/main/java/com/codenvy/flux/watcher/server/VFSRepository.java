@@ -137,7 +137,7 @@ public class VFSRepository implements RepositoryResourceProvider, Repository {
     }
 
     @Override
-    public RepositoryEventBus eventBus() {
+    public RepositoryEventBus repositoryEventBus() {
         return repositoryEventBus;
     }
 

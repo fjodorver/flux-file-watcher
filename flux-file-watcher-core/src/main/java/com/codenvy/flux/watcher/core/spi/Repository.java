@@ -58,9 +58,9 @@ public interface Repository {
     /**
      * Returns the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}.
      *
-     * @return the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}, never {@code null}
+     * @return the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}, never {@code null}.
      */
-    RepositoryEventBus eventBus();
+    RepositoryEventBus repositoryEventBus();
 
     /**
      * Returns the {@link com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider}.

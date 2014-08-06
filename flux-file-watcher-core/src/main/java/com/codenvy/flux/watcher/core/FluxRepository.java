@@ -128,8 +128,8 @@ public class FluxRepository implements Repository {
     }
 
     @Override
-    public RepositoryEventBus eventBus() {
-        return delegate.eventBus();
+    public RepositoryEventBus repositoryEventBus() {
+        return delegate.repositoryEventBus();
     }
 
     @Override

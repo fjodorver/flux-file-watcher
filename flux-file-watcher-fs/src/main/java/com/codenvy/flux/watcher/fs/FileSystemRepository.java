@@ -248,7 +248,7 @@ public class FileSystemRepository implements RepositoryResourceProvider, Reposit
     }
 
     @Override
-    public RepositoryEventBus eventBus() {
+    public RepositoryEventBus repositoryEventBus() {
         return repositoryEventBus;
     }
 

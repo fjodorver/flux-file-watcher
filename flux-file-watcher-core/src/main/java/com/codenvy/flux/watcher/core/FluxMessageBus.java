@@ -155,7 +155,7 @@ public class FluxMessageBus {
      * @throws java.lang.NullPointerException
      *         if {@code message} parameter is {@code null}.
      */
-    void messageReceived(Message message) {
+    public void messageReceived(Message message) {
         checkNotNull(message);
 
         final Set<MessageHandler> messageHandlers = getMessageHandlersFor(message.type().value());
