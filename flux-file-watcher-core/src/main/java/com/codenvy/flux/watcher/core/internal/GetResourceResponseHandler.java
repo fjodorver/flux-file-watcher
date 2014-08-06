@@ -58,24 +58,30 @@ public class GetResourceResponseHandler implements FluxMessageHandler {
                 final ResourceType resourceType = ResourceType.valueOf(request.getString(TYPE.value()).toUpperCase());
 
                 if (resourceType == FILE) {
+                    boolean isResourceStored = false;
+                    final Resource localResource = repositoryResourceProvider.getResource(projectName, resourcePath);
                     final Resource resource = Resource.newFile(projectName, resourcePath, resourceTimestamp, resourceContent.getBytes());
 
-                    if (repositoryResourceProvider.getResource(projectName, resourcePath) == null) {
+                    if (localResource == null) {
                         repositoryResourceProvider.createResource(resource);
+                        isResourceStored = true;
 
-                    } else {
+                    } else if (!localResource.hash().equals(resourceHash) && localResource.timestamp() < resourceTimestamp) {
                         repositoryResourceProvider.updateResource(resource);
+                        isResourceStored = true;
                     }
 
-                    final JSONObject content = new JSONObject()
-                            .put(PROJECT.value(), projectName)
-                            .put(RESOURCE.value(), resourcePath)
-                            .put(TIMESTAMP.value(), resourceTimestamp)
-                            .put(HASH.value(), resourceHash)
-                            .put(TYPE.value(), resourceType.name().toLowerCase());
+                    if (isResourceStored) {
+                        final JSONObject content = new JSONObject()
+                                .put(PROJECT.value(), projectName)
+                                .put(RESOURCE.value(), resourcePath)
+                                .put(TIMESTAMP.value(), resourceTimestamp)
+                                .put(HASH.value(), resourceHash)
+                                .put(TYPE.value(), resourceType.name().toLowerCase());
 
-                    message.source()
-                           .sendMessage(new FluxMessage(RESOURCE_STORED, content));
+                        message.source()
+                               .sendMessage(new FluxMessage(RESOURCE_STORED, content));
+                    }
                 }
             }
 

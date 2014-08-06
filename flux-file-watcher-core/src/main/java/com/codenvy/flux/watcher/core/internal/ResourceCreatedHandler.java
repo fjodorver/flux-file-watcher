@@ -31,7 +31,6 @@ import static com.codenvy.flux.watcher.core.FluxMessageType.GET_RESOURCE_REQUEST
 import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_CREATED;
 import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_STORED;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType;
-import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 import static com.codenvy.flux.watcher.core.Resource.ResourceType.FOLDER;
 
 /**
@@ -61,30 +60,18 @@ public class ResourceCreatedHandler implements FluxMessageHandler {
                     final ResourceType resourceType = ResourceType.valueOf(request.getString(TYPE.value()).toUpperCase());
                     if (resourceType == FOLDER) {
                         final Resource folder = Resource.newFolder(projectName, resourcePath, resourceTimestamp);
-
                         repositoryResourceProvider.createResource(folder);
-
-                        final JSONObject content = new JSONObject()
-                                .put(PROJECT.value(), projectName)
-                                .put(RESOURCE.value(), resourcePath)
-                                .put(TIMESTAMP.value(), resourceTimestamp)
-                                .put(HASH.value(), resourceHash)
-                                .put(TYPE.value(), resourceType.name().toLowerCase());
-
-                        message.source()
-                               .sendMessage(new FluxMessage(RESOURCE_STORED, content));
-
-                    } else if (resourceType == FILE) {
-                        final JSONObject content = new JSONObject()
-                                .put(PROJECT.value(), projectName)
-                                .put(RESOURCE.value(), resourcePath)
-                                .put(TIMESTAMP.value(), resourceTimestamp)
-                                .put(HASH.value(), resourceHash)
-                                .put(TYPE.value(), resourceType.name().toLowerCase());
-
-                        message.source()
-                               .sendMessage(new FluxMessage(GET_RESOURCE_REQUEST, content));
                     }
+
+                    final JSONObject content = new JSONObject()
+                            .put(PROJECT.value(), projectName)
+                            .put(RESOURCE.value(), resourcePath)
+                            .put(TIMESTAMP.value(), resourceTimestamp)
+                            .put(HASH.value(), resourceHash)
+                            .put(TYPE.value(), resourceType.name().toLowerCase());
+
+                    message.source()
+                           .sendMessage(new FluxMessage(resourceType == FOLDER ? RESOURCE_STORED : GET_RESOURCE_REQUEST, content));
                 }
             }
 

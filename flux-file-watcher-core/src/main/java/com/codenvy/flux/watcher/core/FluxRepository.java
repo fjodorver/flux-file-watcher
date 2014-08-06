@@ -31,6 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Kevin Pollet
  */
+//TODO two interface for the Repository?
 @Singleton
 public class FluxRepository implements Repository {
     private final Repository     delegate;

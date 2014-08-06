@@ -10,10 +10,10 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
+import com.codenvy.flux.watcher.core.FluxMessage;
 import com.codenvy.flux.watcher.core.FluxMessageHandler;
 import com.codenvy.flux.watcher.core.FluxMessageTypes;
 import com.codenvy.flux.watcher.core.FluxRepository;
-import com.codenvy.flux.watcher.core.FluxMessage;
 import com.codenvy.flux.watcher.core.Resource;
 import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
 
@@ -47,8 +47,11 @@ public class ResourceDeletedHandler implements FluxMessageHandler {
             final long resourceTimestamp = request.getLong(TIMESTAMP.value());
 
             if (repository.hasProject(projectName)) {
-                final Resource resource = Resource.newUnknown(projectName, resourcePath, resourceTimestamp);
-                repositoryResourceProvider.deleteResource(resource);
+                final Resource localResource = repositoryResourceProvider.getResource(projectName, resourcePath);
+
+                if (localResource != null && localResource.timestamp() < resourceTimestamp) {
+                    repositoryResourceProvider.deleteResource(Resource.newUnknown(projectName, resourcePath, resourceTimestamp));
+                }
             }
 
         } catch (JSONException e) {

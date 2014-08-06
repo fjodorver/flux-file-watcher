@@ -14,6 +14,7 @@ import com.codenvy.flux.watcher.core.FluxMessage;
 import com.codenvy.flux.watcher.core.FluxMessageHandler;
 import com.codenvy.flux.watcher.core.FluxMessageTypes;
 import com.codenvy.flux.watcher.core.FluxRepository;
+import com.codenvy.flux.watcher.core.Resource;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,14 +47,22 @@ public class ResourceChangedHandler implements FluxMessageHandler {
             final String resourceHash = request.getString(HASH.value());
 
             if (repository.hasProject(projectName)) {
-                final JSONObject content = new JSONObject()
-                        .put(PROJECT.value(), projectName)
-                        .put(RESOURCE.value(), resourcePath)
-                        .put(TIMESTAMP.value(), resourceTimestamp)
-                        .put(HASH.value(), resourceHash);
+                final Resource localResource = repository.repositoryResourceProvider()
+                                                         .getResource(projectName, resourcePath);
 
-                message.source()
-                       .sendMessage(new FluxMessage(GET_RESOURCE_REQUEST, content));
+                if (localResource != null
+                    && !localResource.hash().equals(resourceHash)
+                    && localResource.timestamp() < resourceTimestamp) {
+
+                    final JSONObject content = new JSONObject()
+                            .put(PROJECT.value(), projectName)
+                            .put(RESOURCE.value(), resourcePath)
+                            .put(TIMESTAMP.value(), resourceTimestamp)
+                            .put(HASH.value(), resourceHash);
+
+                    message.source()
+                           .sendMessage(new FluxMessage(GET_RESOURCE_REQUEST, content));
+                }
             }
 
         } catch (JSONException e) {

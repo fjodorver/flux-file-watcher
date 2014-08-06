@@ -19,6 +19,7 @@ import java.util.Set;
  *
  * @author Kevin Pollet
  */
+//TODO where the timestamp mechanism has to be checked (currently in handlers)?
 public interface RepositoryResourceProvider {
     /**
      * Returns all {@link com.codenvy.flux.watcher.core.Resource} of the given project.
