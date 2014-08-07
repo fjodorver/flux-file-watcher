@@ -36,26 +36,19 @@ import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_DELETED;
 @FluxMessageTypes(RESOURCE_DELETED)
 public class ResourceDeletedHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(FluxMessage message, FluxRepository repository) {
+    public void onMessage(FluxMessage message, FluxRepository repository) throws JSONException {
+        final JSONObject request = message.content();
+        final String projectName = request.getString(PROJECT.value());
+        final String resourcePath = request.getString(RESOURCE.value());
+        final long resourceTimestamp = request.getLong(TIMESTAMP.value());
         final RepositoryResourceProvider repositoryResourceProvider = repository.repositoryResourceProvider();
 
-        try {
+        if (repository.hasProject(projectName)) {
+            final Resource localResource = repositoryResourceProvider.getResource(projectName, resourcePath);
 
-            final JSONObject request = message.content();
-            final String projectName = request.getString(PROJECT.value());
-            final String resourcePath = request.getString(RESOURCE.value());
-            final long resourceTimestamp = request.getLong(TIMESTAMP.value());
-
-            if (repository.hasProject(projectName)) {
-                final Resource localResource = repositoryResourceProvider.getResource(projectName, resourcePath);
-
-                if (localResource != null && localResource.timestamp() < resourceTimestamp) {
-                    repositoryResourceProvider.deleteResource(Resource.newUnknown(projectName, resourcePath, resourceTimestamp));
-                }
+            if (localResource != null && localResource.timestamp() < resourceTimestamp) {
+                repositoryResourceProvider.deleteResource(Resource.newUnknown(projectName, resourcePath, resourceTimestamp));
             }
-
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
         }
     }
 }

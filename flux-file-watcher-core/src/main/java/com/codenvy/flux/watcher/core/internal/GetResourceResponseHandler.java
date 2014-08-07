@@ -42,51 +42,44 @@ import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 @FluxMessageTypes(GET_RESOURCE_RESPONSE)
 public class GetResourceResponseHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(FluxMessage message, FluxRepository repository) {
+    public void onMessage(FluxMessage message, FluxRepository repository) throws JSONException {
+        final JSONObject request = message.content();
+        final String projectName = request.getString(PROJECT.value());
+        final String resourcePath = request.getString(RESOURCE.value());
+        final long resourceTimestamp = request.getLong(TIMESTAMP.value());
+        final String resourceHash = request.getString(HASH.value());
+        final String resourceContent = request.getString(CONTENT.value());
         final RepositoryResourceProvider repositoryResourceProvider = repository.repositoryResourceProvider();
 
-        try {
+        if (repository.hasProject(projectName)) {
+            final ResourceType resourceType = ResourceType.valueOf(request.getString(TYPE.value()).toUpperCase());
 
-            final JSONObject request = message.content();
-            final String projectName = request.getString(PROJECT.value());
-            final String resourcePath = request.getString(RESOURCE.value());
-            final long resourceTimestamp = request.getLong(TIMESTAMP.value());
-            final String resourceHash = request.getString(HASH.value());
-            final String resourceContent = request.getString(CONTENT.value());
+            if (resourceType == FILE) {
+                boolean isResourceStored = false;
+                final Resource localResource = repositoryResourceProvider.getResource(projectName, resourcePath);
+                final Resource resource = Resource.newFile(projectName, resourcePath, resourceTimestamp, resourceContent.getBytes());
 
-            if (repository.hasProject(projectName)) {
-                final ResourceType resourceType = ResourceType.valueOf(request.getString(TYPE.value()).toUpperCase());
+                if (localResource == null) {
+                    repositoryResourceProvider.createResource(resource);
+                    isResourceStored = true;
 
-                if (resourceType == FILE) {
-                    boolean isResourceStored = false;
-                    final Resource localResource = repositoryResourceProvider.getResource(projectName, resourcePath);
-                    final Resource resource = Resource.newFile(projectName, resourcePath, resourceTimestamp, resourceContent.getBytes());
+                } else if (!localResource.hash().equals(resourceHash) && localResource.timestamp() < resourceTimestamp) {
+                    repositoryResourceProvider.updateResource(resource);
+                    isResourceStored = true;
+                }
 
-                    if (localResource == null) {
-                        repositoryResourceProvider.createResource(resource);
-                        isResourceStored = true;
+                if (isResourceStored) {
+                    final JSONObject content = new JSONObject()
+                            .put(PROJECT.value(), projectName)
+                            .put(RESOURCE.value(), resourcePath)
+                            .put(TIMESTAMP.value(), resourceTimestamp)
+                            .put(HASH.value(), resourceHash)
+                            .put(TYPE.value(), resourceType.name().toLowerCase());
 
-                    } else if (!localResource.hash().equals(resourceHash) && localResource.timestamp() < resourceTimestamp) {
-                        repositoryResourceProvider.updateResource(resource);
-                        isResourceStored = true;
-                    }
-
-                    if (isResourceStored) {
-                        final JSONObject content = new JSONObject()
-                                .put(PROJECT.value(), projectName)
-                                .put(RESOURCE.value(), resourcePath)
-                                .put(TIMESTAMP.value(), resourceTimestamp)
-                                .put(HASH.value(), resourceHash)
-                                .put(TYPE.value(), resourceType.name().toLowerCase());
-
-                        message.source()
-                               .sendMessage(new FluxMessage(RESOURCE_STORED, content));
-                    }
+                    message.source()
+                           .sendMessage(new FluxMessage(RESOURCE_STORED, content));
                 }
             }
-
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
         }
     }
 }

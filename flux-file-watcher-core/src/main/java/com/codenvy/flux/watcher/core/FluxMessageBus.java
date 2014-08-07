@@ -184,7 +184,13 @@ public class FluxMessageBus {
 
         final Set<FluxMessageHandler> messageHandlers = getMessageHandlersFor(message.type().value());
         for (FluxMessageHandler oneMessageHandler : messageHandlers) {
-            oneMessageHandler.onMessage(message, repository.get());
+            try {
+
+                oneMessageHandler.onMessage(message, repository.get());
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

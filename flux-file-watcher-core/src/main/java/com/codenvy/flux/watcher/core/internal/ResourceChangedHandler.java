@@ -37,36 +37,30 @@ import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_CHANGED;
 @FluxMessageTypes(RESOURCE_CHANGED)
 public class ResourceChangedHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(FluxMessage message, FluxRepository repository) {
-        try {
+    public void onMessage(FluxMessage message, FluxRepository repository) throws JSONException {
+        final JSONObject request = message.content();
+        final String projectName = request.getString(PROJECT.value());
+        final String resourcePath = request.getString(RESOURCE.value());
+        final long resourceTimestamp = request.getLong(TIMESTAMP.value());
+        final String resourceHash = request.getString(HASH.value());
 
-            final JSONObject request = message.content();
-            final String projectName = request.getString(PROJECT.value());
-            final String resourcePath = request.getString(RESOURCE.value());
-            final long resourceTimestamp = request.getLong(TIMESTAMP.value());
-            final String resourceHash = request.getString(HASH.value());
+        if (repository.hasProject(projectName)) {
+            final Resource localResource = repository.repositoryResourceProvider()
+                                                     .getResource(projectName, resourcePath);
 
-            if (repository.hasProject(projectName)) {
-                final Resource localResource = repository.repositoryResourceProvider()
-                                                         .getResource(projectName, resourcePath);
+            if (localResource != null
+                && !localResource.hash().equals(resourceHash)
+                && localResource.timestamp() < resourceTimestamp) {
 
-                if (localResource != null
-                    && !localResource.hash().equals(resourceHash)
-                    && localResource.timestamp() < resourceTimestamp) {
+                final JSONObject content = new JSONObject()
+                        .put(PROJECT.value(), projectName)
+                        .put(RESOURCE.value(), resourcePath)
+                        .put(TIMESTAMP.value(), resourceTimestamp)
+                        .put(HASH.value(), resourceHash);
 
-                    final JSONObject content = new JSONObject()
-                            .put(PROJECT.value(), projectName)
-                            .put(RESOURCE.value(), resourcePath)
-                            .put(TIMESTAMP.value(), resourceTimestamp)
-                            .put(HASH.value(), resourceHash);
-
-                    message.source()
-                           .sendMessage(new FluxMessage(GET_RESOURCE_REQUEST, content));
-                }
+                message.source()
+                       .sendMessage(new FluxMessage(GET_RESOURCE_REQUEST, content));
             }
-
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
         }
     }
 }

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core.internal;
 
-import com.codenvy.flux.watcher.core.FluxMessageBus;
 import com.codenvy.flux.watcher.core.FluxMessage;
+import com.codenvy.flux.watcher.core.FluxMessageBus;
 import com.codenvy.flux.watcher.core.RepositoryEvent;
 import com.codenvy.flux.watcher.core.RepositoryEventTypes;
 import com.codenvy.flux.watcher.core.RepositoryListener;
@@ -54,19 +54,13 @@ public class ProjectResourceDeletedListener implements RepositoryListener {
     }
 
     @Override
-    public void onEvent(RepositoryEvent event) {
-        try {
+    public void onEvent(RepositoryEvent event) throws JSONException {
+        final Resource resource = event.resource();
+        final JSONObject content = new JSONObject()
+                .put(PROJECT.value(), resource.projectId())
+                .put(RESOURCE.value(), resource.path())
+                .put(TIMESTAMP.value(), resource.timestamp());
 
-            final Resource resource = event.resource();
-            final JSONObject content = new JSONObject()
-                    .put(PROJECT.value(), resource.projectId())
-                    .put(RESOURCE.value(), resource.path())
-                    .put(TIMESTAMP.value(), resource.timestamp());
-
-            messageBus.sendMessages(new FluxMessage(RESOURCE_DELETED, content));
-
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+        messageBus.sendMessages(new FluxMessage(RESOURCE_DELETED, content));
     }
 }

@@ -42,41 +42,34 @@ import static com.codenvy.flux.watcher.core.Resource.ResourceType.FOLDER;
 @FluxMessageTypes(RESOURCE_CREATED)
 public class ResourceCreatedHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(FluxMessage message, FluxRepository repository) {
+    public void onMessage(FluxMessage message, FluxRepository repository) throws JSONException {
+        final JSONObject request = message.content();
+        final String projectName = request.getString(PROJECT.value());
+        final String resourcePath = request.getString(RESOURCE.value());
+        final long resourceTimestamp = request.getLong(TIMESTAMP.value());
+        final String resourceHash = request.getString(HASH.value());
         final RepositoryResourceProvider repositoryResourceProvider = repository.repositoryResourceProvider();
 
-        try {
+        if (repository.hasProject(projectName)) {
 
-            final JSONObject request = message.content();
-            final String projectName = request.getString(PROJECT.value());
-            final String resourcePath = request.getString(RESOURCE.value());
-            final long resourceTimestamp = request.getLong(TIMESTAMP.value());
-            final String resourceHash = request.getString(HASH.value());
+            if (repositoryResourceProvider.getResource(projectName, resourcePath) == null) {
 
-            if (repository.hasProject(projectName)) {
-
-                if (repositoryResourceProvider.getResource(projectName, resourcePath) == null) {
-
-                    final ResourceType resourceType = ResourceType.valueOf(request.getString(TYPE.value()).toUpperCase());
-                    if (resourceType == FOLDER) {
-                        final Resource folder = Resource.newFolder(projectName, resourcePath, resourceTimestamp);
-                        repositoryResourceProvider.createResource(folder);
-                    }
-
-                    final JSONObject content = new JSONObject()
-                            .put(PROJECT.value(), projectName)
-                            .put(RESOURCE.value(), resourcePath)
-                            .put(TIMESTAMP.value(), resourceTimestamp)
-                            .put(HASH.value(), resourceHash)
-                            .put(TYPE.value(), resourceType.name().toLowerCase());
-
-                    message.source()
-                           .sendMessage(new FluxMessage(resourceType == FOLDER ? RESOURCE_STORED : GET_RESOURCE_REQUEST, content));
+                final ResourceType resourceType = ResourceType.valueOf(request.getString(TYPE.value()).toUpperCase());
+                if (resourceType == FOLDER) {
+                    final Resource folder = Resource.newFolder(projectName, resourcePath, resourceTimestamp);
+                    repositoryResourceProvider.createResource(folder);
                 }
-            }
 
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+                final JSONObject content = new JSONObject()
+                        .put(PROJECT.value(), projectName)
+                        .put(RESOURCE.value(), resourcePath)
+                        .put(TIMESTAMP.value(), resourceTimestamp)
+                        .put(HASH.value(), resourceHash)
+                        .put(TYPE.value(), resourceType.name().toLowerCase());
+
+                message.source()
+                       .sendMessage(new FluxMessage(resourceType == FOLDER ? RESOURCE_STORED : GET_RESOURCE_REQUEST, content));
+            }
         }
     }
 }

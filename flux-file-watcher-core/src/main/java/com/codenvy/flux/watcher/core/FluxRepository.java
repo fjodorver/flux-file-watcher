@@ -19,7 +19,6 @@ import org.json.JSONObject;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
-import java.util.UUID;
 
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.FluxMessageType.PROJECT_CONNECTED;

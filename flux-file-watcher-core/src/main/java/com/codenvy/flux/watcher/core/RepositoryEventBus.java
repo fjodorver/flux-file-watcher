@@ -96,7 +96,13 @@ public class RepositoryEventBus {
                 .toSet();
 
         for (RepositoryListener oneRepositoryListener : filteredRepositoryListeners) {
-            oneRepositoryListener.onEvent(event);
+            try {
+
+                oneRepositoryListener.onEvent(event);
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

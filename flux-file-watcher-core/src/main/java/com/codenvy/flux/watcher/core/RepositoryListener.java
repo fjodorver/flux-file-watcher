@@ -21,6 +21,8 @@ public interface RepositoryListener {
      *
      * @param event
      *         the {@link com.codenvy.flux.watcher.core.RepositoryEvent} instance, never {@code null}.
+     * @throws java.lang.Exception
+     *         if something goes wrong.
      */
-    void onEvent(RepositoryEvent event);
+    void onEvent(RepositoryEvent event) throws Exception;
 }

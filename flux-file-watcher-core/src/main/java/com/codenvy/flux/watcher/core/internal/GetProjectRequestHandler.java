@@ -42,34 +42,28 @@ import static com.codenvy.flux.watcher.core.FluxMessageType.GET_PROJECT_RESPONSE
 @FluxMessageTypes(GET_PROJECT_REQUEST)
 public class GetProjectRequestHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(FluxMessage message, FluxRepository repository) {
-        try {
+    public void onMessage(FluxMessage message, FluxRepository repository) throws JSONException {
+        final JSONObject request = message.content();
+        final int callbackId = request.getInt(CALLBACK_ID.value());
+        final String requestSenderId = request.getString(REQUEST_SENDER_ID.value());
+        final String projectName = request.getString(PROJECT.value());
 
-            final JSONObject request = message.content();
-            final int callbackId = request.getInt(CALLBACK_ID.value());
-            final String requestSenderId = request.getString(REQUEST_SENDER_ID.value());
-            final String projectName = request.getString(PROJECT.value());
-
-            final JSONArray files = new JSONArray();
-            for (Resource oneResource : repository.repositoryResourceProvider().getProjectResources(projectName)) {
-                files.put(new JSONObject()
-                                  .put(PATH.value(), oneResource.path())
-                                  .put(TIMESTAMP.value(), oneResource.timestamp())
-                                  .put(HASH.value(), oneResource.hash())
-                                  .put(TYPE.value(), oneResource.type().name().toLowerCase()));
-            }
-
-            final JSONObject content = new JSONObject()
-                    .put(CALLBACK_ID.value(), callbackId)
-                    .put(REQUEST_SENDER_ID.value(), requestSenderId)
-                    .put(PROJECT.value(), projectName)
-                    .put(FILES.value(), files);
-
-            message.source()
-                   .sendMessage(new FluxMessage(GET_PROJECT_RESPONSE, content));
-
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        final JSONArray files = new JSONArray();
+        for (Resource oneResource : repository.repositoryResourceProvider().getProjectResources(projectName)) {
+            files.put(new JSONObject()
+                              .put(PATH.value(), oneResource.path())
+                              .put(TIMESTAMP.value(), oneResource.timestamp())
+                              .put(HASH.value(), oneResource.hash())
+                              .put(TYPE.value(), oneResource.type().name().toLowerCase()));
         }
+
+        final JSONObject content = new JSONObject()
+                .put(CALLBACK_ID.value(), callbackId)
+                .put(REQUEST_SENDER_ID.value(), requestSenderId)
+                .put(PROJECT.value(), projectName)
+                .put(FILES.value(), files);
+
+        message.source()
+               .sendMessage(new FluxMessage(GET_PROJECT_RESPONSE, content));
     }
 }

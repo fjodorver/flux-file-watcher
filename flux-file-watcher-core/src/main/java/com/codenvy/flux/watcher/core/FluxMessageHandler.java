@@ -24,6 +24,8 @@ public interface FluxMessageHandler {
      *         the {@link FluxMessage} instance, never {@code null}.
      * @param repository
      *         the {@link com.codenvy.flux.watcher.core.FluxRepository} instance, never {@code null}.
+     * @throws java.lang.Exception
+     *         if something goes wrong.
      */
-    void onMessage(FluxMessage message, FluxRepository repository);
+    void onMessage(FluxMessage message, FluxRepository repository) throws Exception;
 }

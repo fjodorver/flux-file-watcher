@@ -57,21 +57,15 @@ public class ProjectResourceCreatedListener implements RepositoryListener {
     }
 
     @Override
-    public void onEvent(RepositoryEvent event) {
-        try {
+    public void onEvent(RepositoryEvent event) throws JSONException {
+        final Resource resource = event.resource();
+        final JSONObject content = new JSONObject()
+                .put(PROJECT.value(), resource.projectId())
+                .put(RESOURCE.value(), resource.path())
+                .put(TIMESTAMP.value(), resource.timestamp())
+                .put(HASH.value(), resource.hash())
+                .put(TYPE.value(), resource.type().name().toLowerCase());
 
-            final Resource resource = event.resource();
-            final JSONObject content = new JSONObject()
-                    .put(PROJECT.value(), resource.projectId())
-                    .put(RESOURCE.value(), resource.path())
-                    .put(TIMESTAMP.value(), resource.timestamp())
-                    .put(HASH.value(), resource.hash())
-                    .put(TYPE.value(), resource.type().name().toLowerCase());
-
-            messageBus.sendMessages(new FluxMessage(RESOURCE_CREATED, content), new FluxMessage(RESOURCE_STORED, content));
-
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+        messageBus.sendMessages(new FluxMessage(RESOURCE_CREATED, content), new FluxMessage(RESOURCE_STORED, content));
     }
 }

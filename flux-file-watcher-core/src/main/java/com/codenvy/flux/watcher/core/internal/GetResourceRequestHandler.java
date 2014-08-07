@@ -42,39 +42,33 @@ import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 @FluxMessageTypes(GET_RESOURCE_REQUEST)
 public class GetResourceRequestHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(FluxMessage message, FluxRepository repository) {
-        try {
+    public void onMessage(FluxMessage message, FluxRepository repository) throws JSONException {
+        final JSONObject request = message.content();
+        final int callbackId = request.getInt(CALLBACK_ID.value());
+        final String requestSenderId = request.getString(REQUEST_SENDER_ID.value());
+        final String projectName = request.getString(PROJECT.value());
+        final String resourcePath = request.getString(RESOURCE.value());
 
-            final JSONObject request = message.content();
-            final int callbackId = request.getInt(CALLBACK_ID.value());
-            final String requestSenderId = request.getString(REQUEST_SENDER_ID.value());
-            final String projectName = request.getString(PROJECT.value());
-            final String resourcePath = request.getString(RESOURCE.value());
+        // we ask the repository to retrieve the resource
+        final Resource resource = repository.repositoryResourceProvider().getResource(projectName, resourcePath);
 
-            // we ask the repository to retrieve the resource
-            final Resource resource = repository.repositoryResourceProvider().getResource(projectName, resourcePath);
+        // we send the resource only if the timestamp are equals or no timestamp is specified
+        if (!request.has(TIMESTAMP.value()) || request.getLong(TIMESTAMP.value()) == resource.timestamp()) {
+            final JSONObject content = new JSONObject()
+                    .put(CALLBACK_ID.value(), callbackId)
+                    .put(REQUEST_SENDER_ID.value(), requestSenderId)
+                    .put(PROJECT.value(), projectName)
+                    .put(RESOURCE.value(), resourcePath)
+                    .put(TIMESTAMP.value(), resource.timestamp())
+                    .put(HASH.value(), resource.hash())
+                    .put(TYPE.value(), resource.type().name().toLowerCase());
 
-            // we send the resource only if the timestamp are equals or no timestamp is specified
-            if (!request.has(TIMESTAMP.value()) || request.getLong(TIMESTAMP.value()) == resource.timestamp()) {
-                final JSONObject content = new JSONObject()
-                        .put(CALLBACK_ID.value(), callbackId)
-                        .put(REQUEST_SENDER_ID.value(), requestSenderId)
-                        .put(PROJECT.value(), projectName)
-                        .put(RESOURCE.value(), resourcePath)
-                        .put(TIMESTAMP.value(), resource.timestamp())
-                        .put(HASH.value(), resource.hash())
-                        .put(TYPE.value(), resource.type().name().toLowerCase());
-
-                if (resource.type() == FILE) {
-                    content.put(CONTENT.value(), new String(resource.content()));
-                }
-
-                message.source()
-                       .sendMessage(new FluxMessage(GET_RESOURCE_RESPONSE, content));
+            if (resource.type() == FILE) {
+                content.put(CONTENT.value(), new String(resource.content()));
             }
 
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+            message.source()
+                   .sendMessage(new FluxMessage(GET_RESOURCE_RESPONSE, content));
         }
     }
 }

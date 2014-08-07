@@ -58,7 +58,7 @@ public final class RepositoryEventBusTest {
     }
 
     @Test
-    public void testFireRepositoryEvent() {
+    public void testFireRepositoryEvent() throws Exception {
         final EntryCreatedListener entryCreatedListener = new EntryCreatedListener();
         repositoryEventBus.addRepositoryListener(entryCreatedListener);
 
@@ -100,7 +100,7 @@ public final class RepositoryEventBusTest {
         }
 
         @Override
-        public void onEvent(RepositoryEvent event) {
+        public void onEvent(RepositoryEvent event) throws Exception {
             mock.onEvent(event);
         }
     }
