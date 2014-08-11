@@ -10,29 +10,71 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
+import com.codenvy.flux.watcher.core.RepositoryEvent;
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
+import com.codenvy.flux.watcher.core.RepositoryEventType;
+import com.codenvy.flux.watcher.core.RepositoryEventTypes;
+import com.codenvy.flux.watcher.core.RepositoryListener;
+import com.codenvy.flux.watcher.core.Resource;
+import com.codenvy.flux.watcher.core.spi.Project;
+import com.google.common.base.Throwables;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.nio.file.WatchEvent;
+import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
+
+import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_CREATED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_DELETED;
+import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_MODIFIED;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.FOLDER;
+import static com.codenvy.flux.watcher.core.Resource.ResourceType.UNKNOWN;
+import static java.nio.file.Files.createDirectory;
+import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.delete;
+import static java.nio.file.Files.getLastModifiedTime;
+import static java.nio.file.Files.readAllBytes;
+import static java.nio.file.Files.write;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import static java.nio.file.WatchEvent.Kind;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 /**
- * {@link JDKProjectWatchService} tests.
+ * {@link com.codenvy.flux.watcher.fs.JDKProjectWatchService} tests.
  *
  * @author Kevin Pollet
  */
-//TODO modify TESTS
 public final class JDKProjectWatchServiceTest extends AbstractTest {
-    /*private JDKProjectWatchService JDKProjectWatchService;
+    private JDKProject             jdkProject;
+    private JDKProjectWatchService jdkProjectWatchService;
+    private RepositoryEventBus     repositoryEventBus;
 
     @Before
     public void beforeTest() throws NoSuchMethodException {
-        final RepositoryEventBus repositoryEventBusMock = mock(RepositoryEventBus.class);
-        JDKProjectWatchService = new JDKProjectWatchService(fileSystem(), repositoryEventBusMock);
+        repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
+        jdkProjectWatchService = new JDKProjectWatchService(fileSystem(), repositoryEventBus);
+        jdkProject = new JDKProject(fileSystem(), jdkProjectWatchService, PROJECT_ID, PROJECT_PATH);
     }
 
     @Test(expected = NullPointerException.class)
     public void testWatchWithNullProject() {
-        JDKProjectWatchService.watch(null);
+        jdkProjectWatchService.watch(null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testUnwatchWithNullPath() {
-        JDKProjectWatchService.unwatch(null);
+    public void testUnwatchWithNullProject() {
+        jdkProjectWatchService.unwatch(null);
     }
 
     @Test
@@ -73,7 +115,7 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
 
         try {
 
-            castMethod.invoke(JDKProjectWatchService, (WatchEvent)null);
+            castMethod.invoke(jdkProjectWatchService, (WatchEvent)null);
 
         } catch (InvocationTargetException e) {
             throw e.getCause();
@@ -82,51 +124,52 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
 
     @Test(expected = NullPointerException.class)
     public void testPathToResourceWithNullKind() throws Exception {
-        pathToResource(null, fileSystem().getPath("foo"));
+        pathToResource(null, jdkProject, fileSystem().getPath(PROJECT_PATH));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testPathToResourceWithNullProject() throws Exception {
+        pathToResource(ENTRY_CREATE, null, fileSystem().getPath(PROJECT_PATH));
     }
 
     @Test(expected = NullPointerException.class)
     public void testPathToResourceWithNullResourcePath() throws Exception {
-        pathToResource(ENTRY_CREATE, null);
+        pathToResource(ENTRY_CREATE, jdkProject, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testPathToResourceWithCreateKindAndNonExistentResourcePath() throws Exception {
-        pathToResource(ENTRY_CREATE, fileSystem().getPath("foo"));
+        pathToResource(ENTRY_CREATE, jdkProject, fileSystem().getPath("foo"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testPathToResourceWithRelativeResourcePath() throws Exception {
-        pathToResource(ENTRY_CREATE, fileSystem().getPath("foo"));
+        pathToResource(ENTRY_CREATE, jdkProject, fileSystem().getPath(RELATIVE_PROJECT_README_FILE_PATH));
     }
 
     @Test
     public void testPathToResourceWithFolderPath() throws Exception {
         final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
-        final Resource resource =
-                pathToResource(ENTRY_CREATE, fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH));
+        final Resource resource = pathToResource(ENTRY_CREATE, jdkProject, absoluteFolderPath);
 
         Assert.assertNotNull(resource);
-        Assert.assertEquals(PROJECT_ID, resource.projectId());
         Assert.assertEquals(RELATIVE_PROJECT_SRC_FOLDER_PATH, resource.path());
         Assert.assertEquals(FOLDER, resource.type());
         Assert.assertEquals(getLastModifiedTime(absoluteFolderPath).toMillis(), resource.timestamp());
-        Assert.assertTrue(Arrays.equals(new byte[0], resource.content()));
+        Assert.assertArrayEquals(null, resource.content());
         Assert.assertNotNull(resource.hash());
     }
 
     @Test
     public void testPathToResourceWithFilePath() throws Exception {
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH);
-        final Resource resource =
-                pathToResource(ENTRY_CREATE, fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH));
+        final Resource resource = pathToResource(ENTRY_CREATE, jdkProject, absoluteFilePath);
 
         Assert.assertNotNull(resource);
-        Assert.assertEquals(PROJECT_ID, resource.projectId());
         Assert.assertEquals(RELATIVE_PROJECT_README_FILE_PATH, resource.path());
         Assert.assertEquals(FILE, resource.type());
         Assert.assertEquals(getLastModifiedTime(absoluteFilePath).toMillis(), resource.timestamp());
-        Assert.assertTrue(Arrays.equals(readAllBytes(absoluteFilePath), resource.content()));
+        Assert.assertArrayEquals(readAllBytes(absoluteFilePath), resource.content());
         Assert.assertNotNull(resource.hash());
     }
 
@@ -134,10 +177,8 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
     public void testWatchEntryCreateFile() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceCreatedListener projectResourceCreatedListener = new ProjectResourceCreatedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
-        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
-        fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
+        jdkProject.watch();
         repositoryEventBus.addRepositoryListener(projectResourceCreatedListener);
 
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_HELLO_FILE_PATH);
@@ -145,26 +186,24 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
 
         countDownLatch.await(1, MINUTES);
 
-        Assert.assertNotNull(projectResourceCreatedListener.repositoryEvent);
-        Assert.assertEquals(PROJECT_RESOURCE_CREATED, projectResourceCreatedListener.repositoryEvent.type());
-        Assert.assertEquals(PROJECT_ID, projectResourceCreatedListener.repositoryEvent.resource().projectId());
-        Assert.assertEquals(RELATIVE_PROJECT_HELLO_FILE_PATH, projectResourceCreatedListener.repositoryEvent.resource().path());
-        Assert.assertEquals(FILE, projectResourceCreatedListener.repositoryEvent.resource().type());
-        Assert.assertEquals(getLastModifiedTime(absoluteFilePath).toMillis(),
-                            projectResourceCreatedListener.repositoryEvent.resource().timestamp());
-        Assert.assertTrue(
-                Arrays.equals(readAllBytes(absoluteFilePath), projectResourceCreatedListener.repositoryEvent.resource().content()));
-        Assert.assertNotNull(projectResourceCreatedListener.repositoryEvent.resource().hash());
+        final RepositoryEvent repositoryEvent = projectResourceCreatedListener.repositoryEvent;
+
+        Assert.assertNotNull(repositoryEvent);
+        Assert.assertEquals(PROJECT_ID, repositoryEvent.project().id());
+        Assert.assertEquals(PROJECT_RESOURCE_CREATED, repositoryEvent.type());
+        Assert.assertEquals(RELATIVE_PROJECT_HELLO_FILE_PATH, repositoryEvent.resource().path());
+        Assert.assertEquals(FILE, repositoryEvent.resource().type());
+        Assert.assertEquals(getLastModifiedTime(absoluteFilePath).toMillis(), repositoryEvent.resource().timestamp());
+        Assert.assertArrayEquals(readAllBytes(absoluteFilePath), repositoryEvent.resource().content());
+        Assert.assertNotNull(repositoryEvent.resource().hash());
     }
 
     @Test
     public void testWatchEntryCreateFolder() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceCreatedListener projectResourceCreatedListener = new ProjectResourceCreatedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
-        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
-        fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
+        jdkProject.watch();
         repositoryEventBus.addRepositoryListener(projectResourceCreatedListener);
 
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_MAIN_FOLDER_PATH);
@@ -172,25 +211,24 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
 
         countDownLatch.await(1, MINUTES);
 
-        Assert.assertNotNull(projectResourceCreatedListener.repositoryEvent);
-        Assert.assertEquals(PROJECT_RESOURCE_CREATED, projectResourceCreatedListener.repositoryEvent.type());
-        Assert.assertEquals(PROJECT_ID, projectResourceCreatedListener.repositoryEvent.resource().projectId());
+        final RepositoryEvent repositoryEvent = projectResourceCreatedListener.repositoryEvent;
+
+        Assert.assertNotNull(repositoryEvent);
+        Assert.assertEquals(PROJECT_RESOURCE_CREATED, repositoryEvent.type());
+        Assert.assertEquals(PROJECT_ID, repositoryEvent.project().id());
         Assert.assertEquals(RELATIVE_PROJECT_MAIN_FOLDER_PATH, projectResourceCreatedListener.repositoryEvent.resource().path());
         Assert.assertEquals(FOLDER, projectResourceCreatedListener.repositoryEvent.resource().type());
-        Assert.assertEquals(getLastModifiedTime(absoluteFilePath).toMillis(),
-                            projectResourceCreatedListener.repositoryEvent.resource().timestamp());
-        Assert.assertTrue(Arrays.equals(new byte[0], projectResourceCreatedListener.repositoryEvent.resource().content()));
-        Assert.assertNotNull(projectResourceCreatedListener.repositoryEvent.resource().hash());
+        Assert.assertEquals(getLastModifiedTime(absoluteFilePath).toMillis(), repositoryEvent.resource().timestamp());
+        Assert.assertArrayEquals(null, repositoryEvent.resource().content());
+        Assert.assertNotNull(repositoryEvent.resource().hash());
     }
 
     @Test
     public void testWatchEntryModifyFile() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceModifiedListener projectResourceModifiedListener = new ProjectResourceModifiedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
-        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
-        fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
+        jdkProject.watch();
         repositoryEventBus.addRepositoryListener(projectResourceModifiedListener);
 
         final String content = "README";
@@ -199,25 +237,24 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
 
         countDownLatch.await(1, MINUTES);
 
-        Assert.assertNotNull(projectResourceModifiedListener.repositoryEvent);
-        Assert.assertEquals(PROJECT_RESOURCE_MODIFIED, projectResourceModifiedListener.repositoryEvent.type());
-        Assert.assertEquals(PROJECT_ID, projectResourceModifiedListener.repositoryEvent.resource().projectId());
-        Assert.assertEquals(RELATIVE_PROJECT_README_FILE_PATH, projectResourceModifiedListener.repositoryEvent.resource().path());
-        Assert.assertEquals(FILE, projectResourceModifiedListener.repositoryEvent.resource().type());
-        Assert.assertEquals(getLastModifiedTime(absoluteFilePath).toMillis(),
-                            projectResourceModifiedListener.repositoryEvent.resource().timestamp());
-        Assert.assertTrue(Arrays.equals(content.getBytes(), projectResourceModifiedListener.repositoryEvent.resource().content()));
-        Assert.assertNotNull(projectResourceModifiedListener.repositoryEvent.resource().hash());
+        final RepositoryEvent repositoryEvent = projectResourceModifiedListener.repositoryEvent;
+
+        Assert.assertNotNull(repositoryEvent);
+        Assert.assertEquals(PROJECT_RESOURCE_MODIFIED, repositoryEvent.type());
+        Assert.assertEquals(PROJECT_ID, repositoryEvent.project().id());
+        Assert.assertEquals(RELATIVE_PROJECT_README_FILE_PATH, repositoryEvent.resource().path());
+        Assert.assertEquals(FILE, repositoryEvent.resource().type());
+        Assert.assertEquals(getLastModifiedTime(absoluteFilePath).toMillis(), repositoryEvent.resource().timestamp());
+        Assert.assertArrayEquals(content.getBytes(), repositoryEvent.resource().content());
+        Assert.assertNotNull(repositoryEvent.resource().hash());
     }
 
     @Test
     public void testWatchEntryDeleteFile() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceDeletedListener projectResourceDeletedListener = new ProjectResourceDeletedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
-        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
-        fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
+        jdkProject.watch();
         repositoryEventBus.addRepositoryListener(projectResourceDeletedListener);
 
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH);
@@ -225,23 +262,23 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
 
         countDownLatch.await(1, MINUTES);
 
-        Assert.assertNotNull(projectResourceDeletedListener.repositoryEvent);
-        Assert.assertEquals(PROJECT_RESOURCE_DELETED, projectResourceDeletedListener.repositoryEvent.type());
-        Assert.assertEquals(PROJECT_ID, projectResourceDeletedListener.repositoryEvent.resource().projectId());
-        Assert.assertEquals(RELATIVE_PROJECT_README_FILE_PATH, projectResourceDeletedListener.repositoryEvent.resource().path());
+        final RepositoryEvent repositoryEvent = projectResourceDeletedListener.repositoryEvent;
+
+        Assert.assertNotNull(repositoryEvent);
+        Assert.assertEquals(PROJECT_RESOURCE_DELETED, repositoryEvent.type());
+        Assert.assertEquals(PROJECT_ID, repositoryEvent.project().id());
+        Assert.assertEquals(RELATIVE_PROJECT_README_FILE_PATH, repositoryEvent.resource().path());
         Assert.assertEquals(UNKNOWN, projectResourceDeletedListener.repositoryEvent.resource().type());
-        Assert.assertTrue(Arrays.equals(new byte[0], projectResourceDeletedListener.repositoryEvent.resource().content()));
-        Assert.assertNotNull(projectResourceDeletedListener.repositoryEvent.resource().hash());
+        Assert.assertArrayEquals(null, repositoryEvent.resource().content());
+        Assert.assertNotNull(repositoryEvent.resource().hash());
     }
 
     @Test
     public void testWatchEntryDeleteFolder() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceDeletedListener projectResourceDeletedListener = new ProjectResourceDeletedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
-        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
-        fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
+        jdkProject.watch();
         repositoryEventBus.addRepositoryListener(projectResourceDeletedListener);
 
         final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
@@ -249,25 +286,25 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
 
         countDownLatch.await(1, MINUTES);
 
-        Assert.assertNotNull(projectResourceDeletedListener.repositoryEvent);
-        Assert.assertEquals(PROJECT_RESOURCE_DELETED, projectResourceDeletedListener.repositoryEvent.type());
-        Assert.assertEquals(PROJECT_ID, projectResourceDeletedListener.repositoryEvent.resource().projectId());
-        Assert.assertEquals(RELATIVE_PROJECT_SRC_FOLDER_PATH, projectResourceDeletedListener.repositoryEvent.resource().path());
-        Assert.assertEquals(UNKNOWN, projectResourceDeletedListener.repositoryEvent.resource().type());
-        Assert.assertTrue(Arrays.equals(new byte[0], projectResourceDeletedListener.repositoryEvent.resource().content()));
-        Assert.assertNotNull(projectResourceDeletedListener.repositoryEvent.resource().hash());
+        final RepositoryEvent repositoryEvent = projectResourceDeletedListener.repositoryEvent;
+
+        Assert.assertNotNull(repositoryEvent);
+        Assert.assertEquals(PROJECT_RESOURCE_DELETED, repositoryEvent.type());
+        Assert.assertEquals(PROJECT_ID, repositoryEvent.project().id());
+        Assert.assertEquals(RELATIVE_PROJECT_SRC_FOLDER_PATH, repositoryEvent.resource().path());
+        Assert.assertEquals(UNKNOWN, repositoryEvent.resource().type());
+        Assert.assertArrayEquals(null, repositoryEvent.resource().content());
+        Assert.assertNotNull(repositoryEvent.resource().hash());
     }
 
     @Test
     public void testUnwatch() throws IOException, InterruptedException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceDeletedListener projectResourceDeletedListener = new ProjectResourceDeletedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
-        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
-        fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
+        jdkProject.watch();
         repositoryEventBus.addRepositoryListener(projectResourceDeletedListener);
-        fileSystemRepository.removeProject(PROJECT_ID);
+        jdkProject.unwatch();
 
         final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
         delete(absoluteFolderPath);
@@ -284,20 +321,21 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
 
         try {
 
-            return (RepositoryEventType)kindToRepositoryEventTypeMethod.invoke(JDKProjectWatchService, kind);
+            return (RepositoryEventType)kindToRepositoryEventTypeMethod.invoke(jdkProjectWatchService, kind);
 
         } catch (InvocationTargetException e) {
             throw Throwables.propagate(e.getCause());
         }
     }
 
-    private Resource pathToResource(Kind<Path> kind, Path resourcePath) throws Exception {
-        final Method pathToResourceMethod = JDKProjectWatchService.class.getDeclaredMethod("pathToResource", Kind.class, Path.class);
+    private Resource pathToResource(Kind<Path> kind, Project project, Path resourcePath) throws Exception {
+        final Method pathToResourceMethod =
+                JDKProjectWatchService.class.getDeclaredMethod("pathToResource", Kind.class, Project.class, Path.class);
         pathToResourceMethod.setAccessible(true);
 
         try {
 
-            return (Resource)pathToResourceMethod.invoke(JDKProjectWatchService, kind, resourcePath);
+            return (Resource)pathToResourceMethod.invoke(jdkProjectWatchService, kind, project, resourcePath);
 
         } catch (InvocationTargetException e) {
             throw Throwables.propagate(e.getCause());
@@ -347,5 +385,5 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
         public ProjectResourceDeletedListener(CountDownLatch countDownLatch) {
             super(countDownLatch);
         }
-    }   */
+    }
 }

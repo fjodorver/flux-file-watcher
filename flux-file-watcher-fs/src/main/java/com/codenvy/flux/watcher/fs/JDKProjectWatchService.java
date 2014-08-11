@@ -49,7 +49,7 @@ import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static java.nio.file.WatchEvent.Kind;
 
 /**
- * Thread watching the file system to notify clients about repository modifications.
+ * Thread watching the file system to notify clients about modifications.
  *
  * @author Kevin Pollet
  */
@@ -69,13 +69,13 @@ public class JDKProjectWatchService extends Thread {
      * @param repositoryEventBus
      *         the {@link com.codenvy.flux.watcher.core.RepositoryEvent} bus.
      * @throws java.lang.NullPointerException
-     *         if {@code repository} or {@code fileSystem} parameter is {@code null}.
+     *         if {@code repositoryEventBus} or {@code fileSystem} parameter is {@code null}.
      */
     JDKProjectWatchService(FileSystem fileSystem, RepositoryEventBus repositoryEventBus) {
         this.watchKeyToPath = HashBiMap.create();
         this.pathToProject = new HashMap<>();
         this.mutex = new Object();
-        this.repositoryEventBus = repositoryEventBus;
+        this.repositoryEventBus = checkNotNull(repositoryEventBus);
         this.fileSystem = checkNotNull(fileSystem);
 
         try {
@@ -220,8 +220,25 @@ public class JDKProjectWatchService extends Thread {
         return null;
     }
 
+    /**
+     * Converts the given resource {@link java.nio.file.Path} to a {@link com.codenvy.flux.watcher.core.Resource}.
+     *
+     * @param kind
+     *         the watch event {@link java.nio.file.WatchEvent.Kind}.
+     * @param project
+     *         the {@link com.codenvy.flux.watcher.core.spi.Project} containing the resource.
+     * @param resourcePath
+     *         the absolute resource {@link java.nio.file.Path}.
+     * @return the {@link com.codenvy.flux.watcher.core.Resource} instance, never {@code null}.
+     * @throws java.lang.NullPointerException
+     *         if {@code kind}, {@code project} or {@code resourcePath} is {@code null}.
+     * @throws java.lang.IllegalArgumentException
+     *         if the resource does not exist and the {@link java.nio.file.WatchEvent.Kind} is not {@link
+     *         java.nio.file.StandardWatchEventKinds#ENTRY_DELETE}.
+     */
     private Resource pathToResource(Kind<Path> kind, Project project, Path resourcePath) {
         checkNotNull(kind);
+        checkNotNull(project);
         checkNotNull(resourcePath);
         checkArgument(resourcePath.isAbsolute());
 
@@ -229,7 +246,6 @@ public class JDKProjectWatchService extends Thread {
 
             final boolean exists = exists(resourcePath);
             checkArgument(kind == ENTRY_DELETE || exists);
-
 
             final Path projectPath = fileSystem.getPath(project.path());
             final String relativeResourcePath = projectPath.relativize(resourcePath).toString();
