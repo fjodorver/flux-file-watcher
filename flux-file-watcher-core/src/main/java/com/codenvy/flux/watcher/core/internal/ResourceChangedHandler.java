@@ -13,8 +13,9 @@ package com.codenvy.flux.watcher.core.internal;
 import com.codenvy.flux.watcher.core.FluxMessage;
 import com.codenvy.flux.watcher.core.FluxMessageHandler;
 import com.codenvy.flux.watcher.core.FluxMessageTypes;
-import com.codenvy.flux.watcher.core.FluxRepository;
+import com.codenvy.flux.watcher.core.Repository;
 import com.codenvy.flux.watcher.core.Resource;
+import com.codenvy.flux.watcher.core.spi.Project;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,16 +38,16 @@ import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_CHANGED;
 @FluxMessageTypes(RESOURCE_CHANGED)
 public class ResourceChangedHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(FluxMessage message, FluxRepository repository) throws JSONException {
+    public void onMessage(FluxMessage message, Repository repository) throws JSONException {
         final JSONObject request = message.content();
         final String projectName = request.getString(PROJECT.value());
         final String resourcePath = request.getString(RESOURCE.value());
         final long resourceTimestamp = request.getLong(TIMESTAMP.value());
         final String resourceHash = request.getString(HASH.value());
 
-        if (repository.hasProject(projectName)) {
-            final Resource localResource = repository.repositoryResourceProvider()
-                                                     .getResource(projectName, resourcePath);
+        final Project project = repository.getProject(projectName);
+        if (project != null) {
+            final Resource localResource = project.getResource(resourcePath);
 
             if (localResource != null
                 && !localResource.hash().equals(resourceHash)

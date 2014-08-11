@@ -13,9 +13,9 @@ package com.codenvy.flux.watcher.core.internal;
 import com.codenvy.flux.watcher.core.FluxMessage;
 import com.codenvy.flux.watcher.core.FluxMessageHandler;
 import com.codenvy.flux.watcher.core.FluxMessageTypes;
-import com.codenvy.flux.watcher.core.FluxRepository;
+import com.codenvy.flux.watcher.core.Repository;
 import com.codenvy.flux.watcher.core.Resource;
-import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
+import com.codenvy.flux.watcher.core.spi.Project;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,29 +42,29 @@ import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
 @FluxMessageTypes(GET_RESOURCE_RESPONSE)
 public class GetResourceResponseHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(FluxMessage message, FluxRepository repository) throws JSONException {
+    public void onMessage(FluxMessage message, Repository repository) throws JSONException {
         final JSONObject request = message.content();
         final String projectName = request.getString(PROJECT.value());
         final String resourcePath = request.getString(RESOURCE.value());
         final long resourceTimestamp = request.getLong(TIMESTAMP.value());
         final String resourceHash = request.getString(HASH.value());
         final String resourceContent = request.getString(CONTENT.value());
-        final RepositoryResourceProvider repositoryResourceProvider = repository.repositoryResourceProvider();
 
-        if (repository.hasProject(projectName)) {
+        final Project project = repository.getProject(projectName);
+        if (project != null) {
             final ResourceType resourceType = ResourceType.valueOf(request.getString(TYPE.value()).toUpperCase());
 
             if (resourceType == FILE) {
                 boolean isResourceStored = false;
-                final Resource localResource = repositoryResourceProvider.getResource(projectName, resourcePath);
-                final Resource resource = Resource.newFile(projectName, resourcePath, resourceTimestamp, resourceContent.getBytes());
+                final Resource localResource = project.getResource(resourcePath);
+                final Resource resource = Resource.newFile(resourcePath, resourceTimestamp, resourceContent.getBytes());
 
                 if (localResource == null) {
-                    repositoryResourceProvider.createResource(resource);
+                    project.createResource(resource);
                     isResourceStored = true;
 
                 } else if (!localResource.hash().equals(resourceHash) && localResource.timestamp() < resourceTimestamp) {
-                    repositoryResourceProvider.updateResource(resource);
+                    project.updateResource(resource);
                     isResourceStored = true;
                 }
 

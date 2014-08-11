@@ -1,0 +1,176 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package com.codenvy.flux.watcher.core;
+
+import com.codenvy.flux.watcher.core.spi.Project;
+import com.codenvy.flux.watcher.core.spi.ProjectFactory;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.net.URL;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
+import static com.codenvy.flux.watcher.core.FluxMessageType.PROJECT_CONNECTED;
+import static com.codenvy.flux.watcher.core.FluxMessageType.PROJECT_DISCONNECTED;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * Represents a repository with Flux connectivity capabilities.
+ *
+ * @author Kevin Pollet
+ */
+@Singleton
+public class Repository {
+    private final Set<Project>       projects;
+    private final FluxMessageBus     messageBus;
+    private final RepositoryEventBus repositoryEventBus;
+    private final ProjectFactory     projectFactory;
+
+    /**
+     * Constructs an instance of {@link Repository}.
+     *
+     * @param messageBus
+     *         the {@link com.codenvy.flux.watcher.core.FluxMessageBus} instance.
+     * @param projectFactory
+     *         the {@link com.codenvy.flux.watcher.core.spi.ProjectFactory} instance.
+     * @param repositoryEventBus
+     *         the {@link com.codenvy.flux.watcher.core.RepositoryEventBus} instance.
+     * @throws java.lang.NullPointerException
+     *         if {@code messageBus}, {@code projectFactory} or {@code repositoryEventBus} parameter is {@code null}.
+     */
+    @Inject
+    Repository(FluxMessageBus messageBus, ProjectFactory projectFactory, RepositoryEventBus repositoryEventBus) {
+        this.repositoryEventBus = checkNotNull(repositoryEventBus);
+        this.messageBus = checkNotNull(messageBus);
+        this.projectFactory = checkNotNull(projectFactory);
+        this.projects = new CopyOnWriteArraySet<>();
+    }
+
+    /**
+     * Connects this {@link Repository} to a Flux remote.
+     *
+     * @param remoteURL
+     *         the remote {@link java.net.URL}.
+     * @param credentials
+     *         the {@link com.codenvy.flux.watcher.core.Credentials} used to connect.
+     * @return the opened {@link com.codenvy.flux.watcher.core.FluxConnection}.
+     * @throws java.lang.NullPointerException
+     *         if {@code remoteURL} or {@code credentials} parameter is {@code null}.
+     */
+    public FluxConnection addRemote(URL remoteURL, Credentials credentials) {
+        return messageBus.connect(checkNotNull(remoteURL), checkNotNull(credentials));
+    }
+
+    /**
+     * Disconnects this {@link Repository} from a Flux remote.
+     *
+     * @param remoteURL
+     *         the server {@link java.net.URL}.
+     * @throws java.lang.NullPointerException
+     *         if {@code remoteURL} parameter is {@code null}.
+     */
+    public void removeRemote(URL remoteURL) {
+        messageBus.disconnect(checkNotNull(remoteURL));
+    }
+
+    /**
+     * Add a project to the repository.
+     *
+     * @param projectId
+     *         the project id.
+     * @param projectPath
+     *         the absolute project path.
+     * @return {@code true} if project was not already added and {@code projectPath} exists, {@code false} otherwise.
+     * @throws java.lang.NullPointerException
+     *         if {@code projectId} or {@code projectPath} parameter is {@code null}.
+     * @throws java.lang.IllegalArgumentException
+     *         if the given {@code projectPath} is not a directory, not absolute or doesn't exist.
+     */
+    public boolean addProject(String projectId, String projectPath) {
+        checkNotNull(projectId);
+        checkNotNull(projectPath);
+
+        final Project project = getProject(projectId);
+        if (project == null) {
+            final Project newProject = projectFactory.newProject(projectId, projectPath);
+            newProject.watch();
+            projects.add(newProject);
+
+            try {
+
+                final JSONObject content = new JSONObject().put(PROJECT.value(), projectId);
+                messageBus.sendMessages(new FluxMessage(PROJECT_CONNECTED, content));
+
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return project == null;
+    }
+
+    /**
+     * Remove a project from the repository.
+     *
+     * @param projectId
+     *         the project id.
+     * @return {@code true} if project has been removed, {@code false} otherwise.
+     */
+    public boolean removeProject(String projectId) {
+        final Project project = getProject(projectId);
+        if (project != null) {
+            projects.remove(project);
+            project.unwatch();
+
+            try {
+
+                final JSONObject content = new JSONObject().put(PROJECT.value(), projectId);
+                messageBus.sendMessages(new FluxMessage(PROJECT_DISCONNECTED, content));
+
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return project != null;
+    }
+
+    /**
+     * Returns the {@link com.codenvy.flux.watcher.core.spi.Project} with the given id.
+     *
+     * @return the {@link com.codenvy.flux.watcher.core.spi.Project} or {@code null} if none.
+     */
+    public Project getProject(final String projectId) {
+        return FluentIterable.from(projects)
+                             .firstMatch(new Predicate<Project>() {
+                                 @Override
+                                 public boolean apply(Project project) {
+                                     return Objects.equals(projectId, project.id());
+                                 }
+                             })
+                             .orNull();
+    }
+
+    /**
+     * Returns the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}.
+     *
+     * @return the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}, never {@code null}.
+     */
+    public RepositoryEventBus repositoryEventBus() {
+        return repositoryEventBus;
+    }
+}

@@ -14,6 +14,7 @@ import com.codenvy.flux.watcher.core.RepositoryEvent;
 import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.RepositoryEventType;
 import com.codenvy.flux.watcher.core.Resource;
+import com.codenvy.flux.watcher.core.spi.Project;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
@@ -27,6 +28,7 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_CREATED;
@@ -51,30 +53,30 @@ import static java.nio.file.WatchEvent.Kind;
  *
  * @author Kevin Pollet
  */
-public class FileSystemWatchService extends Thread {
+public class JDKProjectWatchService extends Thread {
     private final WatchService          watchService;
-    private final BiMap<WatchKey, Path> watchKeys;
-    private final Object                watchKeysMutex;
-    private final FileSystemRepository  repository;
+    private final BiMap<WatchKey, Path> watchKeyToPath;
+    private final Map<Path, Project>    pathToProject;
+    private final Object                mutex;
     private final RepositoryEventBus    repositoryEventBus;
+    private final FileSystem            fileSystem;
 
     /**
-     * Constructs an instance of {@link FileSystemWatchService}.
+     * Constructs an instance of {@link JDKProjectWatchService}.
      *
      * @param fileSystem
      *         the {@link java.nio.file.FileSystem} to watch.
-     * @param repository
-     *         the {@link FileSystemRepository} instance.
      * @param repositoryEventBus
      *         the {@link com.codenvy.flux.watcher.core.RepositoryEvent} bus.
      * @throws java.lang.NullPointerException
-     *         if {@code repository} parameter is {@code null}.
+     *         if {@code repository} or {@code fileSystem} parameter is {@code null}.
      */
-    FileSystemWatchService(FileSystem fileSystem, FileSystemRepository repository, RepositoryEventBus repositoryEventBus) {
-        this.repository = checkNotNull(repository);
-        this.watchKeys = HashBiMap.create();
-        this.watchKeysMutex = new Object();
+    JDKProjectWatchService(FileSystem fileSystem, RepositoryEventBus repositoryEventBus) {
+        this.watchKeyToPath = HashBiMap.create();
+        this.pathToProject = new HashMap<>();
+        this.mutex = new Object();
         this.repositoryEventBus = repositoryEventBus;
+        this.fileSystem = checkNotNull(fileSystem);
 
         try {
 
@@ -85,29 +87,26 @@ public class FileSystemWatchService extends Thread {
         }
     }
 
-    /**
-     * Watch the given {@link java.nio.file.Path} and all its sub-directories.
-     *
-     * @param path
-     *         the {@link java.nio.file.Path} to watch.
-     * @throws java.lang.NullPointerException
-     *         if {@code path} parameter is {@code null}.
-     * @throws java.lang.IllegalArgumentException
-     *         if the given {@code path} is a file, cannot be found or is not absolute.
-     */
-    public void watch(Path path) {
+    public void watch(Project project) {
+        checkNotNull(project);
+        watch(project, fileSystem.getPath(project.path()));
+    }
+
+    private void watch(final Project project, Path path) {
         checkNotNull(path);
         checkArgument(exists(path) && isDirectory(path) && path.isAbsolute());
 
-        synchronized (watchKeysMutex) {
+        synchronized (mutex) {
             try {
 
                 walkFileTree(path, new SimpleFileVisitor<Path>() {
                     @Override
                     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                        if (!watchKeys.containsValue(dir)) {
+                        if (!watchKeyToPath.containsValue(dir)) {
                             final WatchKey watchKey = dir.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-                            watchKeys.put(watchKey, dir);
+
+                            watchKeyToPath.put(watchKey, dir);
+                            pathToProject.put(dir, project);
                         }
                         return CONTINUE;
                     }
@@ -119,31 +118,26 @@ public class FileSystemWatchService extends Thread {
         }
     }
 
-    /**
-     * Unwatch the given {@link java.nio.file.Path} and all its sub-directories.
-     *
-     * @param path
-     *         the {@link java.nio.file.Path} to watch.
-     * @throws java.lang.NullPointerException
-     *         if {@code path} parameter is {@code null}.
-     * @throws java.lang.IllegalArgumentException
-     *         if the given {@code path} is a file, cannot be found or is not absolute.
-     */
-    public void unwatch(Path path) {
+    public void unwatch(Project project) {
+        checkNotNull(project);
+        unwatch(fileSystem.getPath(project.path()));
+    }
+
+    private void unwatch(Path path) {
         checkNotNull(path);
         checkArgument(exists(path) && isDirectory(path) && path.isAbsolute());
 
-        synchronized (watchKeysMutex) {
+        synchronized (mutex) {
             try {
 
                 walkFileTree(path, new SimpleFileVisitor<Path>() {
                     @Override
                     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                        if (!watchKeys.containsValue(dir)) {
-                            final WatchKey watchKey = watchKeys.inverse().remove(dir);
-                            if (watchKey != null) {
-                                watchKey.cancel();
-                            }
+                        final WatchKey watchKey = watchKeyToPath.inverse().get(dir);
+                        if (watchKey != null) {
+                            watchKeyToPath.inverse().remove(dir);
+                            pathToProject.remove(dir);
+                            watchKey.cancel();
                         }
                         return CONTINUE;
                     }
@@ -164,8 +158,8 @@ public class FileSystemWatchService extends Thread {
             try {
 
                 final WatchKey watchKey = watchService.take();
-                synchronized (watchKeysMutex) {
-                    if (!watchKeys.containsKey(watchKey)) {
+                synchronized (mutex) {
+                    if (!watchKeyToPath.containsKey(watchKey)) {
                         continue;
                     }
                 }
@@ -180,20 +174,22 @@ public class FileSystemWatchService extends Thread {
                     }
 
                     if (oneEvent.kind() == ENTRY_CREATE && isDirectory(resourcePath)) {
-                        watch(resourcePath);
+                        watch(pathToProject.get(watchablePath), resourcePath);
                     }
 
+                    final Project project = pathToProject.get(watchablePath);
                     final RepositoryEventType repositoryEventType = kindToRepositoryEventType(pathEvent.kind());
-                    final Resource resource = pathToResource(pathEvent.kind(), resourcePath);
-                    if (repositoryEventType != null && resource != null) {
-                        repositoryEventBus.fireRepositoryEvent(new RepositoryEvent(repositoryEventType, resource));
-                    }
+                    final Resource resource = pathToResource(pathEvent.kind(), project, resourcePath);
+                    repositoryEventBus.fireRepositoryEvent(new RepositoryEvent(repositoryEventType, resource, project));
                 }
 
                 final boolean isValid = watchKey.reset();
                 if (!isValid) {
-                    synchronized (watchKeysMutex) {
-                        watchKeys.remove(watchKey);
+                    synchronized (mutex) {
+                        final Path path = watchKeyToPath.remove(watchKey);
+                        if (path != null) {
+                            pathToProject.remove(path);
+                        }
                     }
                 }
 
@@ -224,21 +220,7 @@ public class FileSystemWatchService extends Thread {
         return null;
     }
 
-    /**
-     * Converts the given {@link java.nio.file.Path} to a {@link com.codenvy.flux.watcher.core.Resource}.
-     *
-     * @param kind
-     *         the {@link java.nio.file.WatchEvent.Kind}.
-     * @param resourcePath
-     *         the absolute resource {@link java.nio.file.Path}.
-     * @return the corresponding {@link com.codenvy.flux.watcher.core.Resource} instance or {@code null} if conversion is impossible.
-     * @throws java.lang.NullPointerException
-     *         if {@code kind} or {@code resourcePath} parameter is {@code null}.
-     * @throws java.lang.IllegalArgumentException
-     *         if {@code kind} is not {@link java.nio.file.StandardWatchEventKinds#ENTRY_DELETE} and the resource doesn't exist or
-     *         {@code resourcePath} is not absolute.
-     */
-    private Resource pathToResource(Kind<Path> kind, Path resourcePath) {
+    private Resource pathToResource(Kind<Path> kind, Project project, Path resourcePath) {
         checkNotNull(kind);
         checkNotNull(resourcePath);
         checkArgument(resourcePath.isAbsolute());
@@ -249,32 +231,22 @@ public class FileSystemWatchService extends Thread {
             checkArgument(kind == ENTRY_DELETE || exists);
 
 
+            final Path projectPath = fileSystem.getPath(project.path());
+            final String relativeResourcePath = projectPath.relativize(resourcePath).toString();
             final long timestamp = exists ? getLastModifiedTime(resourcePath).toMillis() : System.currentTimeMillis();
 
-            // TODO better?
-            for (Map.Entry<String, Path> oneEntry : repository.projects().entrySet()) {
-                final String projectId = oneEntry.getKey();
-                final Path projectPath = oneEntry.getValue();
+            if (exists) {
+                final boolean isDirectory = isDirectory(resourcePath);
+                return isDirectory ? Resource.newFolder(relativeResourcePath, timestamp)
+                                   : Resource.newFile(relativeResourcePath, timestamp, readAllBytes(resourcePath));
 
-                if (resourcePath.startsWith(oneEntry.getValue())) {
-                    final String relativeResourcePath = projectPath.relativize(resourcePath).toString();
-
-                    if (exists) {
-                        final boolean isDirectory = isDirectory(resourcePath);
-                        return isDirectory ? Resource.newFolder(projectId, relativeResourcePath, timestamp)
-                                           : Resource.newFile(projectId, relativeResourcePath, timestamp, readAllBytes(resourcePath));
-
-                    } else {
-                        return Resource.newUnknown(projectId, relativeResourcePath, timestamp);
-                    }
-                }
+            } else {
+                return Resource.newUnknown(relativeResourcePath, timestamp);
             }
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        return null;
     }
 
     /**

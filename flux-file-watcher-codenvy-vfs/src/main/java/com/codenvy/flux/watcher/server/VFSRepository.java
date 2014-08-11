@@ -10,29 +10,13 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.server;
 
-import com.codenvy.api.project.server.ProjectService;
-import com.codenvy.api.project.shared.dto.ProjectDescriptor;
-import com.codenvy.flux.watcher.core.RepositoryEventBus;
-import com.codenvy.flux.watcher.core.Resource;
-import com.codenvy.flux.watcher.core.Resource.ResourceType;
-import com.codenvy.flux.watcher.core.spi.Repository;
-import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
-import com.google.inject.Inject;
-
-import java.io.ByteArrayInputStream;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
- * {@link com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider} implementation.
+ * {@link com.codenvy.flux.watcher.core.spi.Project} implementation.
  *
  * @author Stéphane Tournié
  */
-public class VFSRepository implements RepositoryResourceProvider, Repository {
-    private final ProjectService                projectService;
+public class VFSRepository{// implements Project, Repository {
+   /* private final ProjectService                projectService;
     private final ConcurrentMap<String, String> projects;
     private final RepositoryEventBus            repositoryEventBus;
 
@@ -142,7 +126,7 @@ public class VFSRepository implements RepositoryResourceProvider, Repository {
     }
 
     @Override
-    public RepositoryResourceProvider repositoryResourceProvider() {
+    public Project repositoryResourceProvider() {
         return this;
-    }
+    }   */
 }

@@ -23,17 +23,16 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
 /**
- * Guice bindings for {@link com.codenvy.flux.watcher.core.FluxRepositoryModule}.
+ * Guice bindings for {@link RepositoryModule}.
  *
  * @author Kevin Pollet
  */
-public class FluxRepositoryModule extends AbstractModule {
+public class RepositoryModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(FluxRepository.class);
+        bind(Repository.class);
         bind(FluxMessageBus.class);
         bind(RepositoryEventBus.class);
-
 
         // message handler bindings
         final Multibinder<FluxMessageHandler> messageHandlers = Multibinder.newSetBinder(binder(), FluxMessageHandler.class);

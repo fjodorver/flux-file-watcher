@@ -10,18 +10,10 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.google.common.jimfs.Jimfs;
-
-import java.nio.file.FileSystem;
-
 /**
- * {@link com.google.inject.Module} providing an in-memory file system implementation.
+ * {@link com.codenvy.flux.watcher.fs.JDKProjectFactory} tests.
  *
  * @author Kevin Pollet
  */
-public final class FileSystemRepositoryTestModule extends FileSystemRepositoryModule {
-    @Override
-    protected FileSystem provideFileSystem() {
-        return Jimfs.newFileSystem();
-    }
+public final class JDKProjectFactoryTest {
 }

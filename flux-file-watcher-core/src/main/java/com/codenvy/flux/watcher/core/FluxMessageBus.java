@@ -44,7 +44,7 @@ import static java.util.Collections.emptySet;
 public class FluxMessageBus {
     private final int                                id;
     private final ConcurrentMap<URL, FluxConnection> connections;
-    private final Provider<FluxRepository>           repository;
+    private final Provider<Repository>               repository;
     private final Set<FluxMessageHandler>            messageHandlers;
 
     /**
@@ -53,12 +53,12 @@ public class FluxMessageBus {
      * @param messageHandlers
      *         the {@link FluxMessageHandler} to register.
      * @param repository
-     *         the {@link com.codenvy.flux.watcher.core.FluxRepository} provider instance.
+     *         the {@link Repository} provider instance.
      * @throws java.lang.NullPointerException
      *         if {@code messageHandlers} is {@code null}.
      */
     @Inject
-    FluxMessageBus(Set<FluxMessageHandler> messageHandlers, Provider<FluxRepository> repository) {
+    FluxMessageBus(Set<FluxMessageHandler> messageHandlers, Provider<Repository> repository) {
         this.id = Long.valueOf(UUID.randomUUID().getMostSignificantBits()).intValue();
         this.repository = repository;
         this.messageHandlers = new CopyOnWriteArraySet<>(checkNotNull(messageHandlers));

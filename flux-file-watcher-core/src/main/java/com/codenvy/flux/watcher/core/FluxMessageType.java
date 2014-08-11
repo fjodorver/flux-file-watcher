@@ -10,11 +10,12 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * The types of Flux message.
+ * The types of {@link com.codenvy.flux.watcher.core.FluxMessage}.
  *
  * @author Kevin Pollet
- * @see FluxMessage
  */
 public enum FluxMessageType {
     CONNECT_TO_CHANNEL("connectToChannel"),
@@ -32,36 +33,44 @@ public enum FluxMessageType {
     private final String value;
 
     /**
-     * Constructs an instance of {@link FluxMessageType}.
+     * Constructs an instance of {@link com.codenvy.flux.watcher.core.FluxMessageType}.
      *
      * @param value
-     *         the {@link FluxMessageType} value.
+     *         the {@link com.codenvy.flux.watcher.core.FluxMessageType} value.
+     * @throws java.lang.NullPointerException
+     *         if {@code value} parameter is {@code null}.
      */
     FluxMessageType(String value) {
-        this.value = value;
+        this.value = checkNotNull(value);
     }
 
     /**
-     * Returns the {@link FluxMessageType} corresponding to the given value.
+     * Returns the {@link com.codenvy.flux.watcher.core.FluxMessageType} corresponding to the given type.
      *
-     * @param value
-     *         the {@link FluxMessageType} value.
-     * @return the {@link FluxMessageType} corresponding to the given value or {@code null} if none.
+     * @param type
+     *         the {@link com.codenvy.flux.watcher.core.FluxMessageType} type.
+     * @return the {@link com.codenvy.flux.watcher.core.FluxMessageType} corresponding to the given type or {@code null} if none.
+     * @throws java.lang.NullPointerException
+     *         if {@code type} parameter is {@code null}.
+     * @throws java.lang.IllegalArgumentException
+     *         if no {@link com.codenvy.flux.watcher.core.FluxMessageType} exists for the given type.
      */
-    public static FluxMessageType fromType(String value) {
+    public static FluxMessageType fromType(String type) {
+        checkNotNull(type);
+
         final FluxMessageType[] messageTypes = FluxMessageType.values();
         for (FluxMessageType oneMessageType : messageTypes) {
-            if (oneMessageType.value.equals(value)) {
+            if (oneMessageType.value.equals(type)) {
                 return oneMessageType;
             }
         }
-        return null;
+        throw new IllegalArgumentException("No enum found for type '" + type + "'");
     }
 
     /**
-     * Returns the {@link FluxMessageType} value.
+     * Returns the {@link com.codenvy.flux.watcher.core.FluxMessageType} value.
      *
-     * @return the {@link FluxMessageType} value, never {@code null}.
+     * @return the {@link com.codenvy.flux.watcher.core.FluxMessageType} value, never {@code null}.
      */
     public String value() {
         return value;

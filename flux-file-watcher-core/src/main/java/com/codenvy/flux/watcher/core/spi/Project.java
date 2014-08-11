@@ -15,37 +15,54 @@ import com.codenvy.flux.watcher.core.Resource;
 import java.util.Set;
 
 /**
- * Interface implemented by a {@link com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider}.
+ * Project contract implemented by a provider.
  *
  * @author Kevin Pollet
+ * @see com.codenvy.flux.watcher.core.spi.ProjectFactory
  */
-//TODO where the timestamp mechanism has to be checked (currently in handlers)?
-public interface RepositoryResourceProvider {
+public interface Project {
     /**
-     * Returns all {@link com.codenvy.flux.watcher.core.Resource} of the given project.
+     * Returns the project unique id.
      *
-     * @param projectId
-     *         the project id.
-     * @return the {@link com.codenvy.flux.watcher.core.Resource} {@link java.util.Set}, never {@code null}.
-     * @throws java.lang.NullPointerException
-     *         if {@code projectId} parameter is {@code null}.
-     * @throws java.lang.IllegalArgumentException
-     *         if project doesn't exist.
+     * @return the project unique id, never {@code null}.
      */
-    Set<Resource> getProjectResources(String projectId);
+    String id();
 
     /**
-     * Returns the {@link com.codenvy.flux.watcher.core.Resource} in the given project with the given relative resourcePath.
+     * Returns the project absolute path.
      *
-     * @param projectId
-     *         the project id.
+     * @return the project absolute path, never {@code null}.
+     */
+    String path();
+
+    /**
+     * Watch project {@link com.codenvy.flux.watcher.core.Resource} modifications. The project {@link
+     * com.codenvy.flux.watcher.core.Resource} modifications have to be sent with the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}.
+     */
+    void watch();
+
+    /**
+     * Unwatch project {@link com.codenvy.flux.watcher.core.Resource} modifications.
+     */
+    void unwatch();
+
+    /**
+     * Returns all project {@link com.codenvy.flux.watcher.core.Resource}.
+     *
+     * @return the {@link com.codenvy.flux.watcher.core.Resource} {@link java.util.Set}, never {@code null}.
+     */
+    Set<Resource> getResources();
+
+    /**
+     * Returns the {@link com.codenvy.flux.watcher.core.Resource} in with the given relative resourcePath.
+     *
      * @param resourcePath
      *         the {@link com.codenvy.flux.watcher.core.Resource} relative resourcePath.
      * @return the {@link com.codenvy.flux.watcher.core.Resource} or {@code null} if not found.
      * @throws java.lang.NullPointerException
-     *         if {@code projectId} or {@code resourcePath} parameter is {@code null}.
+     *         if {@code resourcePath} parameter is {@code null}.
      */
-    Resource getResource(String projectId, String resourcePath);
+    Resource getResource(String resourcePath);
 
     /**
      * Creates the given {@link com.codenvy.flux.watcher.core.Resource}.

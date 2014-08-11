@@ -100,12 +100,12 @@ public class FluxSyncEventService {
                 long timestamp = project.getModificationDate();
 
                 if (event.isFolder()) {
-                    resource = Resource.newFolder(eventProject, eventPath, timestamp);
+                    //resource = Resource.newFolder(eventProject, eventPath, timestamp);
                 } else {
                     // TODO get file content from where?
-                    resource = Resource.newFile(eventProject, eventPath, timestamp, new byte[0]);
+                    //resource = Resource.newFile(eventProject, eventPath, timestamp, new byte[0]);
                 }
-                repoEvent = new RepositoryEvent(repoType, resource);
+                //repoEvent = new RepositoryEvent(repoType, resource, project);
             }
 
             repositoryEventBus.fireRepositoryEvent(repoEvent);

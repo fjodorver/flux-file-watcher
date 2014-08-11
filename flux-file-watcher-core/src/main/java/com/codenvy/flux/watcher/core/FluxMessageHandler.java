@@ -11,21 +11,21 @@
 package com.codenvy.flux.watcher.core;
 
 /**
- * Interface implemented to be advise when a {@link FluxMessage} is received by a {@link
+ * Interface implemented to be advise when a {@link com.codenvy.flux.watcher.core.FluxMessage} is received by a {@link
  * com.codenvy.flux.watcher.core.FluxConnection}.
  *
  * @author Kevin Pollet
  */
 public interface FluxMessageHandler {
     /**
-     * Method called when a {@link FluxMessage} is received.
+     * Method called when a {@link com.codenvy.flux.watcher.core.FluxMessage} is received.
      *
      * @param message
-     *         the {@link FluxMessage} instance, never {@code null}.
+     *         the {@link com.codenvy.flux.watcher.core.FluxMessage} instance, never {@code null}.
      * @param repository
-     *         the {@link com.codenvy.flux.watcher.core.FluxRepository} instance, never {@code null}.
+     *         the {@link com.codenvy.flux.watcher.core.Repository} instance, never {@code null}.
      * @throws java.lang.Exception
      *         if something goes wrong.
      */
-    void onMessage(FluxMessage message, FluxRepository repository) throws Exception;
+    void onMessage(FluxMessage message, Repository repository) throws Exception;
 }

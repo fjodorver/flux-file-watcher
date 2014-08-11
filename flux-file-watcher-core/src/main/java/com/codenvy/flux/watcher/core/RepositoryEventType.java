@@ -11,7 +11,7 @@
 package com.codenvy.flux.watcher.core;
 
 /**
- * Type of events sent by a {@link com.codenvy.flux.watcher.core.spi.Repository}.
+ * Type of events sent by a {@link com.codenvy.flux.watcher.core.Repository}.
  *
  * @author Kevin Pollet
  */

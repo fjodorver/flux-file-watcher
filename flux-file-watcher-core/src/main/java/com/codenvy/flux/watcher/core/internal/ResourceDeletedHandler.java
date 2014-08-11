@@ -13,9 +13,9 @@ package com.codenvy.flux.watcher.core.internal;
 import com.codenvy.flux.watcher.core.FluxMessage;
 import com.codenvy.flux.watcher.core.FluxMessageHandler;
 import com.codenvy.flux.watcher.core.FluxMessageTypes;
-import com.codenvy.flux.watcher.core.FluxRepository;
+import com.codenvy.flux.watcher.core.Repository;
 import com.codenvy.flux.watcher.core.Resource;
-import com.codenvy.flux.watcher.core.spi.RepositoryResourceProvider;
+import com.codenvy.flux.watcher.core.spi.Project;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,18 +36,18 @@ import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_DELETED;
 @FluxMessageTypes(RESOURCE_DELETED)
 public class ResourceDeletedHandler implements FluxMessageHandler {
     @Override
-    public void onMessage(FluxMessage message, FluxRepository repository) throws JSONException {
+    public void onMessage(FluxMessage message, Repository repository) throws JSONException {
         final JSONObject request = message.content();
         final String projectName = request.getString(PROJECT.value());
         final String resourcePath = request.getString(RESOURCE.value());
         final long resourceTimestamp = request.getLong(TIMESTAMP.value());
-        final RepositoryResourceProvider repositoryResourceProvider = repository.repositoryResourceProvider();
 
-        if (repository.hasProject(projectName)) {
-            final Resource localResource = repositoryResourceProvider.getResource(projectName, resourcePath);
+        final Project project = repository.getProject(projectName);
+        if (project != null) {
+            final Resource localResource = project.getResource(resourcePath);
 
             if (localResource != null && localResource.timestamp() < resourceTimestamp) {
-                repositoryResourceProvider.deleteResource(Resource.newUnknown(projectName, resourcePath, resourceTimestamp));
+                project.deleteResource(Resource.newUnknown(resourcePath, resourceTimestamp));
             }
         }
     }

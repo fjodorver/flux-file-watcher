@@ -23,7 +23,7 @@ import static com.google.common.base.Predicates.notNull;
 import static java.util.Arrays.asList;
 
 /**
- * Event bus to listen and fire {@link com.codenvy.flux.watcher.core.spi.Repository} events.
+ * Event bus to listen and fire {@link com.codenvy.flux.watcher.core.Repository} events.
  *
  * @author Kevin Pollet
  * @see com.codenvy.flux.watcher.core.RepositoryEvent

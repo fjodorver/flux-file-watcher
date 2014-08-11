@@ -10,7 +10,7 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
-import com.codenvy.flux.watcher.core.spi.Repository;
+import com.codenvy.flux.watcher.core.spi.ProjectFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -25,18 +25,18 @@ import static org.mockito.Mockito.mock;
  *
  * @author Kevin Pollet
  */
-public final class BootstrapTest {
+public final class RepositoryModuleTest {
     @Test
     public void testBootstrap() {
-        final Injector injector = Guice.createInjector(new FluxRepositoryModule(), new TestModule());
+        final Injector injector = Guice.createInjector(new RepositoryModule(), new TestModule());
 
-        Assert.assertNotNull(injector.getInstance(FluxRepository.class));
+        Assert.assertNotNull(injector.getInstance(Repository.class));
     }
 
     public static class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(Repository.class).toInstance(mock(Repository.class));
+            bind(ProjectFactory.class).toInstance(mock(ProjectFactory.class));
         }
     }
 }

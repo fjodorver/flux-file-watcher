@@ -10,108 +10,29 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.RepositoryEvent;
-import com.codenvy.flux.watcher.core.RepositoryEventBus;
-import com.codenvy.flux.watcher.core.RepositoryEventType;
-import com.codenvy.flux.watcher.core.RepositoryEventTypes;
-import com.codenvy.flux.watcher.core.RepositoryListener;
-import com.codenvy.flux.watcher.core.Resource;
-import com.google.common.base.Throwables;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-
-import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_CREATED;
-import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_DELETED;
-import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_MODIFIED;
-import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
-import static com.codenvy.flux.watcher.core.Resource.ResourceType.FOLDER;
-import static com.codenvy.flux.watcher.core.Resource.ResourceType.UNKNOWN;
-import static java.nio.file.Files.createDirectory;
-import static java.nio.file.Files.createFile;
-import static java.nio.file.Files.delete;
-import static java.nio.file.Files.getLastModifiedTime;
-import static java.nio.file.Files.readAllBytes;
-import static java.nio.file.Files.write;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
-import static java.nio.file.WatchEvent.Kind;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 /**
- * {@link com.codenvy.flux.watcher.fs.FileSystemWatchService} tests.
+ * {@link JDKProjectWatchService} tests.
  *
  * @author Kevin Pollet
  */
-public final class FileSystemWatchServiceTest extends AbstractTest {
-    private FileSystemWatchService fileSystemWatchService;
+//TODO modify TESTS
+public final class JDKProjectWatchServiceTest extends AbstractTest {
+    /*private JDKProjectWatchService JDKProjectWatchService;
 
     @Before
     public void beforeTest() throws NoSuchMethodException {
-        final Map<String, Path> projects = new HashMap<>();
-        projects.put(PROJECT_ID, fileSystem().getPath(PROJECT_PATH));
-
         final RepositoryEventBus repositoryEventBusMock = mock(RepositoryEventBus.class);
-        final FileSystemRepository fileSystemRepositoryMock = mock(FileSystemRepository.class);
-        when(fileSystemRepositoryMock.projects()).thenReturn(projects);
-
-        fileSystemWatchService = new FileSystemWatchService(fileSystem(), fileSystemRepositoryMock, repositoryEventBusMock);
+        JDKProjectWatchService = new JDKProjectWatchService(fileSystem(), repositoryEventBusMock);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testWatchWithNullPath() {
-        fileSystemWatchService.watch(null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testWatchWithNonExistentPath() {
-        fileSystemWatchService.watch(fileSystem().getPath("/foo"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testWatchWithFilePath() {
-        fileSystemWatchService.watch(fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testWatchWithNonAbsolutePath() {
-        fileSystemWatchService.watch(fileSystem().getPath(RELATIVE_PROJECT_README_FILE_PATH));
+    public void testWatchWithNullProject() {
+        JDKProjectWatchService.watch(null);
     }
 
     @Test(expected = NullPointerException.class)
     public void testUnwatchWithNullPath() {
-        fileSystemWatchService.unwatch(null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testUnwatchWithNonExistentPath() {
-        fileSystemWatchService.unwatch(fileSystem().getPath("/foo"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testUnwatchWithFilePath() {
-        fileSystemWatchService.unwatch(fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testUnwatchWithNonAbsolutePath() {
-        fileSystemWatchService.unwatch(fileSystem().getPath(RELATIVE_PROJECT_README_FILE_PATH));
+        JDKProjectWatchService.unwatch(null);
     }
 
     @Test
@@ -147,12 +68,12 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
 
     @Test(expected = NullPointerException.class)
     public void testCastWithNullEvent() throws Throwable {
-        final Method castMethod = FileSystemWatchService.class.getDeclaredMethod("cast", WatchEvent.class);
+        final Method castMethod = JDKProjectWatchService.class.getDeclaredMethod("cast", WatchEvent.class);
         castMethod.setAccessible(true);
 
         try {
 
-            castMethod.invoke(fileSystemWatchService, (WatchEvent)null);
+            castMethod.invoke(JDKProjectWatchService, (WatchEvent)null);
 
         } catch (InvocationTargetException e) {
             throw e.getCause();
@@ -213,8 +134,8 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testWatchEntryCreateFile() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceCreatedListener projectResourceCreatedListener = new ProjectResourceCreatedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
+        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
         repositoryEventBus.addRepositoryListener(projectResourceCreatedListener);
@@ -240,8 +161,8 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testWatchEntryCreateFolder() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceCreatedListener projectResourceCreatedListener = new ProjectResourceCreatedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
+        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
         repositoryEventBus.addRepositoryListener(projectResourceCreatedListener);
@@ -266,8 +187,8 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testWatchEntryModifyFile() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceModifiedListener projectResourceModifiedListener = new ProjectResourceModifiedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
+        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
         repositoryEventBus.addRepositoryListener(projectResourceModifiedListener);
@@ -293,8 +214,8 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testWatchEntryDeleteFile() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceDeletedListener projectResourceDeletedListener = new ProjectResourceDeletedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
+        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
         repositoryEventBus.addRepositoryListener(projectResourceDeletedListener);
@@ -317,8 +238,8 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testWatchEntryDeleteFolder() throws InterruptedException, IOException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceDeletedListener projectResourceDeletedListener = new ProjectResourceDeletedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
+        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
         repositoryEventBus.addRepositoryListener(projectResourceDeletedListener);
@@ -341,8 +262,8 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     public void testUnwatch() throws IOException, InterruptedException {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceDeletedListener projectResourceDeletedListener = new ProjectResourceDeletedListener(countDownLatch);
-        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
-        final FileSystemRepository fileSystemRepository = new FileSystemRepository(fileSystem(), repositoryEventBus);
+        final RepositoryEventBus repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repository);
+        final JDKProject fileSystemRepository = new JDKProject(fileSystem(), repositoryEventBus, id, path);
 
         fileSystemRepository.addProject(PROJECT_ID, PROJECT_PATH);
         repositoryEventBus.addRepositoryListener(projectResourceDeletedListener);
@@ -358,12 +279,12 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
 
     private RepositoryEventType kindToRepositoryEventType(Kind<?> kind) throws Exception {
         final Method kindToRepositoryEventTypeMethod =
-                FileSystemWatchService.class.getDeclaredMethod("kindToRepositoryEventType", Kind.class);
+                JDKProjectWatchService.class.getDeclaredMethod("kindToRepositoryEventType", Kind.class);
         kindToRepositoryEventTypeMethod.setAccessible(true);
 
         try {
 
-            return (RepositoryEventType)kindToRepositoryEventTypeMethod.invoke(fileSystemWatchService, kind);
+            return (RepositoryEventType)kindToRepositoryEventTypeMethod.invoke(JDKProjectWatchService, kind);
 
         } catch (InvocationTargetException e) {
             throw Throwables.propagate(e.getCause());
@@ -371,12 +292,12 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
     }
 
     private Resource pathToResource(Kind<Path> kind, Path resourcePath) throws Exception {
-        final Method pathToResourceMethod = FileSystemWatchService.class.getDeclaredMethod("pathToResource", Kind.class, Path.class);
+        final Method pathToResourceMethod = JDKProjectWatchService.class.getDeclaredMethod("pathToResource", Kind.class, Path.class);
         pathToResourceMethod.setAccessible(true);
 
         try {
 
-            return (Resource)pathToResourceMethod.invoke(fileSystemWatchService, kind, resourcePath);
+            return (Resource)pathToResourceMethod.invoke(JDKProjectWatchService, kind, resourcePath);
 
         } catch (InvocationTargetException e) {
             throw Throwables.propagate(e.getCause());
@@ -426,5 +347,5 @@ public final class FileSystemWatchServiceTest extends AbstractTest {
         public ProjectResourceDeletedListener(CountDownLatch countDownLatch) {
             super(countDownLatch);
         }
-    }
+    }   */
 }

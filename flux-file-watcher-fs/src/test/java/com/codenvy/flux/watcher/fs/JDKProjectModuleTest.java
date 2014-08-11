@@ -10,8 +10,8 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.FluxRepository;
-import com.codenvy.flux.watcher.core.FluxRepositoryModule;
+import com.codenvy.flux.watcher.core.Repository;
+import com.codenvy.flux.watcher.core.RepositoryModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -23,11 +23,11 @@ import org.junit.Test;
  *
  * @author Kevin Pollet
  */
-public final class BootstrapTest {
+public final class JDKProjectModuleTest {
     @Test
     public void testBootstrap() {
-        final Injector injector = Guice.createInjector(new FluxRepositoryModule(), new FileSystemRepositoryTestModule());
+        final Injector injector = Guice.createInjector(new RepositoryModule(), new JDKProjectModule());
 
-        Assert.assertNotNull(injector.getInstance(FluxRepository.class));
+        Assert.assertNotNull(injector.getInstance(Repository.class));
     }
 }

@@ -8,13 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package com.codenvy.flux.watcher.core.spi;
+package com.codenvy.flux.watcher.core;
 
-import com.codenvy.flux.watcher.core.RepositoryEvent;
-import com.codenvy.flux.watcher.core.RepositoryEventBus;
-import com.codenvy.flux.watcher.core.RepositoryEventTypes;
-import com.codenvy.flux.watcher.core.RepositoryListener;
-import com.codenvy.flux.watcher.core.Resource;
+import com.codenvy.flux.watcher.core.spi.Project;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -80,15 +76,14 @@ public final class RepositoryEventBusTest {
     }
 
     private void fireAllEventTypes() {
-        final Resource resource = Resource.newFolder("codenvy-project-id", "src", System.currentTimeMillis());
-
-        final RepositoryEvent entryCreatedEvent = new RepositoryEvent(PROJECT_RESOURCE_CREATED, resource);
+        final RepositoryEvent entryCreatedEvent = new RepositoryEvent(PROJECT_RESOURCE_CREATED, mock(Resource.class), mock(Project.class));
         repositoryEventBus.fireRepositoryEvent(entryCreatedEvent);
 
-        final RepositoryEvent entryDeletedEvent = new RepositoryEvent(PROJECT_RESOURCE_DELETED, resource);
+        final RepositoryEvent entryDeletedEvent = new RepositoryEvent(PROJECT_RESOURCE_DELETED, mock(Resource.class), mock(Project.class));
         repositoryEventBus.fireRepositoryEvent(entryDeletedEvent);
 
-        final RepositoryEvent entryModifiedEvent = new RepositoryEvent(PROJECT_RESOURCE_MODIFIED, resource);
+        final RepositoryEvent entryModifiedEvent =
+                new RepositoryEvent(PROJECT_RESOURCE_MODIFIED, mock(Resource.class), mock(Project.class));
         repositoryEventBus.fireRepositoryEvent(entryModifiedEvent);
     }
 
@@ -104,7 +99,6 @@ public final class RepositoryEventBusTest {
             mock.onEvent(event);
         }
     }
-
 
     @RepositoryEventTypes(PROJECT_RESOURCE_CREATED)
     public static class EntryCreatedListener extends AbstractRepositoryListener {

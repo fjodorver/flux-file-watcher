@@ -23,7 +23,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Kevin Pollet
  */
 public class Resource {
-    private final String       projectId;
     private final String       path;
     private final long         timestamp;
     private final String       hash;
@@ -31,79 +30,70 @@ public class Resource {
     private final byte[]       content;
 
     /**
-     * Constructs an instance of {@link Resource} representing a {@link
+     * Constructs an instance of {@link com.codenvy.flux.watcher.core.Resource} representing a {@link
      * Resource.ResourceType#UNKNOWN}.
      *
-     * @param projectId
-     *         the project id this {@link Resource} belongs to.
      * @param path
-     *         the {@link Resource} relative path.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} relative path.
      * @param timestamp
-     *         the {@link Resource} timestamp.
-     * @return the new {@link Resource} instance.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} timestamp.
+     * @return the new {@link com.codenvy.flux.watcher.core.Resource} instance.
      * @throws java.lang.NullPointerException
-     *         if {@code projectId} or {@code path} parameter is {@code null}.
+     *         if {@code path} parameter is {@code null}.
      */
-    public static Resource newUnknown(String projectId, String path, long timestamp) {
-        return new Resource(projectId, path, timestamp, UNKNOWN, new byte[0]);
+    public static Resource newUnknown(String path, long timestamp) {
+        return new Resource(path, timestamp, UNKNOWN, new byte[0]);
     }
 
     /**
-     * Constructs an instance of {@link Resource} representing a {@link
+     * Constructs an instance of {@link com.codenvy.flux.watcher.core.Resource} representing a {@link
      * Resource.ResourceType#FOLDER}.
      *
-     * @param projectId
-     *         the project id this {@link Resource} belongs to.
      * @param path
-     *         the {@link Resource} relative path.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} relative path.
      * @param timestamp
-     *         the {@link Resource} timestamp.
-     * @return the new {@link Resource} instance.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} timestamp.
+     * @return the new {@link com.codenvy.flux.watcher.core.Resource} instance.
      * @throws java.lang.NullPointerException
-     *         if {@code projectId} or {@code path} parameter is {@code null}.
+     *         if {@code path} parameter is {@code null}.
      */
-    public static Resource newFolder(String projectId, String path, long timestamp) {
-        return new Resource(projectId, path, timestamp, FOLDER, new byte[0]);
+    public static Resource newFolder(String path, long timestamp) {
+        return new Resource(path, timestamp, FOLDER, new byte[0]);
     }
 
     /**
-     * Constructs an instance of {@link Resource} representing a {@link
+     * Constructs an instance of {@link com.codenvy.flux.watcher.core.Resource} representing a {@link
      * Resource.ResourceType#FILE}.
      *
-     * @param projectId
-     *         the project id this {@link Resource} belongs to.
      * @param path
-     *         the {@link Resource} relative path.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} relative path.
      * @param timestamp
-     *         the {@link Resource} timestamp.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} timestamp.
      * @param content
-     *         the {@link Resource} content.
-     * @return the new {@link Resource} instance.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} content.
+     * @return the new {@link com.codenvy.flux.watcher.core.Resource} instance.
      * @throws java.lang.NullPointerException
-     *         if {@code projectId} or {@code path} parameter is {@code null}.
+     *         if {@code path} parameter is {@code null}.
      */
-    public static Resource newFile(String projectId, String path, long timestamp, byte[] content) {
-        return new Resource(projectId, path, timestamp, FILE, content);
+    public static Resource newFile(String path, long timestamp, byte[] content) {
+        return new Resource(path, timestamp, FILE, content);
     }
 
     /**
-     * Constructs an instance of {@link Resource}.
+     * Constructs an instance of {@link com.codenvy.flux.watcher.core.Resource}.
      *
-     * @param projectId
-     *         the project id this {@link Resource} belongs to.
      * @param path
-     *         the {@link Resource} relative path.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} relative path.
      * @param timestamp
-     *         the {@link Resource} timestamp.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} timestamp.
      * @param type
-     *         the {@link Resource} {@link Resource.ResourceType}.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} {@link Resource.ResourceType}.
      * @param content
-     *         the {@link Resource} content.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} content.
      * @throws java.lang.NullPointerException
-     *         if {@code projectId}, {@code path}, {@code type} or {@code content} parameter is {@code null}.
+     *         if {@code path}, {@code type} or {@code content} parameter is {@code null}.
      */
-    private Resource(String projectId, String path, long timestamp, ResourceType type, byte[] content) {
-        this.projectId = checkNotNull(projectId);
+    private Resource(String path, long timestamp, ResourceType type, byte[] content) {
         this.path = checkNotNull(path);
         this.timestamp = timestamp;
         this.type = checkNotNull(type);
@@ -112,61 +102,52 @@ public class Resource {
     }
 
     /**
-     * Returns the project id this {@link Resource}.
+     * Returns the relative path of this {@link com.codenvy.flux.watcher.core.Resource}.
      *
-     * @return this {@link Resource} project id, never {@code null}.
-     */
-    public String projectId() {
-        return projectId;
-    }
-
-    /**
-     * Returns the relative path of this {@link Resource}.
-     *
-     * @return this {@link Resource} relative path, never {@code null}.
+     * @return this {@link com.codenvy.flux.watcher.core.Resource} relative path, never {@code null}.
      */
     public String path() {
         return path;
     }
 
     /**
-     * Returns the timestamp of this {@link Resource}.
+     * Returns the timestamp of this {@link com.codenvy.flux.watcher.core.Resource}.
      *
-     * @return this {@link Resource} timestamp.
+     * @return this {@link com.codenvy.flux.watcher.core.Resource} timestamp.
      */
     public long timestamp() {
         return timestamp;
     }
 
     /**
-     * Returns the type hash this {@link Resource}.
+     * Returns the type hash this {@link com.codenvy.flux.watcher.core.Resource}.
      *
-     * @return this {@link Resource} hash, never {@code null}.
+     * @return this {@link com.codenvy.flux.watcher.core.Resource} hash, never {@code null}.
      */
     public String hash() {
         return hash;
     }
 
     /**
-     * Returns the type of this {@link Resource}.
+     * Returns the type of this {@link com.codenvy.flux.watcher.core.Resource}.
      *
-     * @return this {@link Resource} type, never {@code null}.
+     * @return this {@link com.codenvy.flux.watcher.core.Resource} type, never {@code null}.
      */
     public ResourceType type() {
         return type;
     }
 
     /**
-     * Returns the content of this {@link Resource}.
+     * Returns the content of this {@link com.codenvy.flux.watcher.core.Resource}.
      *
-     * @return this {@link Resource} content, never {@code null}.
+     * @return this {@link com.codenvy.flux.watcher.core.Resource} content, never {@code null}.
      */
     public byte[] content() {
         return content;
     }
 
     /**
-     * The {@link Resource} type.
+     * The {@link com.codenvy.flux.watcher.core.Resource} type.
      */
     public enum ResourceType {
         FILE,

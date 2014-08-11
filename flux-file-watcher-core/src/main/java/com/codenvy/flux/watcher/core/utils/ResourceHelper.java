@@ -46,6 +46,7 @@ public final class ResourceHelper {
      */
     public static String sha1Hash(ResourceType type, byte[] content) {
         checkNotNull(type);
+
         if (content == null) {
             content = new byte[0];
         }
