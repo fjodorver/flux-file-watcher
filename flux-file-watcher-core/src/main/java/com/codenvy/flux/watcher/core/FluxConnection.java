@@ -35,6 +35,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Kevin Pollet
  */
 public class FluxConnection {
+    private static final String FLUX_USER_NAME_HEADER_KEY  = "X-flux-user-name";
+    private static final String FLUX_USER_TOKEN_HEADER_KEY = "X-flux-user-token";
+
     private final SocketIO       socket;
     private final FluxMessageBus messageBus;
     private final Credentials    credentials;
@@ -53,8 +56,13 @@ public class FluxConnection {
      */
     FluxConnection(URL serverURL, Credentials credentials, FluxMessageBus messageBus) {
         this.messageBus = checkNotNull(messageBus);
-        this.socket = new SocketIO(checkNotNull(serverURL));
         this.credentials = checkNotNull(credentials);
+
+        this.socket = new SocketIO(checkNotNull(serverURL));
+        if (credentials.token() != null) {
+            this.socket.addHeader(FLUX_USER_NAME_HEADER_KEY, credentials.username());
+            this.socket.addHeader(FLUX_USER_TOKEN_HEADER_KEY, credentials.token());
+        }
     }
 
     /**
