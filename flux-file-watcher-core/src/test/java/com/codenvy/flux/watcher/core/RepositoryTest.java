@@ -69,7 +69,7 @@ public final class RepositoryTest {
 
     @Test(expected = NullPointerException.class)
     public void testAddRemoteWithNullRemoteURL() {
-        repository.addRemote(null, new Credentials("defaultuser"));
+        repository.addRemote(null, Credentials.DEFAULT_USER_CREDENTIALS);
     }
 
     @Test(expected = NullPointerException.class)
@@ -80,11 +80,10 @@ public final class RepositoryTest {
     @Test
     public void testAddRemote() throws MalformedURLException {
         final URL remoteURL = new URL("http://localhost:8080");
-        final Credentials defaultUser = new Credentials("defaultuser");
 
-        repository.addRemote(remoteURL, defaultUser);
+        repository.addRemote(remoteURL, Credentials.DEFAULT_USER_CREDENTIALS);
 
-        verify(fluxMessageBusMock, times(1)).connect(remoteURL, defaultUser);
+        verify(fluxMessageBusMock, times(1)).connect(remoteURL, Credentials.DEFAULT_USER_CREDENTIALS);
     }
 
     @Test(expected = NullPointerException.class)

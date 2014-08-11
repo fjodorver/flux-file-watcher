@@ -18,6 +18,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Kevin Pollet
  */
 public class Credentials {
+    public static final Credentials DEFAULT_USER_CREDENTIALS;
+    private static final String DEFAULT_USER_USERNAME = "defaultuser";
+
+    static {
+        DEFAULT_USER_CREDENTIALS = new Credentials(DEFAULT_USER_USERNAME);
+    }
+
     private final String username;
     private final String token;
 
