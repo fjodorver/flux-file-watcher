@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Singleton
 @RepositoryEventTypes(PROJECT_RESOURCE_DELETED)
-public class ProjectResourceDeletedListener implements RepositoryListener {
+public final class ProjectResourceDeletedListener implements RepositoryListener {
     private final FluxMessageBus messageBus;
 
     /**

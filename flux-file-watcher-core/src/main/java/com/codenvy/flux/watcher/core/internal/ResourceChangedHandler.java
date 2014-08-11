@@ -36,7 +36,7 @@ import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_CHANGED;
  */
 @Singleton
 @FluxMessageTypes(RESOURCE_CHANGED)
-public class ResourceChangedHandler implements FluxMessageHandler {
+public final class ResourceChangedHandler implements FluxMessageHandler {
     @Override
     public void onMessage(FluxMessage message, Repository repository) throws JSONException {
         final JSONObject request = message.content();

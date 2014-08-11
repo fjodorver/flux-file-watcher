@@ -25,7 +25,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.INCLUDE_DELETED;
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
+import static com.codenvy.flux.watcher.core.FluxMessageType.GET_PROJECT_REQUEST;
 import static com.codenvy.flux.watcher.core.FluxMessageType.PROJECT_CONNECTED;
 import static com.codenvy.flux.watcher.core.FluxMessageType.PROJECT_DISCONNECTED;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -114,8 +116,11 @@ public class Repository {
 
             try {
 
-                final JSONObject content = new JSONObject().put(PROJECT.value(), projectId);
+                JSONObject content = new JSONObject().put(PROJECT.value(), projectId);
                 messageBus.sendMessages(new FluxMessage(PROJECT_CONNECTED, content));
+
+                content = new JSONObject().put(PROJECT.value(), projectId).put(INCLUDE_DELETED.value(), true);
+                messageBus.sendMessages(new FluxMessage(GET_PROJECT_REQUEST, content));
 
             } catch (JSONException e) {
                 throw new RuntimeException(e);

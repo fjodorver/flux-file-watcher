@@ -177,7 +177,7 @@ public class FluxMessageBus {
 
         if (message.type() == GET_RESOURCE_RESPONSE || message.type() == GET_PROJECT_RESPONSE) {
             final JSONObject content = message.content();
-            if (content.has(CALLBACK_ID.value()) && content.optInt(CALLBACK_ID.value()) != id) {
+            if (content.optInt(CALLBACK_ID.value()) != id) {
                 return;
             }
         }

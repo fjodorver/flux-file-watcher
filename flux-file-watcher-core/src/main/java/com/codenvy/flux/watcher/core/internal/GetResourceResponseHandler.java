@@ -40,7 +40,7 @@ import static com.codenvy.flux.watcher.core.Resource.ResourceType.FILE;
  */
 @Singleton
 @FluxMessageTypes(GET_RESOURCE_RESPONSE)
-public class GetResourceResponseHandler implements FluxMessageHandler {
+public final class GetResourceResponseHandler implements FluxMessageHandler {
     @Override
     public void onMessage(FluxMessage message, Repository repository) throws JSONException {
         final JSONObject request = message.content();

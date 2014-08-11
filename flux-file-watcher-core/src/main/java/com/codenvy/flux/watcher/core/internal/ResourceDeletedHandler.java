@@ -34,7 +34,7 @@ import static com.codenvy.flux.watcher.core.FluxMessageType.RESOURCE_DELETED;
  */
 @Singleton
 @FluxMessageTypes(RESOURCE_DELETED)
-public class ResourceDeletedHandler implements FluxMessageHandler {
+public final class ResourceDeletedHandler implements FluxMessageHandler {
     @Override
     public void onMessage(FluxMessage message, Repository repository) throws JSONException {
         final JSONObject request = message.content();

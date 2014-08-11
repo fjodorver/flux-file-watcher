@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Singleton
 @RepositoryEventTypes(PROJECT_RESOURCE_MODIFIED)
-public class ProjectResourceModifiedListener implements RepositoryListener {
+public final class ProjectResourceModifiedListener implements RepositoryListener {
     private final FluxMessageBus messageBus;
 
     /**

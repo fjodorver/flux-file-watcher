@@ -11,6 +11,7 @@
 package com.codenvy.flux.watcher.core;
 
 import com.codenvy.flux.watcher.core.internal.GetProjectRequestHandler;
+import com.codenvy.flux.watcher.core.internal.GetProjectResponseHandler;
 import com.codenvy.flux.watcher.core.internal.GetResourceRequestHandler;
 import com.codenvy.flux.watcher.core.internal.GetResourceResponseHandler;
 import com.codenvy.flux.watcher.core.internal.ProjectResourceCreatedListener;
@@ -39,6 +40,7 @@ public class RepositoryModule extends AbstractModule {
         messageHandlers.addBinding().to(GetResourceRequestHandler.class);
         messageHandlers.addBinding().to(GetResourceResponseHandler.class);
         messageHandlers.addBinding().to(GetProjectRequestHandler.class);
+        messageHandlers.addBinding().to(GetProjectResponseHandler.class);
         messageHandlers.addBinding().to(ResourceCreatedHandler.class);
         messageHandlers.addBinding().to(ResourceDeletedHandler.class);
         messageHandlers.addBinding().to(ResourceChangedHandler.class);

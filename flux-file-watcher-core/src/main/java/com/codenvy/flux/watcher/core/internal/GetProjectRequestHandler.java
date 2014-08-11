@@ -41,7 +41,7 @@ import static com.codenvy.flux.watcher.core.FluxMessageType.GET_PROJECT_RESPONSE
  */
 @Singleton
 @FluxMessageTypes(GET_PROJECT_REQUEST)
-public class GetProjectRequestHandler implements FluxMessageHandler {
+public final class GetProjectRequestHandler implements FluxMessageHandler {
     @Override
     public void onMessage(FluxMessage message, Repository repository) throws JSONException {
         final JSONObject request = message.content();

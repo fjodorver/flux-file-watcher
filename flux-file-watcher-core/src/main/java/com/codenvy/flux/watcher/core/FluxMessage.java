@@ -89,19 +89,21 @@ public class FluxMessage {
      * @author Kevin Pollet
      */
     public enum Fields {
-        USERNAME("username"),
         CALLBACK_ID("callback_id"),
-        REQUEST_SENDER_ID("requestSenderID"),
-        PROJECT("project"),
-        FILES("files"),
-        PATH("path"),
-        RESOURCE("resource"),
-        TYPE("type"),
-        TIMESTAMP("timestamp"),
-        HASH("hash"),
-        CONTENT("content"),
         CHANNEL("channel"),
-        CONNECTED_TO_CHANNEL("connectedToChannel");
+        CONNECTED_TO_CHANNEL("connectedToChannel"),
+        CONTENT("content"),
+        DELETED("deleted"),
+        FILES("files"),
+        HASH("hash"),
+        INCLUDE_DELETED("includeDeleted"),
+        PATH("path"),
+        PROJECT("project"),
+        REQUEST_SENDER_ID("requestSenderID"),
+        RESOURCE("resource"),
+        TIMESTAMP("timestamp"),
+        TYPE("type"),
+        USERNAME("username");
 
         private final String value;
 
