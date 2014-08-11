@@ -111,7 +111,7 @@ public class Repository {
         final Project project = getProject(projectId);
         if (project == null) {
             final Project newProject = projectFactory.newProject(projectId, projectPath);
-            newProject.watch();
+            newProject.setSynchronized(true);
             projects.add(newProject);
 
             try {
@@ -140,7 +140,7 @@ public class Repository {
         final Project project = getProject(projectId);
         if (project != null) {
             projects.remove(project);
-            project.unwatch();
+            project.setSynchronized(false);
 
             try {
 

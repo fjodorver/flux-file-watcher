@@ -90,13 +90,12 @@ public class JDKProject implements Project {
     }
 
     @Override
-    public void watch() {
-        watchService.watch(this);
-    }
-
-    @Override
-    public void unwatch() {
-        watchService.unwatch(this);
+    public void setSynchronized(boolean synchronize) {
+        if (synchronize) {
+            watchService.watch(this);
+        } else {
+            watchService.unwatch(this);
+        }
     }
 
     @Override

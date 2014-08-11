@@ -36,15 +36,13 @@ public interface Project {
     String path();
 
     /**
-     * Watch project {@link com.codenvy.flux.watcher.core.Resource} modifications. The project {@link
-     * com.codenvy.flux.watcher.core.Resource} modifications have to be sent with the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}.
+     * Defines if this project is synchronized. The implementer must send the project events to the {@link
+     * com.codenvy.flux.watcher.core.RepositoryEventBus}.
+     *
+     * @param synchronize
+     *         {@code true} if the project have to be synchronized, {@code false} otherwise.
      */
-    void watch();
-
-    /**
-     * Unwatch project {@link com.codenvy.flux.watcher.core.Resource} modifications.
-     */
-    void unwatch();
+    void setSynchronized(boolean synchronize);
 
     /**
      * Returns all project {@link com.codenvy.flux.watcher.core.Resource}.

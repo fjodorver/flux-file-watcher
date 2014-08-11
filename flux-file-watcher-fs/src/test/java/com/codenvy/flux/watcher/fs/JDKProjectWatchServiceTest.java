@@ -178,7 +178,7 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceCreatedListener projectResourceCreatedListener = new ProjectResourceCreatedListener(countDownLatch);
 
-        jdkProject.watch();
+        jdkProjectWatchService.watch(jdkProject);
         repositoryEventBus.addRepositoryListener(projectResourceCreatedListener);
 
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_HELLO_FILE_PATH);
@@ -203,7 +203,7 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceCreatedListener projectResourceCreatedListener = new ProjectResourceCreatedListener(countDownLatch);
 
-        jdkProject.watch();
+        jdkProjectWatchService.watch(jdkProject);
         repositoryEventBus.addRepositoryListener(projectResourceCreatedListener);
 
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_MAIN_FOLDER_PATH);
@@ -228,7 +228,7 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceModifiedListener projectResourceModifiedListener = new ProjectResourceModifiedListener(countDownLatch);
 
-        jdkProject.watch();
+        jdkProjectWatchService.watch(jdkProject);
         repositoryEventBus.addRepositoryListener(projectResourceModifiedListener);
 
         final String content = "README";
@@ -254,7 +254,7 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceDeletedListener projectResourceDeletedListener = new ProjectResourceDeletedListener(countDownLatch);
 
-        jdkProject.watch();
+        jdkProjectWatchService.watch(jdkProject);
         repositoryEventBus.addRepositoryListener(projectResourceDeletedListener);
 
         final Path absoluteFilePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH);
@@ -278,7 +278,7 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceDeletedListener projectResourceDeletedListener = new ProjectResourceDeletedListener(countDownLatch);
 
-        jdkProject.watch();
+        jdkProjectWatchService.watch(jdkProject);
         repositoryEventBus.addRepositoryListener(projectResourceDeletedListener);
 
         final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
@@ -302,9 +302,9 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final ProjectResourceDeletedListener projectResourceDeletedListener = new ProjectResourceDeletedListener(countDownLatch);
 
-        jdkProject.watch();
+        jdkProjectWatchService.watch(jdkProject);
         repositoryEventBus.addRepositoryListener(projectResourceDeletedListener);
-        jdkProject.unwatch();
+        jdkProjectWatchService.unwatch(jdkProject);
 
         final Path absoluteFolderPath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_SRC_FOLDER_PATH);
         delete(absoluteFolderPath);

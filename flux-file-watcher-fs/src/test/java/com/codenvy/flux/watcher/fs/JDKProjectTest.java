@@ -53,15 +53,16 @@ public final class JDKProjectTest extends AbstractTest {
     }
 
     @Test
-    public void testWatch() {
-        project.watch();
+    public void testSetSynchronizedWithTrue() {
+        project.setSynchronized(true);
         verify(jdkProjectWatchServiceMock, times(1)).watch(any(Project.class));
+        verify(jdkProjectWatchServiceMock, times(0)).unwatch(any(Project.class));
     }
 
     @Test
-    public void testUnwatch() {
-        project.unwatch();
-        project.watch();
+    public void testSetSynchronizedWithFalse() {
+        project.setSynchronized(false);
+        verify(jdkProjectWatchServiceMock, times(0)).watch(any(Project.class));
         verify(jdkProjectWatchServiceMock, times(1)).unwatch(any(Project.class));
     }
 
