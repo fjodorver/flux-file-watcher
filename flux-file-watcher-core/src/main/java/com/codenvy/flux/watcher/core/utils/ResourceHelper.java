@@ -14,7 +14,6 @@ import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static com.codenvy.flux.watcher.core.Resource.ResourceType;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -36,30 +35,17 @@ public final class ResourceHelper {
     }
 
     /**
-     * Calculates the sha1 for the given {@link com.codenvy.flux.watcher.core.Resource.ResourceType} and content.
+     * Calculates the sha1 for the given {@link java.lang.Byte} array.
      *
-     * @param type
-     *         the {@link com.codenvy.flux.watcher.core.Resource.ResourceType}.
-     * @param content
-     *         the content, might be {@code null}.
+     * @param bytes
+     *         the {@link java.lang.Byte} array.
      * @return the sha1 as an hexadecimal {@link String}, never {@code null}.
+     * @throws java.lang.NullPointerException
+     *         if {@code bytes} parameter is {@code null}.
      */
-    public static String sha1Hash(ResourceType type, byte[] content) {
-        checkNotNull(type);
-
-        if (content == null) {
-            content = new byte[0];
-        }
-
-        switch (type) {
-            case FILE: {
-                final byte[] digest = messageDigest.digest(content);
-                return DatatypeConverter.printHexBinary(digest);
-            }
-
-            default:
-                return "0";
-        }
+    public static String sha1(byte[] bytes) {
+        final byte[] digest = messageDigest.digest(checkNotNull(bytes));
+        return DatatypeConverter.printHexBinary(digest);
     }
 
     /**

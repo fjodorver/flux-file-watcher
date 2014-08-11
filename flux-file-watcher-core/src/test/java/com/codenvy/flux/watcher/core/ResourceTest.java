@@ -41,7 +41,7 @@ public final class ResourceTest {
         Assert.assertNotNull(resource);
         Assert.assertEquals(timestamp, resource.timestamp());
         Assert.assertEquals(RESOURCE_PATH, resource.path());
-        Assert.assertTrue(Arrays.equals(new byte[0], resource.content()));
+        Assert.assertEquals(null, resource.content());
         Assert.assertEquals(UNKNOWN, resource.type());
         Assert.assertEquals("0", resource.hash());
     }
@@ -59,7 +59,7 @@ public final class ResourceTest {
         Assert.assertNotNull(resource);
         Assert.assertEquals(timestamp, resource.timestamp());
         Assert.assertEquals(RESOURCE_PATH, resource.path());
-        Assert.assertTrue(Arrays.equals(new byte[0], resource.content()));
+        Assert.assertEquals(null, resource.content());
         Assert.assertEquals(FOLDER, resource.type());
         Assert.assertEquals("0", resource.hash());
     }
@@ -67,11 +67,6 @@ public final class ResourceTest {
     @Test(expected = NullPointerException.class)
     public void testNewFileWithNullPath() {
         Resource.newFile(null, System.currentTimeMillis(), new byte[0]);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testNewFileWithNullContent() {
-        Resource.newFile(RESOURCE_PATH, System.currentTimeMillis(), null);
     }
 
     @Test

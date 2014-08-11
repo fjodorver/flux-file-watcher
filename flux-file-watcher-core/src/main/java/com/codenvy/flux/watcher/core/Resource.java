@@ -23,6 +23,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Kevin Pollet
  */
 public class Resource {
+    private static final String NULL_CONTENT_HASH = "0";
+
     private final String       path;
     private final long         timestamp;
     private final String       hash;
@@ -42,7 +44,7 @@ public class Resource {
      *         if {@code path} parameter is {@code null}.
      */
     public static Resource newUnknown(String path, long timestamp) {
-        return new Resource(path, timestamp, UNKNOWN, new byte[0]);
+        return new Resource(path, timestamp, UNKNOWN, null);
     }
 
     /**
@@ -58,7 +60,7 @@ public class Resource {
      *         if {@code path} parameter is {@code null}.
      */
     public static Resource newFolder(String path, long timestamp) {
-        return new Resource(path, timestamp, FOLDER, new byte[0]);
+        return new Resource(path, timestamp, FOLDER, null);
     }
 
     /**
@@ -91,14 +93,14 @@ public class Resource {
      * @param content
      *         the {@link com.codenvy.flux.watcher.core.Resource} content.
      * @throws java.lang.NullPointerException
-     *         if {@code path}, {@code type} or {@code content} parameter is {@code null}.
+     *         if {@code path} or {@code type} parameter is {@code null}.
      */
     private Resource(String path, long timestamp, ResourceType type, byte[] content) {
         this.path = checkNotNull(path);
         this.timestamp = timestamp;
         this.type = checkNotNull(type);
-        this.content = checkNotNull(content);
-        this.hash = ResourceHelper.sha1Hash(type, content);
+        this.content = content;
+        this.hash = content != null ? ResourceHelper.sha1(content) : NULL_CONTENT_HASH;
     }
 
     /**
@@ -140,7 +142,7 @@ public class Resource {
     /**
      * Returns the content of this {@link com.codenvy.flux.watcher.core.Resource}.
      *
-     * @return this {@link com.codenvy.flux.watcher.core.Resource} content, never {@code null}.
+     * @return this {@link com.codenvy.flux.watcher.core.Resource} content, {@code null} if none.
      */
     public byte[] content() {
         return content;

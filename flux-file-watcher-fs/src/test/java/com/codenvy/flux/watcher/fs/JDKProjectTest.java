@@ -98,7 +98,7 @@ public final class JDKProjectTest extends AbstractTest {
         Assert.assertEquals(RELATIVE_PROJECT_SRC_FOLDER_PATH, resource.path());
         Assert.assertEquals(FOLDER, resource.type());
         Assert.assertEquals(getLastModifiedTime(absoluteFolderPath).toMillis(), resource.timestamp());
-        Assert.assertTrue(Arrays.equals(new byte[0], resource.content()));
+        Assert.assertEquals(null, resource.content());
         Assert.assertNotNull(resource.hash());
     }
 
