@@ -10,6 +10,7 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
+import com.codenvy.flux.watcher.core.Repository;
 import com.codenvy.flux.watcher.core.RepositoryEvent;
 import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.RepositoryEventType;
@@ -22,7 +23,10 @@ import com.google.common.base.Throwables;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+import javax.inject.Provider;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -49,6 +53,8 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.WatchEvent.Kind;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link com.codenvy.flux.watcher.fs.JDKProjectWatchService} tests.
@@ -60,9 +66,21 @@ public final class JDKProjectWatchServiceTest extends AbstractTest {
     private JDKProjectWatchService jdkProjectWatchService;
     private RepositoryEventBus     repositoryEventBus;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void beforeTest() throws NoSuchMethodException {
-        repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
+        final Provider<Repository> repositoryProviderMock = mock(Provider.class);
+        when(repositoryProviderMock.get()).thenAnswer(new Answer<Repository>() {
+            @Override
+            public Repository answer(InvocationOnMock invocationOnMock) throws Throwable {
+                final Repository repositoryMock = mock(Repository.class);
+                when(repositoryMock.getProject(PROJECT_ID)).thenReturn(mock(Project.class));
+
+                return repositoryMock;
+            }
+        });
+
+        repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repositoryProviderMock);
         jdkProjectWatchService = new JDKProjectWatchService(fileSystem(), repositoryEventBus);
         jdkProject = new JDKProject(fileSystem(), jdkProjectWatchService, PROJECT_ID, PROJECT_PATH);
     }

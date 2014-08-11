@@ -14,7 +14,10 @@ import com.codenvy.flux.watcher.core.spi.Project;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+import javax.inject.Provider;
 import java.util.Collections;
 
 import static com.codenvy.flux.watcher.core.RepositoryEventType.PROJECT_RESOURCE_CREATED;
@@ -24,6 +27,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link com.codenvy.flux.watcher.core.RepositoryEventBus} tests
@@ -31,11 +35,36 @@ import static org.mockito.Mockito.verify;
  * @author Kevin Pollet
  */
 public final class RepositoryEventBusTest {
+    private static final String PROJECT_ID = "project-id";
+
     private RepositoryEventBus repositoryEventBus;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void beforeTest() {
-        this.repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet());
+        final Provider<Repository> repositoryProviderMock = mock(Provider.class);
+        when(repositoryProviderMock.get()).thenAnswer(new Answer<Repository>() {
+            @Override
+            public Repository answer(InvocationOnMock invocationOnMock) throws Throwable {
+                final Repository repositoryMock = mock(Repository.class);
+                when(repositoryMock.getProject(PROJECT_ID)).thenReturn(mock(Project.class));
+
+                return repositoryMock;
+            }
+        });
+
+        this.repositoryEventBus = new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), repositoryProviderMock);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(expected = NullPointerException.class)
+    public void testNewWithNullRepositoryListeners() {
+        new RepositoryEventBus(null, mock(Provider.class));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testNewWithNullRepository() {
+        new RepositoryEventBus(Collections.<RepositoryListener>emptySet(), null);
     }
 
     @Test(expected = NullPointerException.class)
@@ -51,6 +80,13 @@ public final class RepositoryEventBusTest {
     @Test(expected = NullPointerException.class)
     public void testFireRepositoryEventWithNullEvent() {
         repositoryEventBus.fireRepositoryEvent(null);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testFireRepositoryEventWithNonAddedProject() {
+        final RepositoryEvent entryCreatedEvent = new RepositoryEvent(PROJECT_RESOURCE_CREATED, mock(Resource.class), mock(Project.class));
+
+        repositoryEventBus.fireRepositoryEvent(entryCreatedEvent);
     }
 
     @Test
@@ -76,14 +112,16 @@ public final class RepositoryEventBusTest {
     }
 
     private void fireAllEventTypes() {
-        final RepositoryEvent entryCreatedEvent = new RepositoryEvent(PROJECT_RESOURCE_CREATED, mock(Resource.class), mock(Project.class));
+        final Project projectMock = mock(Project.class);
+        when(projectMock.id()).thenReturn(PROJECT_ID);
+
+        final RepositoryEvent entryCreatedEvent = new RepositoryEvent(PROJECT_RESOURCE_CREATED, mock(Resource.class), projectMock);
         repositoryEventBus.fireRepositoryEvent(entryCreatedEvent);
 
-        final RepositoryEvent entryDeletedEvent = new RepositoryEvent(PROJECT_RESOURCE_DELETED, mock(Resource.class), mock(Project.class));
+        final RepositoryEvent entryDeletedEvent = new RepositoryEvent(PROJECT_RESOURCE_DELETED, mock(Resource.class), projectMock);
         repositoryEventBus.fireRepositoryEvent(entryDeletedEvent);
 
-        final RepositoryEvent entryModifiedEvent =
-                new RepositoryEvent(PROJECT_RESOURCE_MODIFIED, mock(Resource.class), mock(Project.class));
+        final RepositoryEvent entryModifiedEvent = new RepositoryEvent(PROJECT_RESOURCE_MODIFIED, mock(Resource.class), projectMock);
         repositoryEventBus.fireRepositoryEvent(entryModifiedEvent);
     }
 

@@ -14,11 +14,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Predicates.notNull;
 import static java.util.Arrays.asList;
 
@@ -30,6 +32,7 @@ import static java.util.Arrays.asList;
  */
 @Singleton
 public class RepositoryEventBus {
+    private final Provider<Repository>    repository;
     private final Set<RepositoryListener> repositoryListeners;
 
     /**
@@ -37,11 +40,14 @@ public class RepositoryEventBus {
      *
      * @param repositoryListeners
      *         the repository listeners to register.
+     * @param repository
+     *         the {@link com.codenvy.flux.watcher.core.Repository}.
      * @throws java.lang.NullPointerException
-     *         if {@code repositoryListeners} parameter is {@code null}.
+     *         if {@code repositoryListeners} or {@code repository} parameter is {@code null}.
      */
     @Inject
-    public RepositoryEventBus(Set<RepositoryListener> repositoryListeners) {
+    public RepositoryEventBus(Set<RepositoryListener> repositoryListeners, Provider<Repository> repository) {
+        this.repository = checkNotNull(repository);
         this.repositoryListeners = new CopyOnWriteArraySet<>(checkNotNull(repositoryListeners));
     }
 
@@ -79,9 +85,13 @@ public class RepositoryEventBus {
      *         the {@link com.codenvy.flux.watcher.core.RepositoryEvent} to fire.
      * @throws java.lang.NullPointerException
      *         if {@code event} parameter is {@code null}.
+     * @throws java.lang.IllegalStateException
+     *         if the {@link com.codenvy.flux.watcher.core.spi.Project} concerned by the event is not in the {@link
+     *         com.codenvy.flux.watcher.core.Repository}.
      */
     public void fireRepositoryEvent(final RepositoryEvent event) {
         checkNotNull(event);
+        checkState(repository.get().getProject(event.project().id()) != null);
 
         final Set<RepositoryListener> filteredRepositoryListeners = FluentIterable
                 .from(repositoryListeners)
