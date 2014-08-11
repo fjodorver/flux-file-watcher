@@ -12,6 +12,7 @@ package com.codenvy.flux.watcher.fs;
 
 
 import com.codenvy.flux.watcher.core.Resource;
+import com.codenvy.flux.watcher.core.spi.Project;
 import com.google.common.collect.Sets;
 
 import org.junit.Assert;
@@ -19,8 +20,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Set;
 
@@ -31,20 +32,37 @@ import static java.nio.file.Files.exists;
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.nio.file.Files.isDirectory;
 import static java.nio.file.Files.readAllBytes;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
- * {@link JDKProject} tests.
+ * {@link com.codenvy.flux.watcher.fs.JDKProject} tests.
  *
  * @author Kevin Pollet
  */
-//TODO check tests
 public final class JDKProjectTest extends AbstractTest {
-    private JDKProject project;
+    private JDKProject             project;
+    private JDKProjectWatchService jdkProjectWatchServiceMock;
 
     @Before
     public void beforeTest() throws IOException {
-        project = new JDKProject(fileSystem(), mock(JDKProjectWatchService.class), PROJECT_ID, PROJECT_PATH);
+        jdkProjectWatchServiceMock = mock(JDKProjectWatchService.class);
+        project = new JDKProject(fileSystem(), jdkProjectWatchServiceMock, PROJECT_ID, PROJECT_PATH);
+    }
+
+    @Test
+    public void testWatch() {
+        project.watch();
+        verify(jdkProjectWatchServiceMock, times(1)).watch(any(Project.class));
+    }
+
+    @Test
+    public void testUnwatch() {
+        project.unwatch();
+        project.watch();
+        verify(jdkProjectWatchServiceMock, times(1)).unwatch(any(Project.class));
     }
 
     @Test
@@ -85,7 +103,7 @@ public final class JDKProjectTest extends AbstractTest {
         Assert.assertEquals(RELATIVE_PROJECT_README_FILE_PATH, resource.path());
         Assert.assertEquals(FILE, resource.type());
         Assert.assertEquals(getLastModifiedTime(absoluteResourcePath).toMillis(), resource.timestamp());
-        Assert.assertTrue(Arrays.equals(readAllBytes(absoluteResourcePath), resource.content()));
+        Assert.assertArrayEquals(readAllBytes(absoluteResourcePath), resource.content());
         Assert.assertNotNull(resource.hash());
     }
 
@@ -135,9 +153,33 @@ public final class JDKProjectTest extends AbstractTest {
 
         Assert.assertTrue(exists(absoluteFilePath));
         Assert.assertFalse(isDirectory(absoluteFilePath));
-        Assert.assertTrue(Arrays.equals(readAllBytes(absoluteFilePath), helloFileContent));
+        Assert.assertArrayEquals(readAllBytes(absoluteFilePath), helloFileContent);
         Assert.assertEquals(calendar.getTimeInMillis(), getLastModifiedTime(absoluteFilePath).toMillis());
+    }
 
+    @Test(expected = NullPointerException.class)
+    public void testUpdateResourceWithNullResource() {
+        project.updateResource(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUpdateResourceWithFolderResource() {
+        project.updateResource(Resource.newFolder(RELATIVE_PROJECT_MAIN_FOLDER_PATH, System.currentTimeMillis()));
+    }
+
+    @Test
+    public void testUpdateResource() throws IOException {
+        final byte[] readmeContent = "readme".getBytes();
+        final long timestamp = System.currentTimeMillis();
+        final Path resourcePath = fileSystem().getPath(PROJECT_PATH).resolve(RELATIVE_PROJECT_README_FILE_PATH);
+        final Resource resource = Resource.newFile(RELATIVE_PROJECT_README_FILE_PATH, timestamp, readmeContent);
+
+        Assert.assertArrayEquals(new byte[0], Files.readAllBytes(resourcePath));
+
+        project.updateResource(resource);
+
+        Assert.assertEquals(timestamp, getLastModifiedTime(resourcePath).toMillis());
+        Assert.assertArrayEquals(readmeContent, readAllBytes(resourcePath));
     }
 
     @Test(expected = NullPointerException.class)

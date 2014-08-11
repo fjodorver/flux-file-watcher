@@ -54,10 +54,10 @@ public interface Project {
     Set<Resource> getResources();
 
     /**
-     * Returns the {@link com.codenvy.flux.watcher.core.Resource} in with the given relative resourcePath.
+     * Returns the {@link com.codenvy.flux.watcher.core.Resource} with the given relative resource path.
      *
      * @param resourcePath
-     *         the {@link com.codenvy.flux.watcher.core.Resource} relative resourcePath.
+     *         the {@link com.codenvy.flux.watcher.core.Resource} relative path.
      * @return the {@link com.codenvy.flux.watcher.core.Resource} or {@code null} if not found.
      * @throws java.lang.NullPointerException
      *         if {@code resourcePath} parameter is {@code null}.
