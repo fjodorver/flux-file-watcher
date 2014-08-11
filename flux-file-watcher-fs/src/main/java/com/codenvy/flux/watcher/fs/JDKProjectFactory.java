@@ -13,12 +13,16 @@ package com.codenvy.flux.watcher.fs;
 import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.spi.Project;
 import com.codenvy.flux.watcher.core.spi.ProjectFactory;
-import com.google.inject.Singleton;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.nio.file.FileSystem;
+import java.nio.file.Path;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isDirectory;
 
 /**
  * {@link com.codenvy.flux.watcher.core.spi.ProjectFactory} implementation.
@@ -48,6 +52,12 @@ public class JDKProjectFactory implements ProjectFactory {
 
     @Override
     public Project newProject(String projectId, String projectPath) {
+        checkNotNull(projectId);
+        checkNotNull(projectPath);
+
+        final Path path = fileSystem.getPath(projectPath);
+        checkArgument(exists(path) && isDirectory(path) && path.isAbsolute());
+
         return new JDKProject(fileSystem, watchService, projectId, projectPath);
     }
 }

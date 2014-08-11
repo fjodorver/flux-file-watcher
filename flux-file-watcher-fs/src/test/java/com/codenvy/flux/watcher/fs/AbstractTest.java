@@ -29,7 +29,7 @@ import static java.nio.file.Files.delete;
 import static java.nio.file.Files.walkFileTree;
 
 /**
- * Abstract test class bootstrapping a Guice injector.
+ * Abstract test class.
  *
  * @author Kevin Pollet
  */
