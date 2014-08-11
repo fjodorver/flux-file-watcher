@@ -98,21 +98,21 @@ public class Repository {
      *         the project id.
      * @param projectPath
      *         the absolute project path.
-     * @return {@code true} if project was not already added and {@code projectPath} exists, {@code false} otherwise.
+     * @return the added {@link com.codenvy.flux.watcher.core.spi.Project} instance, never {@code null}.
      * @throws java.lang.NullPointerException
      *         if {@code projectId} or {@code projectPath} parameter is {@code null}.
      * @throws java.lang.IllegalArgumentException
      *         if the given {@code projectPath} is not a directory, not absolute or doesn't exist.
      */
-    public boolean addProject(String projectId, String projectPath) {
+    public Project addProject(String projectId, String projectPath) {
         checkNotNull(projectId);
         checkNotNull(projectPath);
 
-        final Project project = getProject(projectId);
+        Project project = getProject(projectId);
         if (project == null) {
-            final Project newProject = projectFactory.newProject(projectId, projectPath);
-            newProject.setSynchronized(true);
-            projects.add(newProject);
+            project = projectFactory.newProject(projectId, projectPath);
+            project.setSynchronized(true);
+            projects.add(project);
 
             try {
 
@@ -126,7 +126,7 @@ public class Repository {
                 throw new RuntimeException(e);
             }
         }
-        return project == null;
+        return project;
     }
 
     /**
@@ -134,9 +134,9 @@ public class Repository {
      *
      * @param projectId
      *         the project id.
-     * @return {@code true} if project has been removed, {@code false} otherwise.
+     * @return the removed {@link com.codenvy.flux.watcher.core.spi.Project} instance or {@code null} if none.
      */
-    public boolean removeProject(String projectId) {
+    public Project removeProject(String projectId) {
         final Project project = getProject(projectId);
         if (project != null) {
             projects.remove(project);
@@ -151,7 +151,7 @@ public class Repository {
                 throw new RuntimeException(e);
             }
         }
-        return project != null;
+        return project;
     }
 
     /**

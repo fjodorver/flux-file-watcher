@@ -112,29 +112,31 @@ public final class RepositoryTest {
 
     @Test
     public void testRemoveProjectWithNonExistentProjectId() {
-        final boolean isRemoved = repository.removeProject(PROJECT_ID);
+        final Project project = repository.removeProject(PROJECT_ID);
 
-        Assert.assertFalse(isRemoved);
+        Assert.assertNull(project);
     }
 
     @Test
     public void testRemoveProject() {
-        final boolean isAdded = repository.addProject(PROJECT_ID, PROJECT_PATH);
-        final boolean isRemoved = repository.removeProject(PROJECT_ID);
+        final Project project = repository.addProject(PROJECT_ID, PROJECT_PATH);
+        final Project removedProject = repository.removeProject(PROJECT_ID);
 
-        Assert.assertTrue(isAdded);
-        Assert.assertTrue(isRemoved);
+        Assert.assertNotNull(project);
+        Assert.assertNotNull(removedProject);
+        Assert.assertSame(project, removedProject);
     }
 
     @Test
     public void testAddProjectWithAlreadyAddedProject() {
-        boolean isAdded = repository.addProject(PROJECT_ID, PROJECT_PATH);
+        final Project project = repository.addProject(PROJECT_ID, PROJECT_PATH);
 
-        Assert.assertTrue(isAdded);
+        Assert.assertNotNull(project);
 
-        isAdded = repository.addProject(PROJECT_ID, PROJECT_PATH);
+        final Project newProject = repository.addProject(PROJECT_ID, PROJECT_PATH);
 
-        Assert.assertFalse(isAdded);
+        Assert.assertNotNull(newProject);
+        Assert.assertSame(project, newProject);
     }
 
     @Test
@@ -153,14 +155,15 @@ public final class RepositoryTest {
 
     @Test
     public void testGetProject() {
-        final boolean isAdded = repository.addProject(PROJECT_ID, PROJECT_PATH);
-
-        Assert.assertTrue(isAdded);
-
-        final Project project = repository.getProject(PROJECT_ID);
+        final Project project = repository.addProject(PROJECT_ID, PROJECT_PATH);
 
         Assert.assertNotNull(project);
-        Assert.assertEquals(PROJECT_ID, project.id());
-        Assert.assertEquals(PROJECT_PATH, project.path());
+
+        final Project currentProject = repository.getProject(PROJECT_ID);
+
+        Assert.assertNotNull(currentProject);
+        Assert.assertSame(project, currentProject);
+        Assert.assertEquals(PROJECT_ID, currentProject.id());
+        Assert.assertEquals(PROJECT_PATH, currentProject.path());
     }
 }
