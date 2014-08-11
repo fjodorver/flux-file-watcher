@@ -51,16 +51,6 @@ public class VFSProject implements Project {
     }
 
     @Override
-    public void watch() {
-        watchService.startSync(this);
-    }
-
-    @Override
-    public void unwatch() {
-        watchService.stopSync(this);
-    }
-
-    @Override
     public Set<Resource> getResources() {
         final Set<Resource> resources = new HashSet<>();
         return null;
@@ -114,6 +104,15 @@ public class VFSProject implements Project {
             projectService.delete(null, resource.path());
         } catch (Exception e) {
             e.getMessage();
+        }
+    }
+
+    @Override
+    public void setSynchronized(boolean synchronize) {
+        if (synchronize) {
+            watchService.startSync(this);
+        } else {
+            watchService.stopSync(this);
         }
     }
 }
