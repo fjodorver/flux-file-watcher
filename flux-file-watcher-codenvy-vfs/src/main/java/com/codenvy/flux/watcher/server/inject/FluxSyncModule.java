@@ -10,6 +10,7 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.server.inject;
 
+import com.codenvy.flux.watcher.core.spi.ProjectFactory;
 import com.codenvy.flux.watcher.server.VFSProjectFactory;
 import com.codenvy.inject.DynaModule;
 import com.google.inject.AbstractModule;
@@ -24,6 +25,6 @@ public class FluxSyncModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(VFSProjectFactory.class);
+        bind(ProjectFactory.class).to(VFSProjectFactory.class);
     }
 }

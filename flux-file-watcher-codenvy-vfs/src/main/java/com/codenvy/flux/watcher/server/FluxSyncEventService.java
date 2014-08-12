@@ -26,7 +26,6 @@ import com.codenvy.api.core.ServerException;
 import com.codenvy.api.core.notification.EventService;
 import com.codenvy.api.core.notification.EventSubscriber;
 import com.codenvy.api.project.server.FolderEntry;
-import com.codenvy.api.project.server.Project;
 import com.codenvy.api.project.server.ProjectManager;
 import com.codenvy.api.project.server.VirtualFileEntry;
 import com.codenvy.api.vfs.server.VirtualFile;
@@ -97,18 +96,18 @@ public class FluxSyncEventService {
             }
             if (vfsProject != null && workspaceBaseFolder != null) {
                 VirtualFileEvent.ChangeType eventType = event.getType();
-                RepositoryEventType repoType = null;
+                RepositoryEventType repoEventType = null;
                 if ((eventType == VirtualFileEvent.ChangeType.CREATED) || (eventType == VirtualFileEvent.ChangeType.MOVED)
                     || (eventType == VirtualFileEvent.ChangeType.RENAMED)) {
-                    repoType = RepositoryEventType.PROJECT_RESOURCE_CREATED;
+                    repoEventType = RepositoryEventType.PROJECT_RESOURCE_CREATED;
                 } else if (eventType == VirtualFileEvent.ChangeType.CONTENT_UPDATED) {
-                    repoType = RepositoryEventType.PROJECT_RESOURCE_MODIFIED;
+                    repoEventType = RepositoryEventType.PROJECT_RESOURCE_MODIFIED;
                 } else if (eventType == VirtualFileEvent.ChangeType.DELETED) {
-                    repoType = RepositoryEventType.PROJECT_RESOURCE_DELETED;
+                    repoEventType = RepositoryEventType.PROJECT_RESOURCE_DELETED;
                 }
 
                 RepositoryEvent repoEvent = null;
-                if (repoType != null) {
+                if (repoEventType != null) {
                     try {
                         FolderEntry root = projectManager.getProjectsRoot(eventWorkspace);
                         VirtualFileEntry entry = root.getChild(eventPath);
@@ -124,7 +123,7 @@ public class FluxSyncEventService {
                             } else if (entry.isFolder() && event.isFolder()) {
                                 resource = Resource.newFolder(eventPath, lastModificationDate);
                             }
-                            repoEvent = new RepositoryEvent(repoType, resource, vfsProject);
+                            repoEvent = new RepositoryEvent(repoEventType, resource, vfsProject);
                         }
                     } catch (ServerException | ForbiddenException | IOException e) {
                         e.getMessage();
