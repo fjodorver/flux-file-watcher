@@ -13,22 +13,24 @@ package com.codenvy.flux.watcher.server;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import com.codenvy.api.core.notification.EventService;
-import com.codenvy.api.project.server.ProjectService;
+import com.codenvy.api.project.server.ProjectManager;
 import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.spi.Project;
 import com.codenvy.flux.watcher.core.spi.ProjectFactory;
 
+@Singleton
 public class VFSProjectFactory implements ProjectFactory {
 
     private FluxSyncEventService watchService;
-    private ProjectService       projectService;
+    private ProjectManager       projectManager;
 
     @Inject
-    public VFSProjectFactory(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectService projectService) {
-        this.projectService = projectService;
-        watchService = new FluxSyncEventService(eventService, repositoryEventBus, projectService);
+    public VFSProjectFactory(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectManager projectManager) {
+        this.projectManager = projectManager;
+        this.watchService = new FluxSyncEventService(eventService, repositoryEventBus, projectManager);
     }
 
     @Override
@@ -36,6 +38,6 @@ public class VFSProjectFactory implements ProjectFactory {
         checkNotNull(projectId);
         checkNotNull(projectPath);
         
-        return new VFSProject(watchService, projectService, projectId, projectPath);
+        return new VFSProject(watchService, projectManager, projectId, projectPath);
     }
 }

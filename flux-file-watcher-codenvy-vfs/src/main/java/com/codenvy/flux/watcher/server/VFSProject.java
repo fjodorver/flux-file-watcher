@@ -12,13 +12,21 @@ package com.codenvy.flux.watcher.server;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import com.codenvy.api.project.server.ProjectService;
+import org.apache.commons.io.IOUtils;
+
+import com.codenvy.api.core.ForbiddenException;
+import com.codenvy.api.core.ServerException;
+import com.codenvy.api.project.server.VirtualFileEntry;
+import com.codenvy.api.project.server.FileEntry;
+import com.codenvy.api.project.server.FolderEntry;
+import com.codenvy.api.project.server.ProjectManager;
+import com.codenvy.api.vfs.server.VirtualFile;
 import com.codenvy.flux.watcher.core.Resource;
-import com.codenvy.flux.watcher.core.Resource.ResourceType;
 import com.codenvy.flux.watcher.core.spi.Project;
 
 /**
@@ -31,13 +39,13 @@ public class VFSProject implements Project {
     private final String               id;
     private final String               path;
     private final FluxSyncEventService watchService;
-    private final ProjectService       projectService;
+    private final ProjectManager       projectManager;
 
-    public VFSProject(FluxSyncEventService watchService, ProjectService projectService, String id, String path) {
+    public VFSProject(FluxSyncEventService watchService, ProjectManager projectManager, String id, String path) {
         this.id = checkNotNull(id);
         this.path = checkNotNull(path);
         this.watchService = watchService;
-        this.projectService = projectService;
+        this.projectManager = projectManager;
     }
 
     @Override
@@ -53,20 +61,71 @@ public class VFSProject implements Project {
     @Override
     public Set<Resource> getResources() {
         final Set<Resource> resources = new HashSet<>();
-        return null;
+        try {
+            // TODO workspace should not be hardcoded
+            com.codenvy.api.project.server.Project project = projectManager.getProject("worksapce", path);
+            FolderEntry baseFolder = project.getBaseFolder();
+
+            List<FolderEntry> folders = baseFolder.getChildFolders();
+            for (FolderEntry folder : folders) {
+                resources.addAll(getResources(folder));
+            }
+            List<FileEntry> files = baseFolder.getChildFiles();
+            for (FileEntry file : files) {
+                VirtualFile vFile = file.getVirtualFile();
+                byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
+                resources.add(Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content));
+            }
+        } catch (IOException | ServerException | ForbiddenException e) {
+            e.getMessage();
+        }
+        return resources;
+    }
+
+    private Set<Resource> getResources(FolderEntry folder) {
+        final Set<Resource> resources = new HashSet<>();
+        try {
+            // current folder is not project base folder
+            if (!folder.getPath().equals(path)) {
+                resources.add(Resource.newFolder(folder.getPath(), folder.getVirtualFile().getLastModificationDate()));
+            }
+            List<FileEntry> files = folder.getChildFiles();
+            for (FileEntry file : files) {
+                VirtualFile vFile = file.getVirtualFile();
+                byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
+                resources.add(Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content));
+            }
+            List<FolderEntry> folders = folder.getChildFolders();
+            for (FolderEntry folderr : folders) {
+                resources.addAll(getResources(folderr));
+            }
+        } catch (IOException | ForbiddenException | ServerException e) {
+            e.getMessage();
+        }
+        return resources;
     }
 
     @Override
     public Resource getResource(String resourcePath) {
         checkNotNull(resourcePath);
 
-        if (path != null) {
-            // TODO get file/folder from Codenvy VFS & return it as a Resource
-            try {
-                projectService.getFile(null, resourcePath);
-            } catch (Exception e) {
-                e.getMessage();
+        try {
+            // TODO workspace should not be hardcoded
+            com.codenvy.api.project.server.Project project = projectManager.getProject("worksapce", path);
+            FolderEntry baseFolder = project.getBaseFolder();
+            VirtualFileEntry vfEntry = baseFolder.getChild(resourcePath);
+
+            if (vfEntry != null) {
+                VirtualFile vFile = vfEntry.getVirtualFile();
+                if (vfEntry.isFolder()) {
+                    return Resource.newFolder(vFile.getPath(), vFile.getLastModificationDate());
+                } else if (vfEntry.isFile()) {
+                    byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
+                    return Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content);
+                }
             }
+        } catch (IOException | ForbiddenException | ServerException e) {
+            e.getMessage();
         }
         return null;
     }
@@ -75,34 +134,55 @@ public class VFSProject implements Project {
     public void createResource(Resource resource) {
         checkNotNull(resource);
 
-        // TODO check first that resource.path() exists in codenvy VFS
         try {
-            // TODO set workspace, parentPath & fileName field
-            // TODO create a field 'name' in Resource?
-            if (resource.type() == ResourceType.FOLDER) {
-                projectService.createFile(null, null, null, "folder", new ByteArrayInputStream(resource.content()));
+            // TODO workspace should not be hardcoded
+            com.codenvy.api.project.server.Project project = projectManager.getProject("worksapce", path);
+            FolderEntry baseFolder = project.getBaseFolder();
+            VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
+            if (vfEntry == null) {
+                // TODO
             } else {
-                projectService.createFile(null, null, null, "file", new ByteArrayInputStream(resource.content()));
+                // resource at given resource.path() already exist & cannot be created
             }
-        } catch (Exception e) {
+        } catch (ForbiddenException | ServerException e) {
             e.getMessage();
         }
     }
 
     @Override
     public void updateResource(Resource resource) {
+        checkNotNull(resource);
 
+        try {
+            // TODO workspace should not be hardcoded
+            com.codenvy.api.project.server.Project project = projectManager.getProject("worksapce", path);
+            FolderEntry baseFolder = project.getBaseFolder();
+            VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
+            if (vfEntry != null) {
+                // TODO
+            } else {
+                // resource at given resource.path() does not exist & cannot be updated
+            }
+        } catch (ForbiddenException | ServerException e) {
+            e.getMessage();
+        }
     }
 
     @Override
     public void deleteResource(Resource resource) {
         checkNotNull(resource);
 
-        // TODO check first that resource.path() exists in codenvy VFS
         try {
-            // TODO set workspace field
-            projectService.delete(null, resource.path());
-        } catch (Exception e) {
+            // TODO workspace should not be hardcoded
+            com.codenvy.api.project.server.Project project = projectManager.getProject("worksapce", path);
+            FolderEntry baseFolder = project.getBaseFolder();
+            VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
+            if (vfEntry != null) {
+                // TODO
+            } else {
+                // resource at given resource.path() does not exist & cannot be deleted
+            }
+        } catch (ForbiddenException | ServerException e) {
             e.getMessage();
         }
     }
@@ -110,9 +190,9 @@ public class VFSProject implements Project {
     @Override
     public void setSynchronized(boolean synchronize) {
         if (synchronize) {
-            watchService.startSync(this);
+            watchService.setProjectSync(this);
         } else {
-            watchService.stopSync(this);
+            watchService.setProjectSync(null);
         }
     }
 }

@@ -12,16 +12,24 @@ package com.codenvy.flux.watcher.server;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.IOException;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codenvy.api.core.ForbiddenException;
+import com.codenvy.api.core.ServerException;
 import com.codenvy.api.core.notification.EventService;
 import com.codenvy.api.core.notification.EventSubscriber;
-import com.codenvy.api.project.server.ProjectService;
-import com.codenvy.api.project.shared.dto.ProjectDescriptor;
+import com.codenvy.api.project.server.FolderEntry;
+import com.codenvy.api.project.server.Project;
+import com.codenvy.api.project.server.ProjectManager;
+import com.codenvy.api.project.server.VirtualFileEntry;
+import com.codenvy.api.vfs.server.VirtualFile;
 import com.codenvy.api.vfs.server.observation.VirtualFileEvent;
 import com.codenvy.flux.watcher.core.RepositoryEvent;
 import com.codenvy.flux.watcher.core.RepositoryEventBus;
@@ -29,7 +37,7 @@ import com.codenvy.flux.watcher.core.RepositoryEventType;
 import com.codenvy.flux.watcher.core.Resource;
 
 /**
- * Service notifying Flux repository about publishing of VFS events for a project in Codenvy.
+ * Service firing VFS events from Codenvy to the repository event bus
  * 
  * @author Stéphane Tournié
  */
@@ -41,9 +49,9 @@ public class FluxSyncEventService {
     private final EventSubscriber<VirtualFileEvent> subscriber;
 
     // @Inject
-    FluxSyncEventService(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectService projectService) {
+    FluxSyncEventService(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectManager projectManager) {
         this.eventService = eventService;
-        this.subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectService);
+        this.subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectManager);
     }
 
     @PostConstruct
@@ -56,12 +64,8 @@ public class FluxSyncEventService {
         eventService.unsubscribe(subscriber);
     }
 
-    public void startSync(VFSProject project) {
+    public void setProjectSync(VFSProject project) {
         ((VirtualFileEventSubscriber)subscriber).setProject(project);
-    }
-
-    public void stopSync(VFSProject project) {
-        ((VirtualFileEventSubscriber)subscriber).setProject(null);
     }
 
     /**
@@ -69,22 +73,29 @@ public class FluxSyncEventService {
      */
     public class VirtualFileEventSubscriber implements EventSubscriber<VirtualFileEvent> {
         private final RepositoryEventBus repositoryEventBus;
-        private final ProjectService     projectService;
-        private VFSProject               project;
+        private final ProjectManager     projectManager;
+        private VFSProject               vfsProject;
 
-        public VirtualFileEventSubscriber(RepositoryEventBus repositoryEventBus, ProjectService projectService) {
+        public VirtualFileEventSubscriber(RepositoryEventBus repositoryEventBus, ProjectManager projectManager) {
             this.repositoryEventBus = checkNotNull(repositoryEventBus);
-            this.projectService = checkNotNull(projectService);
+            this.projectManager = checkNotNull(projectManager);
         }
 
-        public void setProject(VFSProject project) {
-            this.project = project;
+        public void setProject(VFSProject vfsProject) {
+            this.vfsProject = vfsProject;
         }
 
         @Override
         public void onEvent(VirtualFileEvent event) {
-            // TODO get project id from event
-            if (project != null && event.getWorkspaceId().equals(project.id())) {
+            String eventWorkspace = event.getWorkspaceId();
+            String eventPath = event.getPath();
+            FolderEntry workspaceBaseFolder = null;
+            try {
+                workspaceBaseFolder = projectManager.getProjectsRoot(eventWorkspace);
+            } catch (ServerException e) {
+                LOG.error(e.getMessage());
+            }
+            if (vfsProject != null && workspaceBaseFolder != null) {
                 VirtualFileEvent.ChangeType eventType = event.getType();
                 RepositoryEventType repoType = null;
                 if ((eventType == VirtualFileEvent.ChangeType.CREATED) || (eventType == VirtualFileEvent.ChangeType.MOVED)
@@ -98,27 +109,26 @@ public class FluxSyncEventService {
 
                 RepositoryEvent repoEvent = null;
                 if (repoType != null) {
-                    Resource resource = null;
-                    String eventWorkspace = event.getWorkspaceId();
-                    String eventPath = event.getPath();
-                    ProjectDescriptor project = null;
                     try {
-                        project = projectService.getProject(eventWorkspace, eventPath);
-                    } catch (Exception e) {
-                        LOG.error(e.getMessage());
-                    }
-                    String eventProject = project.getName();
-                    // TODO get file/folder modification time from VFS and set as timestamp
-                    long timestamp = project.getModificationDate();
+                        FolderEntry root = projectManager.getProjectsRoot(eventWorkspace);
+                        VirtualFileEntry entry = root.getChild(eventPath);
+                        if (entry != null) {
+                            VirtualFile file = entry.getVirtualFile();
 
-                    if (event.isFolder()) {
-                        resource = Resource.newFolder(eventPath, timestamp);
-                    } else {
-                        // TODO get file content from where?
-                        resource = Resource.newFile(eventPath, timestamp, new byte[0]);
+                            long lastModificationDate = file.getLastModificationDate();
+
+                            Resource resource = null;
+                            if (entry.isFile() && !event.isFolder()) {
+                                byte[] content = IOUtils.toByteArray(file.getContent().getStream());
+                                resource = Resource.newFile(eventPath, lastModificationDate, content);
+                            } else if (entry.isFolder() && event.isFolder()) {
+                                resource = Resource.newFolder(eventPath, lastModificationDate);
+                            }
+                            repoEvent = new RepositoryEvent(repoType, resource, vfsProject);
+                        }
+                    } catch (ServerException | ForbiddenException | IOException e) {
+                        e.getMessage();
                     }
-                    // TODO convert from codenvy path/project to {@link com.codenvy.flux.watcher.core.spi.Project}
-                    repoEvent = new RepositoryEvent(repoType, resource, null);
                 }
 
                 repositoryEventBus.fireRepositoryEvent(repoEvent);
