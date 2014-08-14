@@ -18,15 +18,19 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.codenvy.api.core.ConflictException;
 import com.codenvy.api.core.ForbiddenException;
 import com.codenvy.api.core.ServerException;
-import com.codenvy.api.project.server.VirtualFileEntry;
 import com.codenvy.api.project.server.FileEntry;
 import com.codenvy.api.project.server.FolderEntry;
 import com.codenvy.api.project.server.ProjectManager;
+import com.codenvy.api.project.server.VirtualFileEntry;
 import com.codenvy.api.vfs.server.VirtualFile;
 import com.codenvy.flux.watcher.core.Resource;
+import com.codenvy.flux.watcher.core.Resource.ResourceType;
 import com.codenvy.flux.watcher.core.spi.Project;
 
 /**
@@ -35,6 +39,8 @@ import com.codenvy.flux.watcher.core.spi.Project;
  * @author Stéphane Tournié
  */
 public class VFSProject implements Project {
+
+    private static final Logger        LOG = LoggerFactory.getLogger(VFSProject.class);
 
     private final String               id;
     private final String               projectPath;
@@ -78,7 +84,8 @@ public class VFSProject implements Project {
                 resources.add(Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content));
             }
         } catch (IOException | ServerException | ForbiddenException e) {
-            e.getMessage();
+            LOG.error("Couldn't get resources", e.getMessage());
+            throw new RuntimeException("Couldn't get resource", e);
         }
         return resources;
     }
@@ -102,7 +109,8 @@ public class VFSProject implements Project {
                 resources.addAll(getResources(folderr));
             }
         } catch (IOException | ForbiddenException | ServerException e) {
-            e.getMessage();
+            LOG.error("Couldn't get resources", e.getMessage());
+            throw new RuntimeException("Couldn't get resource", e);
         }
         return resources;
     }
@@ -129,7 +137,8 @@ public class VFSProject implements Project {
                 }
             }
         } catch (IOException | ForbiddenException | ServerException e) {
-            e.getMessage();
+            LOG.error("Couldn't get resources", e.getMessage());
+            throw new RuntimeException("Couldn't get resource", e);
         }
         return null;
     }
@@ -144,12 +153,16 @@ public class VFSProject implements Project {
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
             if (vfEntry == null) {
-                // TODO
+                if (resource.type() == ResourceType.FILE) {
+                    baseFolder.createFile(resource.path(), resource.content(), null);
+                } else {
+                    baseFolder.createFolder(resource.path());
+                }
             } else {
                 // resource at given resource.path() already exist & cannot be created
             }
-        } catch (ForbiddenException | ServerException e) {
-            e.getMessage();
+        } catch (ForbiddenException | ServerException | ConflictException e) {
+            LOG.error(e.getMessage());
         }
     }
 
@@ -168,7 +181,7 @@ public class VFSProject implements Project {
                 // resource at given resource.path() does not exist & cannot be updated
             }
         } catch (ForbiddenException | ServerException e) {
-            e.getMessage();
+            LOG.error(e.getMessage());
         }
     }
 
@@ -187,7 +200,7 @@ public class VFSProject implements Project {
                 // resource at given resource.path() does not exist & cannot be deleted
             }
         } catch (ForbiddenException | ServerException e) {
-            e.getMessage();
+            LOG.error(e.getMessage());
         }
     }
 
