@@ -40,14 +40,12 @@ import com.codenvy.flux.watcher.core.Resource;
  * 
  * @author Stéphane Tournié
  */
-// @Singleton
 public class FluxSyncEventService {
     private static final Logger                     LOG = LoggerFactory.getLogger(FluxSyncEventService.class);
 
     private final EventService                      eventService;
     private final EventSubscriber<VirtualFileEvent> subscriber;
 
-    // @Inject
     FluxSyncEventService(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectManager projectManager) {
         this.eventService = eventService;
         this.subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectManager);
@@ -109,14 +107,12 @@ public class FluxSyncEventService {
                 RepositoryEvent repoEvent = null;
                 if (repoEventType != null) {
                     try {
-                        FolderEntry root = projectManager.getProjectsRoot(eventWorkspace);
-                        VirtualFileEntry entry = root.getChild(eventPath);
+                        VirtualFileEntry entry = workspaceBaseFolder.getChild(eventPath);
                         if (entry != null) {
                             VirtualFile file = entry.getVirtualFile();
-
                             long lastModificationDate = file.getLastModificationDate();
-
                             Resource resource = null;
+
                             if (entry.isFile() && !event.isFolder()) {
                                 byte[] content = IOUtils.toByteArray(file.getContent().getStream());
                                 resource = Resource.newFile(eventPath, lastModificationDate, content);

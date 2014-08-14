@@ -63,7 +63,7 @@ public class VFSProject implements Project {
         final Set<Resource> resources = new HashSet<>();
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("worksapce", path);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", path);
             FolderEntry baseFolder = project.getBaseFolder();
 
             List<FolderEntry> folders = baseFolder.getChildFolders();
@@ -85,7 +85,7 @@ public class VFSProject implements Project {
     private Set<Resource> getResources(FolderEntry folder) {
         final Set<Resource> resources = new HashSet<>();
         try {
-            // current folder is not project base folder
+            // if current folder is not project base folder
             if (!folder.getPath().equals(path)) {
                 resources.add(Resource.newFolder(folder.getPath(), folder.getVirtualFile().getLastModificationDate()));
             }
@@ -111,7 +111,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("worksapce", path);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", path);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resourcePath);
 
