@@ -37,13 +37,13 @@ import com.codenvy.flux.watcher.core.spi.Project;
 public class VFSProject implements Project {
 
     private final String               id;
-    private final String               path;
+    private final String               projectPath;
     private final FluxSyncEventService watchService;
     private final ProjectManager       projectManager;
 
     public VFSProject(FluxSyncEventService watchService, ProjectManager projectManager, String id, String path) {
         this.id = checkNotNull(id);
-        this.path = checkNotNull(path);
+        this.projectPath = checkNotNull(path);
         this.watchService = watchService;
         this.projectManager = projectManager;
     }
@@ -55,7 +55,7 @@ public class VFSProject implements Project {
 
     @Override
     public String path() {
-        return path;
+        return projectPath;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class VFSProject implements Project {
         final Set<Resource> resources = new HashSet<>();
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", path);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
 
             List<FolderEntry> folders = baseFolder.getChildFolders();
@@ -74,6 +74,7 @@ public class VFSProject implements Project {
             for (FileEntry file : files) {
                 VirtualFile vFile = file.getVirtualFile();
                 byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
+                // TODO check that getPath() gives a relative path
                 resources.add(Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content));
             }
         } catch (IOException | ServerException | ForbiddenException e) {
@@ -85,14 +86,15 @@ public class VFSProject implements Project {
     private Set<Resource> getResources(FolderEntry folder) {
         final Set<Resource> resources = new HashSet<>();
         try {
-            // if current folder is not project base folder
-            if (!folder.getPath().equals(path)) {
+            // TODO check that getPath() gives a relative path
+            if (!folder.getPath().equals(projectPath.startsWith("/") ? projectPath.substring(1) : projectPath)) {
                 resources.add(Resource.newFolder(folder.getPath(), folder.getVirtualFile().getLastModificationDate()));
             }
             List<FileEntry> files = folder.getChildFiles();
             for (FileEntry file : files) {
                 VirtualFile vFile = file.getVirtualFile();
                 byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
+                // TODO check that getPath() gives a relative path
                 resources.add(Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content));
             }
             List<FolderEntry> folders = folder.getChildFolders();
@@ -111,16 +113,18 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", path);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resourcePath);
 
             if (vfEntry != null) {
                 VirtualFile vFile = vfEntry.getVirtualFile();
                 if (vfEntry.isFolder()) {
+                    // TODO check that getPath() gives a relative path
                     return Resource.newFolder(vFile.getPath(), vFile.getLastModificationDate());
                 } else if (vfEntry.isFile()) {
                     byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
+                    // TODO check that getPath() gives a relative path
                     return Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content);
                 }
             }
@@ -136,7 +140,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("worksapce", path);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
             if (vfEntry == null) {
@@ -155,7 +159,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("worksapce", path);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
             if (vfEntry != null) {
@@ -174,7 +178,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("worksapce", path);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
             if (vfEntry != null) {
