@@ -154,6 +154,7 @@ public class VFSProject implements Project {
             VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
             if (vfEntry == null) {
                 if (resource.type() == ResourceType.FILE) {
+                    // TODO set a correct media type instead of null?
                     baseFolder.createFile(resource.path(), resource.content(), null);
                 } else {
                     baseFolder.createFolder(resource.path());

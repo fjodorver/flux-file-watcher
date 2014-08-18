@@ -33,14 +33,14 @@ public class VFSProjectFactory implements ProjectFactory {
 
     private FluxSyncEventService        watchService;
     private ProjectManager              projectManager;
-    private HashMap<String, VFSProject> projects;
+    private HashMap<String, VFSProject> synchronizedProjects;
 
     @Inject
     public VFSProjectFactory(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectManager projectManager) {
         this.projectManager = checkNotNull(projectManager);
         this.watchService = new FluxSyncEventService(checkNotNull(eventService), checkNotNull(repositoryEventBus),
                                                      checkNotNull(projectManager));
-        projects = new HashMap<String, VFSProject>();
+        synchronizedProjects = new HashMap<String, VFSProject>();
     }
 
     @Override
@@ -48,8 +48,8 @@ public class VFSProjectFactory implements ProjectFactory {
         checkNotNull(projectId);
         checkNotNull(projectPath);
 
-        if (!projects.containsKey(projectPath)) {
-            // make sure that project folder exists
+        if (!synchronizedProjects.containsKey(projectPath)) {
+            // make sure that project folder exists in Codenvy
             VirtualFile projectFolder = null;
             try {
                 // TODO workspace should not be hardcoded
@@ -62,10 +62,10 @@ public class VFSProjectFactory implements ProjectFactory {
 
             VFSProject project = new VFSProject(watchService, projectManager, projectId, projectPath);
             project.setSynchronized(true);
-            projects.put(projectPath, project);
+            synchronizedProjects.put(projectPath, project);
             return project;
         } else {
-            return projects.get(projectPath);
+            return synchronizedProjects.get(projectPath);
         }
     }
 }
