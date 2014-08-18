@@ -13,8 +13,6 @@ package com.codenvy.flux.watcher.server;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.HashMap;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -31,16 +29,14 @@ import com.codenvy.flux.watcher.core.spi.ProjectFactory;
 @Singleton
 public class VFSProjectFactory implements ProjectFactory {
 
-    private FluxSyncEventService        watchService;
-    private ProjectManager              projectManager;
-    private HashMap<String, VFSProject> synchronizedProjects;
+    private FluxVFSEventService watchService;
+    private ProjectManager      projectManager;
 
     @Inject
     public VFSProjectFactory(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectManager projectManager) {
         this.projectManager = checkNotNull(projectManager);
-        this.watchService = new FluxSyncEventService(checkNotNull(eventService), checkNotNull(repositoryEventBus),
-                                                     checkNotNull(projectManager));
-        synchronizedProjects = new HashMap<String, VFSProject>();
+        this.watchService = new FluxVFSEventService(checkNotNull(eventService), checkNotNull(repositoryEventBus),
+                                                    checkNotNull(projectManager));
     }
 
     @Override
@@ -48,24 +44,17 @@ public class VFSProjectFactory implements ProjectFactory {
         checkNotNull(projectId);
         checkNotNull(projectPath);
 
-        if (!synchronizedProjects.containsKey(projectPath)) {
-            // make sure that project folder exists in Codenvy
-            VirtualFile projectFolder = null;
-            try {
-                // TODO workspace should not be hardcoded
-                FolderEntry root = projectManager.getProjectsRoot("workspace");
-                projectFolder = root.getVirtualFile().getChild(projectPath);
-            } catch (ServerException | ForbiddenException e) {
-                e.getMessage();
-            }
-            checkArgument(projectFolder != null && projectFolder.isFolder());
-
-            VFSProject project = new VFSProject(watchService, projectManager, projectId, projectPath);
-            project.setSynchronized(true);
-            synchronizedProjects.put(projectPath, project);
-            return project;
-        } else {
-            return synchronizedProjects.get(projectPath);
+        // make sure that project folder exists in Codenvy
+        VirtualFile projectFolder = null;
+        try {
+            // TODO workspace should not be hardcoded
+            FolderEntry root = projectManager.getProjectsRoot("default");
+            projectFolder = root.getVirtualFile().getChild(projectPath);
+        } catch (ServerException | ForbiddenException e) {
+            e.getMessage();
         }
+        checkArgument(projectFolder != null && projectFolder.isFolder());
+
+        return new VFSProject(watchService, projectManager, projectId, projectPath);
     }
 }
