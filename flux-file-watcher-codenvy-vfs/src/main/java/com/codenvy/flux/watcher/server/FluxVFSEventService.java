@@ -40,13 +40,13 @@ import com.codenvy.flux.watcher.core.Resource;
  * 
  * @author Stéphane Tournié
  */
-public class FluxSyncEventService {
-    private static final Logger                     LOG = LoggerFactory.getLogger(FluxSyncEventService.class);
+public class FluxVFSEventService {
+    private static final Logger                     LOG = LoggerFactory.getLogger(FluxVFSEventService.class);
 
     private final EventService                      eventService;
     private final EventSubscriber<VirtualFileEvent> subscriber;
 
-    FluxSyncEventService(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectManager projectManager) {
+    FluxVFSEventService(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectManager projectManager) {
         this.eventService = eventService;
         this.subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectManager);
     }
