@@ -40,14 +40,14 @@ import com.codenvy.flux.watcher.core.spi.Project;
  */
 public class VFSProject implements Project {
 
-    private static final Logger        LOG = LoggerFactory.getLogger(VFSProject.class);
+    private static final Logger       LOG = LoggerFactory.getLogger(VFSProject.class);
 
-    private final String               id;
-    private final String               projectPath;
-    private final FluxSyncEventService watchService;
-    private final ProjectManager       projectManager;
+    private final String              id;
+    private final String              projectPath;
+    private final FluxVFSEventService watchService;
+    private final ProjectManager      projectManager;
 
-    public VFSProject(FluxSyncEventService watchService, ProjectManager projectManager, String id, String path) {
+    public VFSProject(FluxVFSEventService watchService, ProjectManager projectManager, String id, String path) {
         this.id = checkNotNull(id);
         this.projectPath = checkNotNull(path);
         this.watchService = watchService;
@@ -69,7 +69,7 @@ public class VFSProject implements Project {
         final Set<Resource> resources = new HashSet<>();
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", projectPath);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("default", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
 
             List<FolderEntry> folders = baseFolder.getChildFolders();
@@ -121,7 +121,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", projectPath);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("default", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resourcePath);
 
@@ -149,7 +149,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", projectPath);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("default", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
             if (vfEntry == null) {
@@ -173,7 +173,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", projectPath);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("default", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
             if (vfEntry != null) {
@@ -192,7 +192,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("workspace", projectPath);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("default", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
             if (vfEntry != null) {
