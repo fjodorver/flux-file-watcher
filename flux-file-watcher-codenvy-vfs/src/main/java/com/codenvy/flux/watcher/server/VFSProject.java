@@ -69,7 +69,7 @@ public class VFSProject implements Project {
         final Set<Resource> resources = new HashSet<>();
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("default", projectPath);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("1q2w3e", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
 
             List<FolderEntry> folders = baseFolder.getChildFolders();
@@ -121,7 +121,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("default", projectPath);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("1q2w3e", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resourcePath);
 
@@ -149,7 +149,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("default", projectPath);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("1q2w3e", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
             if (vfEntry == null) {
@@ -173,7 +173,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("default", projectPath);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("1q2w3e", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
             if (vfEntry != null) {
@@ -192,7 +192,7 @@ public class VFSProject implements Project {
 
         try {
             // TODO workspace should not be hardcoded
-            com.codenvy.api.project.server.Project project = projectManager.getProject("default", projectPath);
+            com.codenvy.api.project.server.Project project = projectManager.getProject("1q2w3e", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
             VirtualFileEntry vfEntry = baseFolder.getChild(resource.path());
             if (vfEntry != null) {

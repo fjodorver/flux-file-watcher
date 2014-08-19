@@ -53,7 +53,7 @@ public class VFSProjectFactory implements ProjectFactory {
         VirtualFile projectFolder = null;
         try {
             // TODO workspace should not be hardcoded
-            FolderEntry root = projectManager.getProjectsRoot("default");
+            FolderEntry root = projectManager.getProjectsRoot("1q2w3e");
             projectFolder = root.getVirtualFile().getChild(projectPath);
         } catch (ServerException | ForbiddenException e) {
             LOG.error(e.getMessage());
