@@ -16,6 +16,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.codenvy.api.core.ForbiddenException;
 import com.codenvy.api.core.ServerException;
 import com.codenvy.api.core.notification.EventService;
@@ -28,6 +31,8 @@ import com.codenvy.flux.watcher.core.spi.ProjectFactory;
 
 @Singleton
 public class VFSProjectFactory implements ProjectFactory {
+
+    private static final Logger LOG = LoggerFactory.getLogger(FluxSyncInitService.class);
 
     private FluxVFSEventService watchService;
     private ProjectManager      projectManager;
@@ -51,7 +56,7 @@ public class VFSProjectFactory implements ProjectFactory {
             FolderEntry root = projectManager.getProjectsRoot("default");
             projectFolder = root.getVirtualFile().getChild(projectPath);
         } catch (ServerException | ForbiddenException e) {
-            e.getMessage();
+            LOG.error(e.getMessage());
         }
         checkArgument(projectFolder != null && projectFolder.isFolder());
 
