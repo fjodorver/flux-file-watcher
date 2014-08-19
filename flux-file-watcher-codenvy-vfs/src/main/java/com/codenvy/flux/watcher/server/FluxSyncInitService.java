@@ -32,8 +32,7 @@ import com.codenvy.flux.watcher.core.Repository;
 public class FluxSyncInitService {
 
     private static final Logger  LOG      = LoggerFactory.getLogger(FluxSyncInitService.class);
-
-    private final String         FLUX_URL = "http://localhost:3000";
+    private static final String  FLUX_URL = "http://localhost:3000";
 
     private final ProjectManager projectManager;
     private final Repository     repository;
