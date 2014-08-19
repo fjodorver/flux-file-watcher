@@ -26,6 +26,7 @@ public class FluxSyncModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        install(new com.codenvy.flux.watcher.core.RepositoryModule());
         bind(ProjectFactory.class).to(VFSProjectFactory.class);
         bind(FluxSyncInitService.class).asEagerSingleton();
     }

@@ -16,6 +16,8 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +50,7 @@ public class FluxSyncInitService {
         try {
             repository.addRemote(new URL(FLUX_URL), Credentials.DEFAULT_USER_CREDENTIALS);
         } catch (MalformedURLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Couldn't connect to Flux server", e);
         }
 
         // start sync for all projects in current workspace
@@ -57,7 +59,7 @@ public class FluxSyncInitService {
         try {
             projects = projectManager.getProjects("default");
         } catch (ServerException e) {
-            LOG.error("Couldn't get projects", e.getMessage());
+            LOG.error("Couldn't get projects", e);
             throw new RuntimeException("Couldn't get projects", e);
         }
 
@@ -74,7 +76,7 @@ public class FluxSyncInitService {
         try {
             repository.removeRemote(new URL(FLUX_URL));
         } catch (MalformedURLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Couldn't connect to Flux server", e);
         }
     }
 }
