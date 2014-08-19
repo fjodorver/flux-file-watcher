@@ -27,8 +27,8 @@ import com.codenvy.api.project.server.Project;
 import com.codenvy.api.project.server.ProjectManager;
 import com.codenvy.flux.watcher.core.Credentials;
 import com.codenvy.flux.watcher.core.Repository;
-import com.google.inject.Inject;
 
+@Singleton
 public class FluxSyncInitService {
 
     private static final Logger  LOG      = LoggerFactory.getLogger(FluxSyncInitService.class);
