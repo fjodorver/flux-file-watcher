@@ -80,7 +80,6 @@ public class VFSProject implements Project {
             for (FileEntry file : files) {
                 VirtualFile vFile = file.getVirtualFile();
                 byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
-                // TODO check that getPath() gives a relative path
                 resources.add(Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content));
             }
         } catch (IOException | ServerException | ForbiddenException e) {
@@ -93,7 +92,6 @@ public class VFSProject implements Project {
     private Set<Resource> getResources(FolderEntry folder) {
         final Set<Resource> resources = new HashSet<>();
         try {
-            // TODO check that getPath() gives a relative path
             if (!folder.getPath().equals(projectPath.startsWith("/") ? projectPath.substring(1) : projectPath)) {
                 resources.add(Resource.newFolder(folder.getPath(), folder.getVirtualFile().getLastModificationDate()));
             }
@@ -101,7 +99,6 @@ public class VFSProject implements Project {
             for (FileEntry file : files) {
                 VirtualFile vFile = file.getVirtualFile();
                 byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
-                // TODO check that getPath() gives a relative path
                 resources.add(Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content));
             }
             List<FolderEntry> folders = folder.getChildFolders();
@@ -130,11 +127,9 @@ public class VFSProject implements Project {
             if (vfEntry != null) {
                 VirtualFile vFile = vfEntry.getVirtualFile();
                 if (vfEntry.isFolder()) {
-                    // TODO check that getPath() gives a relative path
                     return Resource.newFolder(vFile.getPath(), vFile.getLastModificationDate());
                 } else if (vfEntry.isFile()) {
                     byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
-                    // TODO check that getPath() gives a relative path
                     return Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content);
                 }
             }
