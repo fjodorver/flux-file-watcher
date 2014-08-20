@@ -35,7 +35,7 @@ import com.codenvy.flux.watcher.core.spi.Project;
 
 /**
  * {@link com.codenvy.flux.watcher.core.spi.Project} implementation.
- * 
+ *
  * @author Stéphane Tournié
  */
 public class VFSProject implements Project {
@@ -49,7 +49,7 @@ public class VFSProject implements Project {
 
     public VFSProject(FluxVFSEventService watchService, ProjectManager projectManager, String id, String path) {
         this.id = checkNotNull(id);
-        this.projectPath = checkNotNull(path);
+        projectPath = checkNotNull(path);
         this.watchService = watchService;
         this.projectManager = projectManager;
     }

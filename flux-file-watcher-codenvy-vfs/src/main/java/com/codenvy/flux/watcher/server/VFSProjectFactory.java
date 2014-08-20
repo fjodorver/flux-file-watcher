@@ -40,7 +40,7 @@ public class VFSProjectFactory implements ProjectFactory {
     @Inject
     public VFSProjectFactory(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectManager projectManager) {
         this.projectManager = checkNotNull(projectManager);
-        this.watchService = new FluxVFSEventService(checkNotNull(eventService), checkNotNull(repositoryEventBus),
+        watchService = new FluxVFSEventService(checkNotNull(eventService), checkNotNull(repositoryEventBus),
                                                     checkNotNull(projectManager));
     }
 

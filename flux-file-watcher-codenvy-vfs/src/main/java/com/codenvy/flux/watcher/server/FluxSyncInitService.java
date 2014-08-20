@@ -53,13 +53,12 @@ public class FluxSyncInitService {
         }
 
         // start sync for all projects in current workspace
-        List<Project> projects;
+        List<Project> projects = null;
         // TODO workspace should not be hardcoded
         try {
             projects = projectManager.getProjects("1q2w3e");
         } catch (ServerException e) {
             LOG.error("Couldn't get projects", e);
-            throw new RuntimeException("Couldn't get projects", e);
         }
 
         if (projects != null) {
