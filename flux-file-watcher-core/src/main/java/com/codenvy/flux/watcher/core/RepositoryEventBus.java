@@ -10,19 +10,21 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Predicates.notNull;
 import static java.util.Arrays.asList;
+
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Event bus to listen and fire {@link com.codenvy.flux.watcher.core.Repository} events.
@@ -93,7 +95,7 @@ public class RepositoryEventBus {
         checkNotNull(event);
         checkState(repository.get().getProject(event.project().id()) != null);
 
-        final Set<RepositoryListener> filteredRepositoryListeners = FluentIterable
+        final Set<RepositoryListener> filteredRepositoryListeners = ImmutableSet.copyOf(FluentIterable
                 .from(repositoryListeners)
                 .filter(notNull())
                 .filter(new Predicate<RepositoryListener>() {
@@ -102,8 +104,7 @@ public class RepositoryEventBus {
                         final RepositoryEventTypes repositoryEventTypes = listener.getClass().getAnnotation(RepositoryEventTypes.class);
                         return asList(repositoryEventTypes.value()).contains(event.type());
                     }
-                })
-                .toSet();
+                }));;
 
         for (RepositoryListener oneRepositoryListener : filteredRepositoryListeners) {
             try {

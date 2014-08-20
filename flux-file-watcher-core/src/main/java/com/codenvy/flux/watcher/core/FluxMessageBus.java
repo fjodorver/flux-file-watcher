@@ -10,16 +10,13 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
+import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CALLBACK_ID;
+import static com.codenvy.flux.watcher.core.FluxMessageType.GET_PROJECT_RESPONSE;
+import static com.codenvy.flux.watcher.core.FluxMessageType.GET_RESOURCE_RESPONSE;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.notNull;
+import static java.util.Collections.emptySet;
 
-import org.json.JSONObject;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Set;
@@ -28,12 +25,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import static com.codenvy.flux.watcher.core.FluxMessage.Fields.CALLBACK_ID;
-import static com.codenvy.flux.watcher.core.FluxMessageType.GET_PROJECT_RESPONSE;
-import static com.codenvy.flux.watcher.core.FluxMessageType.GET_RESOURCE_RESPONSE;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.notNull;
-import static java.util.Collections.emptySet;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+import org.json.JSONObject;
+
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Message bus connected to Flux instance.
@@ -59,10 +61,10 @@ public class FluxMessageBus {
      */
     @Inject
     FluxMessageBus(Set<FluxMessageHandler> messageHandlers, Provider<Repository> repository) {
-        this.id = Long.valueOf(UUID.randomUUID().getMostSignificantBits()).intValue();
+        id = Long.valueOf(UUID.randomUUID().getMostSignificantBits()).intValue();
         this.repository = repository;
         this.messageHandlers = new CopyOnWriteArraySet<>(checkNotNull(messageHandlers));
-        this.connections = new ConcurrentHashMap<>();
+        connections = new ConcurrentHashMap<>();
     }
 
     /**
@@ -195,7 +197,7 @@ public class FluxMessageBus {
     }
 
     private Set<FluxMessageHandler> getMessageHandlersFor(final String messageType) {
-        return FluentIterable.from(messageHandlers)
+        return ImmutableSet.copyOf(FluentIterable.from(messageHandlers)
                              .filter(notNull())
                              .filter(new Predicate<FluxMessageHandler>() {
                                  @Override
@@ -203,8 +205,7 @@ public class FluxMessageBus {
                                      final Set<String> supportedTypes = getMessageTypesFor(messageHandler);
                                      return supportedTypes.contains(messageType);
                                  }
-                             })
-                             .toSet();
+                             }));
     }
 
     private Set<String> getMessageTypesFor(FluxMessageHandler messageHandler) {
@@ -213,14 +214,13 @@ public class FluxMessageBus {
             return emptySet();
         }
 
-        return FluentIterable.from(Arrays.asList(types.value()))
+        return ImmutableSet.copyOf(FluentIterable.from(Arrays.asList(types.value()))
                              .filter(Predicates.notNull())
                              .transform(new Function<FluxMessageType, String>() {
                                  @Override
                                  public String apply(FluxMessageType messageType) {
                                      return messageType.value();
                                  }
-                             })
-                             .toSet();
+                             }));
     }
 }
