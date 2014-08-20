@@ -27,6 +27,7 @@ import com.codenvy.api.project.server.Project;
 import com.codenvy.api.project.server.ProjectManager;
 import com.codenvy.flux.watcher.core.Credentials;
 import com.codenvy.flux.watcher.core.Repository;
+import com.codenvy.vfs.impl.fs.LocalFileSystemRegistryPlugin;
 
 @Singleton
 public class FluxSyncInitService {
@@ -36,11 +37,14 @@ public class FluxSyncInitService {
 
     private final ProjectManager projectManager;
     private final Repository     repository;
+    private LocalFileSystemRegistryPlugin localFileSystemRegistryPlugin;
 
     @Inject
-    public FluxSyncInitService(ProjectManager projectManager, Repository repository) {
+    public FluxSyncInitService(ProjectManager projectManager, Repository repository, LocalFileSystemRegistryPlugin localFileSystemRegistryPlugin) {
         this.projectManager = projectManager;
         this.repository = repository;
+        // just to be loaded after :)
+        this.localFileSystemRegistryPlugin = localFileSystemRegistryPlugin;
     }
 
     @PostConstruct
