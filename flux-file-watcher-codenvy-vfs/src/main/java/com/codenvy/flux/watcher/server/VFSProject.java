@@ -118,12 +118,14 @@ public class VFSProject implements Project {
     @Override
     public Resource getResource(String resourcePath) {
         checkNotNull(resourcePath);
+        // for Flux, the resourcePath contains the projectName /projectName/resourcepath
+        String projectRelativeResourcePath = resourcePath.substring(projectPath.length());
 
         try {
             // TODO workspace should not be hardcoded
             com.codenvy.api.project.server.Project project = projectManager.getProject("1q2w3e", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
-            VirtualFileEntry vfEntry = baseFolder.getChild(resourcePath);
+            VirtualFileEntry vfEntry = baseFolder.getChild(projectRelativeResourcePath);
 
             if (vfEntry != null) {
                 VirtualFile vFile = vfEntry.getVirtualFile();
