@@ -21,11 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import com.codenvy.api.core.ForbiddenException;
 import com.codenvy.api.core.ServerException;
-import com.codenvy.api.core.notification.EventService;
 import com.codenvy.api.project.server.FolderEntry;
 import com.codenvy.api.project.server.ProjectManager;
 import com.codenvy.api.vfs.server.VirtualFile;
-import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.spi.Project;
 import com.codenvy.flux.watcher.core.spi.ProjectFactory;
 
@@ -38,10 +36,9 @@ public class VFSProjectFactory implements ProjectFactory {
     private ProjectManager      projectManager;
 
     @Inject
-    public VFSProjectFactory(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectManager projectManager) {
-        this.projectManager = checkNotNull(projectManager);
-        watchService = new FluxVFSEventService(checkNotNull(eventService), checkNotNull(repositoryEventBus),
-                                                    checkNotNull(projectManager));
+    public VFSProjectFactory(ProjectManager projectManager, FluxVFSEventService watchService) {
+        this.projectManager = projectManager;
+        this.watchService = watchService;
     }
 
     @Override

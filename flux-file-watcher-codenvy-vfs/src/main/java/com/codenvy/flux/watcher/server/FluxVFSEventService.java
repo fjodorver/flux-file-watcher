@@ -16,6 +16,7 @@ import java.io.IOException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ public class FluxVFSEventService {
     private final EventService                      eventService;
     private final EventSubscriber<VirtualFileEvent> subscriber;
 
+    @Inject
     FluxVFSEventService(EventService eventService, RepositoryEventBus repositoryEventBus, ProjectManager projectManager) {
         this.eventService = eventService;
         this.subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectManager);
@@ -122,7 +124,7 @@ public class FluxVFSEventService {
                             repoEvent = new RepositoryEvent(repoEventType, resource, vfsProject);
                         }
                     } catch (ServerException | ForbiddenException | IOException e) {
-                        e.getMessage();
+                        LOG.error("Couldn't get child named "+eventPath+" in "+workspaceBaseFolder.getPath(), e);
                     }
                 }
 
