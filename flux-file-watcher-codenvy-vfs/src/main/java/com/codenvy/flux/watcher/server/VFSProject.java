@@ -80,7 +80,7 @@ public class VFSProject implements Project {
             for (FileEntry file : files) {
                 VirtualFile vFile = file.getVirtualFile();
                 byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
-                resources.add(Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content));
+                resources.add(Resource.newFile(vFile.getName(), vFile.getLastModificationDate(), content));
             }
         } catch (IOException | ServerException | ForbiddenException e) {
             LOG.error("Couldn't get resources", e.getMessage());
@@ -93,13 +93,13 @@ public class VFSProject implements Project {
         final Set<Resource> resources = new HashSet<>();
         try {
             if (!folder.getPath().equals(projectPath.startsWith("/") ? projectPath.substring(1) : projectPath)) {
-                resources.add(Resource.newFolder(folder.getPath(), folder.getVirtualFile().getLastModificationDate()));
+                resources.add(Resource.newFolder(folder.getName(), folder.getVirtualFile().getLastModificationDate()));
             }
             List<FileEntry> files = folder.getChildFiles();
             for (FileEntry file : files) {
                 VirtualFile vFile = file.getVirtualFile();
                 byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
-                resources.add(Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content));
+                resources.add(Resource.newFile(vFile.getName(), vFile.getLastModificationDate(), content));
             }
             List<FolderEntry> folders = folder.getChildFolders();
             for (FolderEntry folderr : folders) {
@@ -115,14 +115,12 @@ public class VFSProject implements Project {
     @Override
     public Resource getResource(String resourcePath) {
         checkNotNull(resourcePath);
-        // for Flux, the resourcePath contains the projectName /projectName/resourcepath
-        String projectRelativeResourcePath = resourcePath.substring(projectPath.length());
 
         try {
             // TODO workspace should not be hardcoded
             com.codenvy.api.project.server.Project project = projectManager.getProject("1q2w3e", projectPath);
             FolderEntry baseFolder = project.getBaseFolder();
-            VirtualFileEntry vfEntry = baseFolder.getChild(projectRelativeResourcePath);
+            VirtualFileEntry vfEntry = baseFolder.getChild(resourcePath);
 
             if (vfEntry != null) {
                 VirtualFile vFile = vfEntry.getVirtualFile();
