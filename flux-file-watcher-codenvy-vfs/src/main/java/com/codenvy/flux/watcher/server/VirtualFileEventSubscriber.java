@@ -75,6 +75,11 @@ public class VirtualFileEventSubscriber implements EventSubscriber<VirtualFileEv
                                         })
                                         .orNull();
 
+        String resourceProjectPath = eventPath.substring(project.path().length());
+        if (resourceProjectPath.startsWith("/")) {
+            resourceProjectPath = resourceProjectPath.substring(1);
+        }
+
         if (workspaceBaseFolder != null && project != null) {
             VirtualFileEvent.ChangeType eventType = event.getType();
             RepositoryEventType repoEventType = null;
@@ -90,7 +95,7 @@ public class VirtualFileEventSubscriber implements EventSubscriber<VirtualFileEv
             RepositoryEvent repoEvent = null;
             if (repoEventType != null) {
                 try {
-                    VirtualFileEntry eventPathVFEntry = workspaceBaseFolder.getChild(eventPath);
+                    VirtualFileEntry eventPathVFEntry = workspaceBaseFolder.getChild(resourceProjectPath);
                     Resource resource = null;
                     if (eventPathVFEntry != null) {
                         VirtualFile eventPathVFile = eventPathVFEntry.getVirtualFile();
@@ -98,16 +103,16 @@ public class VirtualFileEventSubscriber implements EventSubscriber<VirtualFileEv
 
                         if (eventPathVFEntry.isFile() && !event.isFolder()) {
                             byte[] content = IOUtils.toByteArray(eventPathVFile.getContent().getStream());
-                            resource = Resource.newFile(eventPath, lastModificationDate, content);
+                            resource = Resource.newFile(resourceProjectPath, lastModificationDate, content);
                         } else if (eventPathVFEntry.isFolder() && event.isFolder()) {
-                            resource = Resource.newFolder(eventPath, lastModificationDate);
+                            resource = Resource.newFolder(resourceProjectPath, lastModificationDate);
                         }
                     } else {
                         // case of file/folder deletion event
                         if (!event.isFolder()) {
-                            resource = Resource.newFile(eventPath, System.currentTimeMillis(), new byte[0]);
+                            resource = Resource.newFile(resourceProjectPath, System.currentTimeMillis(), new byte[0]);
                         } else if (event.isFolder()) {
-                            resource = Resource.newFolder(eventPath, System.currentTimeMillis());
+                            resource = Resource.newFolder(resourceProjectPath, System.currentTimeMillis());
                         }
                     }
                     repoEvent = new RepositoryEvent(repoEventType, resource, project);
