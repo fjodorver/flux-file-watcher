@@ -54,15 +54,18 @@ public final class GetResourceRequestHandler implements FluxMessageHandler {
         if (project != null) {
             final Resource resource = project.getResource(resourcePath);
 
-            if (!request.has(TIMESTAMP.value()) || request.getLong(TIMESTAMP.value()) == resource.timestamp()) {
+            // compare the time stamp and allow a nearly difference for now TODO find out why CodenvyVFS -> Eclipse has different timestamp
+            long requestTimeStamp = request.has(TIMESTAMP.value()) ? request.getLong(TIMESTAMP.value()) : 0;
+            long resourceTimeStamp = resource.timestamp();
+            if (!request.has(TIMESTAMP.value()) || Math.abs(requestTimeStamp - resourceTimeStamp) < 10000) {
                 final JSONObject content = new JSONObject()
-                        .put(CALLBACK_ID.value(), callbackId)
-                        .put(REQUEST_SENDER_ID.value(), requestSenderId)
-                        .put(PROJECT.value(), projectName)
-                        .put(RESOURCE.value(), resourcePath)
-                        .put(TIMESTAMP.value(), resource.timestamp())
-                        .put(HASH.value(), resource.hash())
-                        .put(TYPE.value(), resource.type().name().toLowerCase());
+                                                           .put(CALLBACK_ID.value(), callbackId)
+                                                           .put(REQUEST_SENDER_ID.value(), requestSenderId)
+                                                           .put(PROJECT.value(), projectName)
+                                                           .put(RESOURCE.value(), resourcePath)
+                                                           .put(TIMESTAMP.value(), resourceTimeStamp)
+                                                           .put(HASH.value(), resource.hash())
+                                                           .put(TYPE.value(), resource.type().name().toLowerCase());
 
                 if (resource.type() == FILE) {
                     content.put(CONTENT.value(), new String(resource.content()));
