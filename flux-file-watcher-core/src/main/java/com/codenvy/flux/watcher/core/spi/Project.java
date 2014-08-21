@@ -45,6 +45,13 @@ public interface Project {
     void setSynchronized(boolean synchronize);
 
     /**
+     * Returns whether or not the project is currently synchronized.
+     *
+     * @return true or false, never {@code null}.
+     */
+    boolean getSynchronized();
+    
+    /**
      * Returns all project {@link com.codenvy.flux.watcher.core.Resource}.
      *
      * @return the {@link com.codenvy.flux.watcher.core.Resource} {@link java.util.Set}, never {@code null}.

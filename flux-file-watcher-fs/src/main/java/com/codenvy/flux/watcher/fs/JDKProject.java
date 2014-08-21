@@ -97,6 +97,12 @@ public class JDKProject implements Project {
             watchService.unwatch(this);
         }
     }
+    
+    @Override
+    public boolean getSynchronized() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
     @Override
     public Set<Resource> getResources() {

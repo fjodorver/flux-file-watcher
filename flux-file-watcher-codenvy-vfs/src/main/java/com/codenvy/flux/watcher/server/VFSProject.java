@@ -35,23 +35,24 @@ import com.codenvy.flux.watcher.core.spi.Project;
 
 /**
  * {@link com.codenvy.flux.watcher.core.spi.Project} implementation.
- *
+ * 
  * @author Stéphane Tournié
  */
 public class VFSProject implements Project {
 
-    private static final Logger       LOG = LoggerFactory.getLogger(VFSProject.class);
+    private static final Logger  LOG = LoggerFactory.getLogger(VFSProject.class);
 
-    private final String              id;
-    private final String              projectPath;
-    private final FluxVFSEventService watchService;
-    private final ProjectManager      projectManager;
+    private final String         id;
+    private final String         projectPath;
+    private final ProjectManager projectManager;
+    private boolean              sync;
 
-    public VFSProject(FluxVFSEventService watchService, ProjectManager projectManager, String id, String path) {
-        this.id = checkNotNull(id);
-        projectPath = checkNotNull(path);
-        this.watchService = watchService;
+    public VFSProject(ProjectManager projectManager,
+                      String id,
+                      String path) {
         this.projectManager = projectManager;
+        this.id = checkNotNull(id);
+        this.projectPath = checkNotNull(path);
     }
 
     @Override
@@ -203,9 +204,14 @@ public class VFSProject implements Project {
     @Override
     public void setSynchronized(boolean synchronize) {
         if (synchronize) {
-            watchService.setProjectSync(this);
+            sync = true;
         } else {
-            watchService.setProjectSync(null);
+            sync = false;
         }
+    }
+
+    @Override
+    public boolean getSynchronized() {
+        return sync;
     }
 }

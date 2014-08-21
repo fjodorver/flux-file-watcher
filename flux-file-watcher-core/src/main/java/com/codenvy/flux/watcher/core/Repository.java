@@ -10,27 +10,30 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
-import com.codenvy.flux.watcher.core.spi.Project;
-import com.codenvy.flux.watcher.core.spi.ProjectFactory;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.net.URL;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.INCLUDE_DELETED;
 import static com.codenvy.flux.watcher.core.FluxMessage.Fields.PROJECT;
 import static com.codenvy.flux.watcher.core.FluxMessageType.GET_PROJECT_REQUEST;
 import static com.codenvy.flux.watcher.core.FluxMessageType.PROJECT_CONNECTED;
 import static com.codenvy.flux.watcher.core.FluxMessageType.PROJECT_DISCONNECTED;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.notNull;
+
+import java.net.URL;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.codenvy.flux.watcher.core.spi.Project;
+import com.codenvy.flux.watcher.core.spi.ProjectFactory;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Represents a repository with Flux connectivity capabilities.
@@ -170,6 +173,22 @@ public class Repository {
                              .orNull();
     }
 
+    /**
+     * Returns all synchronized {@link com.codenvy.flux.watcher.core.spi.Project}.
+     *
+     * @return a {@link java.util.Set} of all synchronized {@link com.codenvy.flux.watcher.core.spi.Project}.
+     */
+    public Set<Project> getSynchronizedProjects() {
+        return ImmutableSet.copyOf(FluentIterable.from(projects)
+                                   .filter(notNull())
+                                   .filter(new Predicate<Project>() {
+                                       @Override
+                                       public boolean apply(Project project) {
+                                           return project.getSynchronized();
+                                       }
+                                   }));
+    }
+    
     /**
      * Returns the {@link com.codenvy.flux.watcher.core.RepositoryEventBus}.
      *

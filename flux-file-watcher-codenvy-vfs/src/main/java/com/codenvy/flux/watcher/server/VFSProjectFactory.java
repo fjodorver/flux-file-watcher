@@ -13,6 +13,8 @@ package com.codenvy.flux.watcher.server;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -21,26 +23,44 @@ import org.slf4j.LoggerFactory;
 
 import com.codenvy.api.core.ForbiddenException;
 import com.codenvy.api.core.ServerException;
+import com.codenvy.api.core.notification.EventService;
 import com.codenvy.api.project.server.FolderEntry;
 import com.codenvy.api.project.server.ProjectManager;
 import com.codenvy.api.vfs.server.VirtualFile;
+import com.codenvy.flux.watcher.core.Repository;
+import com.codenvy.flux.watcher.core.RepositoryEventBus;
 import com.codenvy.flux.watcher.core.spi.Project;
 import com.codenvy.flux.watcher.core.spi.ProjectFactory;
 
 @Singleton
 public class VFSProjectFactory implements ProjectFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FluxSyncInitService.class);
+    private static final Logger              LOG = LoggerFactory.getLogger(VFSProjectFactory.class);
 
-    private FluxVFSEventService watchService;
-    private ProjectManager      projectManager;
+    private final EventService               eventService;
+    private final ProjectManager             projectManager;
+    private final VirtualFileEventSubscriber subscriber;
 
     @Inject
-    public VFSProjectFactory(ProjectManager projectManager, FluxVFSEventService watchService) {
+    public VFSProjectFactory(EventService eventService,
+                             RepositoryEventBus repositoryEventBus,
+                             ProjectManager projectManager,
+                             Repository repository) {
+        this.eventService = eventService;
         this.projectManager = projectManager;
-        this.watchService = watchService;
+        this.subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectManager, repository);
     }
 
+    @PostConstruct
+    public void start() {
+        eventService.subscribe(subscriber);
+    }
+    
+    @PreDestroy
+    public void stop() {
+        eventService.unsubscribe(subscriber);
+    }
+    
     @Override
     public Project newProject(String projectId, String projectPath) {
         checkNotNull(projectId);
@@ -57,6 +77,6 @@ public class VFSProjectFactory implements ProjectFactory {
         }
         checkArgument(projectFolder != null && projectFolder.isFolder());
 
-        return new VFSProject(watchService, projectManager, projectId, projectPath);
+        return new VFSProject(projectManager, projectId, projectPath);
     }
 }
