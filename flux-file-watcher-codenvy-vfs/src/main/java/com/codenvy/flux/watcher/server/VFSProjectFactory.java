@@ -16,6 +16,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
@@ -45,10 +46,10 @@ public class VFSProjectFactory implements ProjectFactory {
     public VFSProjectFactory(EventService eventService,
                              RepositoryEventBus repositoryEventBus,
                              ProjectManager projectManager,
-                             Repository repository) {
+                             Provider<Repository> repository) {
         this.eventService = eventService;
         this.projectManager = projectManager;
-        this.subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectManager, repository);
+        this.subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectManager, repository.get());
     }
 
     @PostConstruct
