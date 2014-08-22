@@ -87,7 +87,7 @@ public class VFSProject implements Project {
                 resources.add(Resource.newFile(relativizeFilePath(vFile), vFile.getLastModificationDate(), content));
             }
         } catch (IOException | ServerException | ForbiddenException e) {
-            LOG.error("Couldn't get resources", e.getMessage());
+            LOG.error("Couldn't get resources for project " + projectPath, e);
             throw new RuntimeException("Couldn't get resource", e);
         }
         return resources;
@@ -126,8 +126,7 @@ public class VFSProject implements Project {
 
             }
         } catch (IOException | ForbiddenException | ServerException e) {
-            LOG.error("Couldn't get resources", e.getMessage());
-            throw new RuntimeException("Couldn't get resource", e);
+            LOG.error("Couldn't get resources for folder: " + folder.getPath() + " in project " + projectPath, e);
         }
         return resources;
     }
@@ -152,8 +151,7 @@ public class VFSProject implements Project {
                 }
             }
         } catch (IOException | ForbiddenException | ServerException e) {
-            LOG.error("Couldn't get resources", e.getMessage());
-            throw new RuntimeException("Couldn't get resource", e);
+            LOG.error("Couldn't get resource: " + resourcePath + ", in project " + projectPath, e);
         }
         return null;
     }
@@ -178,7 +176,7 @@ public class VFSProject implements Project {
                 // resource at given resource.path() already exist & cannot be created
             }
         } catch (ForbiddenException | ServerException | ConflictException e) {
-            LOG.error(e.getMessage());
+            LOG.error("An Error Occured when trying to create resource in project" + projectPath, e);
         }
     }
 
@@ -197,7 +195,7 @@ public class VFSProject implements Project {
                 // resource at given resource.path() does not exist & cannot be updated
             }
         } catch (ForbiddenException | ServerException e) {
-            LOG.error(e.getMessage());
+            LOG.error("An Error Occured when trying to update resource in project" + projectPath, e);
         }
     }
 
@@ -216,7 +214,7 @@ public class VFSProject implements Project {
                 // resource at given resource.path() does not exist & cannot be deleted
             }
         } catch (ForbiddenException | ServerException e) {
-            LOG.error(e.getMessage());
+            LOG.error("An Error Occured when trying to delete resource in project" + projectPath, e);
         }
     }
 
