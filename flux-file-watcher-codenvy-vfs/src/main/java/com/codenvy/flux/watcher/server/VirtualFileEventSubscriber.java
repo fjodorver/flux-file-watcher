@@ -59,7 +59,6 @@ public class VirtualFileEventSubscriber implements EventSubscriber<VirtualFileEv
     public void onEvent(VirtualFileEvent event) {
         VirtualFileEvent.ChangeType eventType = event.getType();
         String eventWorkspace = event.getWorkspaceId();
-        LOG.debug("new event in workspace " + eventWorkspace);
 
         // TODO workspace should not be hardcoded
         if (eventWorkspace.equals("1q2w3e")) {
@@ -68,7 +67,6 @@ public class VirtualFileEventSubscriber implements EventSubscriber<VirtualFileEv
             Resource resource;
 
             final String eventPath = event.getPath();
-            LOG.debug("eventPath : >" + eventPath + "<");
 
             Set<Project> projects = repository.getSynchronizedProjects();
             Project project = FluentIterable.from(projects)
@@ -106,12 +104,10 @@ public class VirtualFileEventSubscriber implements EventSubscriber<VirtualFileEv
                         if (event.isFolder()) {
                             resource = Resource.newFolder(resourceRelativePath,
                                                           (vFile != null ? vFile.getLastModificationDate() : System.currentTimeMillis()));
-                            LOG.debug("newFolder : " + resourceRelativePath);
                         } else {
                             byte[] content = (vFile != null ? IOUtils.toByteArray(vFile.getContent().getStream()) : new byte[0]);
                             resource = Resource.newFile(resourceRelativePath,
                                                         (vFile != null ? vFile.getLastModificationDate() : System.currentTimeMillis()), content);
-                            LOG.debug("newFile : " + resourceRelativePath + ", containing "+(vFile != null ? IOUtils.toString(vFile.getContent().getStream(), "UTF-8") : "nothing"));
                         }
                         // and firing event to Flux clients
                         if (repositoryEventType != null) {
