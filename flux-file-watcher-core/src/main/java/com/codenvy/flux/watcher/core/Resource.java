@@ -100,7 +100,7 @@ public class Resource {
         this.timestamp = timestamp;
         this.type = checkNotNull(type);
         this.content = content;
-        this.hash = content != null ? ResourceHelper.sha1(content) : NULL_CONTENT_HASH;
+        hash = content != null ? ResourceHelper.sha1(content) : NULL_CONTENT_HASH;
     }
 
     /**
@@ -155,5 +155,10 @@ public class Resource {
         FILE,
         FOLDER,
         UNKNOWN
+    }
+
+    @Override
+    public String toString() {
+        return "Resource:" + path + ", " + type + ", " + hash + ", " + timestamp;
     }
 }

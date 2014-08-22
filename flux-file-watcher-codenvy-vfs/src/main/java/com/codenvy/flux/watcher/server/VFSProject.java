@@ -75,16 +75,16 @@ public class VFSProject implements Project {
 
             List<FolderEntry> folders = baseFolder.getChildFolders();
             for (FolderEntry folder : folders) {
-                VirtualFile vFile = folder.getVirtualFile();
-                resources.add(Resource.newFolder(relativizeFilePath(vFile),
-                                                 vFile.getLastModificationDate()));
+                VirtualFile vFolder = folder.getVirtualFile();
+                resources.add(Resource.newFolder(relativizeFilePath(vFolder), vFolder.getLastModificationDate()));
                 resources.addAll(getResources(folder));
             }
             List<FileEntry> files = baseFolder.getChildFiles();
             for (FileEntry file : files) {
                 VirtualFile vFile = file.getVirtualFile();
                 byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
-                resources.add(Resource.newFile(relativizeFilePath(vFile), vFile.getLastModificationDate(), content));
+                Resource newFile = Resource.newFile(relativizeFilePath(vFile), vFile.getLastModificationDate(), content);
+                resources.add(newFile);
             }
         } catch (IOException | ServerException | ForbiddenException e) {
             LOG.error("Couldn't get resources for project " + projectPath, e);
@@ -101,7 +101,7 @@ public class VFSProject implements Project {
      */
     protected String relativizeFilePath(VirtualFile vFile) {
         int toRemoveCharLength = projectPath.length();
-        if (projectPath.endsWith("/")) {
+        if (!projectPath.endsWith("/")) {
             toRemoveCharLength++;
         }
         return vFile.getPath().substring(toRemoveCharLength);
@@ -144,10 +144,10 @@ public class VFSProject implements Project {
             if (vfEntry != null) {
                 VirtualFile vFile = vfEntry.getVirtualFile();
                 if (vfEntry.isFolder()) {
-                    return Resource.newFolder(vFile.getPath(), vFile.getLastModificationDate());
+                    return Resource.newFolder(relativizeFilePath(vFile), vFile.getLastModificationDate());
                 } else if (vfEntry.isFile()) {
                     byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
-                    return Resource.newFile(vFile.getPath(), vFile.getLastModificationDate(), content);
+                    return Resource.newFile(relativizeFilePath(vFile), vFile.getLastModificationDate(), content);
                 }
             }
         } catch (IOException | ForbiddenException | ServerException e) {
