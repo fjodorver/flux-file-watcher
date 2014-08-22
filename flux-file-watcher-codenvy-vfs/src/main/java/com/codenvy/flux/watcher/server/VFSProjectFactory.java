@@ -48,19 +48,19 @@ public class VFSProjectFactory implements ProjectFactory {
                              Repository repository) {
         this.eventService = eventService;
         this.projectManager = projectManager;
-        this.subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectManager, repository);
+        subscriber = new VirtualFileEventSubscriber(repositoryEventBus, projectManager, repository);
     }
 
     @PostConstruct
     public void start() {
         eventService.subscribe(subscriber);
     }
-    
+
     @PreDestroy
     public void stop() {
         eventService.unsubscribe(subscriber);
     }
-    
+
     @Override
     public Project newProject(String projectId, String projectPath) {
         checkNotNull(projectId);
