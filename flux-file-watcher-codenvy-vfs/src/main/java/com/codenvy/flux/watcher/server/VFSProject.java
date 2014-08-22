@@ -75,13 +75,16 @@ public class VFSProject implements Project {
 
             List<FolderEntry> folders = baseFolder.getChildFolders();
             for (FolderEntry folder : folders) {
+                VirtualFile vFile = folder.getVirtualFile();
+                resources.add(Resource.newFolder(relativizeFilePath(vFile),
+                                                 vFile.getLastModificationDate()));
                 resources.addAll(getResources(folder));
             }
             List<FileEntry> files = baseFolder.getChildFiles();
             for (FileEntry file : files) {
                 VirtualFile vFile = file.getVirtualFile();
                 byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
-                resources.add(Resource.newFile(vFile.getName(), vFile.getLastModificationDate(), content));
+                resources.add(Resource.newFile(relativizeFilePath(vFile), vFile.getLastModificationDate(), content));
             }
         } catch (IOException | ServerException | ForbiddenException e) {
             LOG.error("Couldn't get resources", e.getMessage());
@@ -90,21 +93,37 @@ public class VFSProject implements Project {
         return resources;
     }
 
-    private Set<Resource> getResources(FolderEntry folder) {
+    /**
+     * Return the path of the vFile relative to the current project path
+     *
+     * @param vFile
+     * @return resource path relative to the project.
+     */
+    protected String relativizeFilePath(VirtualFile vFile) {
+        int toRemoveCharLength = projectPath.length();
+        if (projectPath.endsWith("/")) {
+            toRemoveCharLength++;
+        }
+        return vFile.getPath().substring(toRemoveCharLength);
+    }
+
+    protected Set<Resource> getResources(FolderEntry folder) {
         final Set<Resource> resources = new HashSet<>();
         try {
-            if (!folder.getPath().equals(projectPath.startsWith("/") ? projectPath.substring(1) : projectPath)) {
-                resources.add(Resource.newFolder(folder.getName(), folder.getVirtualFile().getLastModificationDate()));
-            }
             List<FileEntry> files = folder.getChildFiles();
             for (FileEntry file : files) {
                 VirtualFile vFile = file.getVirtualFile();
                 byte[] content = IOUtils.toByteArray(vFile.getContent().getStream());
-                resources.add(Resource.newFile(vFile.getName(), vFile.getLastModificationDate(), content));
+                resources.add(Resource.newFile(relativizeFilePath(vFile), vFile.getLastModificationDate(),
+                                               content));
             }
             List<FolderEntry> folders = folder.getChildFolders();
             for (FolderEntry folderr : folders) {
+                VirtualFile vFile = folderr.getVirtualFile();
+                resources.add(Resource.newFolder(relativizeFilePath(vFile),
+                                                 vFile.getLastModificationDate()));
                 resources.addAll(getResources(folderr));
+
             }
         } catch (IOException | ForbiddenException | ServerException e) {
             LOG.error("Couldn't get resources", e.getMessage());
