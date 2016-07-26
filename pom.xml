@@ -19,7 +19,7 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>com.codenvy</groupId>
-        <version>1.8.18-SNAPSHOT</version>
+        <version>1.20.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
@@ -40,7 +40,6 @@
     <modules>
         <module>flux-file-watcher-core</module>
         <module>flux-file-watcher-fs</module>
-        <module>flux-file-watcher-codenvy-vfs</module>
     </modules>
 
     <properties>
