@@ -39,7 +39,6 @@
     <modules>
         <module>flux-file-watcher-core</module>
         <module>flux-file-watcher-fs</module>
-        <module>flux-file-watcher-codenvy-vfs</module>
     </modules>
 
     <properties>
