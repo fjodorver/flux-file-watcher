@@ -27,9 +27,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>socketIO</groupId>
-            <artifactId>socketIO</artifactId>
-            <version>0.0.1</version>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
