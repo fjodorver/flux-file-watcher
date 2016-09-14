@@ -18,9 +18,8 @@
 
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
-        <groupId>com.codenvy</groupId>
-        <version>1.20.0-SNAPSHOT</version>
-        <relativePath/>
+        <groupId>org.eclipse.che.depmgt</groupId>
+        <version>5.0.0-M1-SNAPSHOT</version>
     </parent>
 
     <groupId>com.codenvy.flux</groupId>
@@ -40,6 +39,7 @@
     <modules>
         <module>flux-file-watcher-core</module>
         <module>flux-file-watcher-fs</module>
+        <module>flux-file-watcher-codenvy-vfs</module>
     </modules>
 
     <properties>
