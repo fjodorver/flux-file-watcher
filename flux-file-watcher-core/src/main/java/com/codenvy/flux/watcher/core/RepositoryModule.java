@@ -10,18 +10,17 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
-import com.codenvy.flux.watcher.core.internal.GetProjectRequestHandler;
-import com.codenvy.flux.watcher.core.internal.GetProjectResponseHandler;
-import com.codenvy.flux.watcher.core.internal.GetResourceRequestHandler;
-import com.codenvy.flux.watcher.core.internal.GetResourceResponseHandler;
-import com.codenvy.flux.watcher.core.internal.ProjectResourceCreatedListener;
-import com.codenvy.flux.watcher.core.internal.ProjectResourceDeletedListener;
-import com.codenvy.flux.watcher.core.internal.ProjectResourceModifiedListener;
-import com.codenvy.flux.watcher.core.internal.ResourceChangedHandler;
-import com.codenvy.flux.watcher.core.internal.ResourceCreatedHandler;
-import com.codenvy.flux.watcher.core.internal.ResourceDeletedHandler;
+import com.codenvy.flux.watcher.core.repository.ProjectRepository;
+import com.codenvy.flux.watcher.core.repository.impl.ProjectRepositoryImpl;
+import com.codenvy.flux.watcher.core.service.ConnectionService;
+import com.codenvy.flux.watcher.core.service.ProjectService;
+import com.codenvy.flux.watcher.core.service.impl.ConnectionServiceImpl;
+import com.codenvy.flux.watcher.core.service.impl.ProjectServiceImpl;
+import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
+import com.google.inject.Provides;
+
+import javax.inject.Singleton;
 
 /**
  * Guice bindings for {@link RepositoryModule}.
@@ -31,24 +30,14 @@ import com.google.inject.multibindings.Multibinder;
 public class RepositoryModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(Repository.class);
-        bind(FluxMessageBus.class);
-        bind(RepositoryEventBus.class);
+        bind(ConnectionService.class).to(ConnectionServiceImpl.class);
+        bind(ProjectService.class).to(ProjectServiceImpl.class);
+        bind(ProjectRepository.class).to(ProjectRepositoryImpl.class);
+    }
 
-        // message handler bindings
-        final Multibinder<FluxMessageHandler> messageHandlers = Multibinder.newSetBinder(binder(), FluxMessageHandler.class);
-        messageHandlers.addBinding().to(GetResourceRequestHandler.class);
-        messageHandlers.addBinding().to(GetResourceResponseHandler.class);
-        messageHandlers.addBinding().to(GetProjectRequestHandler.class);
-        messageHandlers.addBinding().to(GetProjectResponseHandler.class);
-        messageHandlers.addBinding().to(ResourceCreatedHandler.class);
-        messageHandlers.addBinding().to(ResourceDeletedHandler.class);
-        messageHandlers.addBinding().to(ResourceChangedHandler.class);
-
-        // repository listener bindings
-        final Multibinder<RepositoryListener> repositoryListeners = Multibinder.newSetBinder(binder(), RepositoryListener.class);
-        repositoryListeners.addBinding().to(ProjectResourceCreatedListener.class);
-        repositoryListeners.addBinding().to(ProjectResourceDeletedListener.class);
-        repositoryListeners.addBinding().to(ProjectResourceModifiedListener.class);
+    @Singleton
+    @Provides
+    protected EventBus provideEventBus() {
+        return new EventBus();
     }
 }

@@ -10,58 +10,66 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.fs;
 
-import com.codenvy.flux.watcher.core.Resource;
-import com.codenvy.flux.watcher.core.spi.Project;
-import com.google.common.jimfs.Jimfs;
+import com.codenvy.flux.watcher.core.Credentials;
+import com.codenvy.flux.watcher.core.RepositoryModule;
+import com.codenvy.flux.watcher.core.enums.EventType;
+import com.codenvy.flux.watcher.core.event.ProjectEvent;
+import com.codenvy.flux.watcher.core.event.ResourceEvent;
+import com.codenvy.flux.watcher.core.handler.ProjectHandler;
+import com.codenvy.flux.watcher.core.handler.ResourceHandler;
+import com.codenvy.flux.watcher.core.model.Project;
+import com.codenvy.flux.watcher.core.service.ConnectionService;
+import com.codenvy.flux.watcher.core.service.ProjectService;
+import com.codenvy.flux.watcher.fs.service.WatcherServiceImpl;
+import com.google.common.collect.Sets;
+import com.google.common.eventbus.EventBus;
+import com.google.common.util.concurrent.Service;
+import com.google.common.util.concurrent.ServiceManager;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
-import javax.security.auth.login.Configuration;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.nio.file.FileSystem;
-import java.text.MessageFormat;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static java.nio.file.Files.createDirectory;
-import static org.mockito.Mockito.mock;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Set;
 
 /**
  * @author Kevin Pollet
  */
 public class Main {
-    public static void main(String[] args) throws IOException {
-        /*final Injector injector = Guice.createInjector(new RepositoryModule(), new JDKProjectModule());
+    public static void main(String[] args) throws URISyntaxException {
+        Injector injector = Guice.createInjector(new RepositoryModule(), new JDKModule());
 
-        final Repository repository = injector.getInstance(Repository.class);
-        repository.addRemote(new URL("http://localhost:3000"), Credentials.DEFAULT_USER_CREDENTIALS);
-        repository.addProject("flux", "/Users/kevin/Desktop/flux/flux");*/
-        final String PROJECT_ID = "codenvy-project-id";
-        final String PROJECT_PATH = "/codenvy-project";
+        ProjectService projectService = injector.getInstance(ProjectService.class);
+        ConnectionService connectionService = injector.getInstance(ConnectionService.class);
+        ProjectHandler projectHandler = injector.getInstance(ProjectHandler.class);
+        ResourceHandler resourceHandler = injector.getInstance(ResourceHandler.class);
+        WatcherServiceImpl watcherService = injector.getInstance(WatcherServiceImpl.class);
+        EventBus eventBus = injector.getInstance(EventBus.class);
+        eventBus.register(projectHandler);
+        eventBus.register(resourceHandler);
 
-        MemoryMXBean mxBean = ManagementFactory.getMemoryMXBean();
-        FileSystem fileSystem = Jimfs.newFileSystem();
-        createDirectory(fileSystem.getPath(PROJECT_PATH));
-        createDirectory(fileSystem.getPath(PROJECT_PATH).resolve("src"));
-        JDKProjectWatchService watchService = mock(JDKProjectWatchService.class);
-        Project project = new JDKProject(fileSystem, watchService, PROJECT_ID, PROJECT_PATH);
+        Set<Service> services = Sets.newHashSet();
+        services.add(watcherService);
+        ServiceManager serviceManager = new ServiceManager(services);
+        serviceManager.startAsync().awaitHealthy();
 
-        byte[] data = new byte[1000000];
-        Random random = new Random();
-        random.nextBytes(data);
+        URI uri = new URI("http://localhost:3000");
 
-        List<Long> results = new ArrayList<>();
-
-        for (int i = 0; i < 100; i++) {
-            String filename = MessageFormat.format("src/{0}.txt", i);
-            Resource resource = Resource.newFile(filename, LocalDateTime.now().getNano(), data);
-            project.createResource(resource);
-            project.updateResource(resource);
-            project.deleteResource(resource);
-            results.add(mxBean.getHeapMemoryUsage().getUsed());
+        connectionService.addRemote(uri, new Credentials("defaultuser"));
+        connectionService.registerEvent("getProjectRequest", new ProjectEvent(EventType.REQUEST));
+        connectionService.registerEvent("getProjectResponse", new ProjectEvent(EventType.RESPONSE));
+        connectionService.registerEvent("getResourceRequest", new ResourceEvent(EventType.REQUEST));
+        connectionService.registerEvent("getResourceResponse", new ResourceEvent(EventType.RESPONSE));
+        connectionService.registerEvent("resourceCreated", new ResourceEvent(EventType.CREATE));
+        connectionService.registerEvent("resourceChanged", new ResourceEvent(EventType.CHANGE));
+        connectionService.registerEvent("resourceDeleted", new ResourceEvent(EventType.DELETE));
+        connectionService.registerEvent("resourceStored", new ResourceEvent(EventType.STORE));
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        System.out.println(results.stream().mapToLong(x -> x).average().orElse(0));
+        connectionService.connectToChannel(uri, "defaultuser");
+        projectService.connect(new Project().setName("flux").setPath("/home/fjodor/Documents/"));
     }
 }

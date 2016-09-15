@@ -31,10 +31,8 @@ public class Credentials {
     /**
      * Constructs an instance of {@link com.codenvy.flux.watcher.core.Credentials}.
      *
-     * @param username
-     *         the username.
-     * @throws java.lang.NullPointerException
-     *         if {@code username} parameter is {@code null}.
+     * @param username the username.
+     * @throws java.lang.NullPointerException if {@code username} parameter is {@code null}.
      */
     public Credentials(String username) {
         this(username, null);
@@ -43,12 +41,9 @@ public class Credentials {
     /**
      * Constructs an instance of {@link com.codenvy.flux.watcher.core.Credentials}.
      *
-     * @param username
-     *         the username.
-     * @param token
-     *         the user token.
-     * @throws java.lang.NullPointerException
-     *         if {@code username} parameter is {@code null}.
+     * @param username the username.
+     * @param token the user token.
+     * @throws java.lang.NullPointerException if {@code username} parameter is {@code null}.
      */
     public Credentials(String username, String token) {
         this.username = checkNotNull(username);
