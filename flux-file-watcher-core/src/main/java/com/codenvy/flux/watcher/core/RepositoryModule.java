@@ -10,6 +10,8 @@
  *******************************************************************************/
 package com.codenvy.flux.watcher.core;
 
+import com.codenvy.flux.watcher.core.handler.ProjectHandler;
+import com.codenvy.flux.watcher.core.handler.ResourceHandler;
 import com.codenvy.flux.watcher.core.repository.ProjectRepository;
 import com.codenvy.flux.watcher.core.repository.impl.ProjectRepositoryImpl;
 import com.codenvy.flux.watcher.core.service.ConnectionService;
@@ -33,6 +35,8 @@ public class RepositoryModule extends AbstractModule {
         bind(ConnectionService.class).to(ConnectionServiceImpl.class);
         bind(ProjectService.class).to(ProjectServiceImpl.class);
         bind(ProjectRepository.class).to(ProjectRepositoryImpl.class);
+        bind(ProjectHandler.class).asEagerSingleton();
+        bind(ResourceHandler.class).asEagerSingleton();
     }
 
     @Singleton

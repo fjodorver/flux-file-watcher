@@ -7,6 +7,7 @@ import com.codenvy.flux.watcher.core.event.ResourceEvent;
 import com.codenvy.flux.watcher.core.model.Resource;
 import com.codenvy.flux.watcher.core.service.ConnectionService;
 import com.codenvy.flux.watcher.core.service.ResourceService;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import javax.inject.Inject;
@@ -14,6 +15,11 @@ import javax.inject.Singleton;
 
 @Singleton
 public class ResourceHandler {
+
+    @Inject
+    public ResourceHandler(EventBus eventBus) {
+        eventBus.register(this);
+    }
 
     @Inject
     private ResourceService resourceService;
