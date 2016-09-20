@@ -41,11 +41,6 @@
             <version>${com.google.code.guice.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-multibindings</artifactId>
-            <version>${com.google.code.guice.version}</version>
-        </dependency>
-        <dependency>
             <groupId>io.socket</groupId>
             <artifactId>socket.io-client</artifactId>
             <version>0.7.0</version>

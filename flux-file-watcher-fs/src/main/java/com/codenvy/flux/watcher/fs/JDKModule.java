@@ -14,10 +14,8 @@ import com.codenvy.flux.watcher.core.service.ResourceService;
 import com.codenvy.flux.watcher.core.service.WatcherService;
 import com.codenvy.flux.watcher.fs.service.ResourceServiceImpl;
 import com.codenvy.flux.watcher.fs.service.WatcherServiceImpl;
-import com.google.common.util.concurrent.Service;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.multibindings.Multibinder;
 
 import javax.inject.Singleton;
 import java.nio.file.FileSystem;
