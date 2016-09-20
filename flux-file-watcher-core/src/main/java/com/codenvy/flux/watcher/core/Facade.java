@@ -3,6 +3,8 @@ package com.codenvy.flux.watcher.core;
 import com.codenvy.flux.watcher.core.enums.EventType;
 import com.codenvy.flux.watcher.core.event.ProjectEvent;
 import com.codenvy.flux.watcher.core.event.ResourceEvent;
+import com.codenvy.flux.watcher.core.handler.ProjectHandler;
+import com.codenvy.flux.watcher.core.handler.ResourceHandler;
 import com.codenvy.flux.watcher.core.model.Project;
 import com.codenvy.flux.watcher.core.service.ConnectionService;
 import com.codenvy.flux.watcher.core.service.ProjectService;
@@ -25,6 +27,12 @@ public class Facade {
     private EventBus eventBus;
 
     @Inject
+    private ProjectHandler projectHandler;
+
+    @Inject
+    private ResourceHandler resourceHandler;
+
+    @Inject
     public void init() {
         connectionService.registerEvent("getProjectRequest", new ProjectEvent(EventType.REQUEST));
         connectionService.registerEvent("getProjectResponse", new ProjectEvent(EventType.RESPONSE));
@@ -34,6 +42,8 @@ public class Facade {
         connectionService.registerEvent("resourceChanged", new ResourceEvent(EventType.CHANGE));
         connectionService.registerEvent("resourceDeleted", new ResourceEvent(EventType.DELETE));
         connectionService.registerEvent("resourceStored", new ResourceEvent(EventType.STORE));
+        eventBus.register(projectHandler);
+        eventBus.register(resourceHandler);
     }
 
     public void addRemote(URI uri, Credentials credentials){
