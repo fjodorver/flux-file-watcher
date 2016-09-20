@@ -21,6 +21,14 @@ public class Resource implements Serializable {
 
     private byte[] content;
 
+    public Resource() {
+    }
+
+    public Resource(String path, String projectName) {
+        this.path = path;
+        this.projectName = projectName;
+    }
+
     public String getPath() {
         return path;
     }

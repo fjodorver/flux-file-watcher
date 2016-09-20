@@ -6,6 +6,7 @@ import com.codenvy.flux.watcher.core.event.LocalResourceEvent;
 import com.codenvy.flux.watcher.core.model.Project;
 import com.codenvy.flux.watcher.core.model.Resource;
 import com.codenvy.flux.watcher.core.repository.ProjectRepository;
+import com.codenvy.flux.watcher.core.service.ResourceService;
 import com.codenvy.flux.watcher.core.service.WatcherService;
 import com.google.common.eventbus.EventBus;
 import com.google.common.hash.Hashing;
@@ -33,6 +34,9 @@ public class WatcherServiceImpl extends AbstractExecutionThreadService implement
 
     @Inject
     private ProjectRepository projectRepository;
+
+    @Inject
+    private ResourceService resourceService;
 
     @Inject
     private EventBus eventBus;
@@ -66,8 +70,9 @@ public class WatcherServiceImpl extends AbstractExecutionThreadService implement
                 Path watchablePath = (Path) key.watchable();
                 if (event.kind() == OVERFLOW)
                     return;
-                Project project = projectRepository.findByPath(watchablePath.toString());
-                Resource resource = find(project.getName(), event.context().toString());
+                String projectName = projectRepository.findByPath(watchablePath.toString()).getName();
+                String resourcePath = event.context().toString();
+                Resource resource = resourceService.find(new Resource(projectName, resourcePath));
 
                 EventType type = kindToMessageType(event.kind());
                 if (type == EventType.CREATE && resource.getType() == ResourceType.FOLDER) {
@@ -76,30 +81,6 @@ public class WatcherServiceImpl extends AbstractExecutionThreadService implement
                 eventBus.post(new LocalResourceEvent(type, resource));
             }
             key.reset();
-        }
-    }
-
-    private Resource find(String projectName, String path) {
-        Project project = projectRepository.findByName(projectName);
-        Path projectPath = fileSystem.getPath(project.getPath());
-        Path resourcePath = projectPath.resolve(path);
-        try {
-            BasicFileAttributes attrs = Files.readAttributes(resourcePath, BasicFileAttributes.class);
-            return getResource(projectPath, resourcePath, attrs);
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    private Resource getResource(Path projectPath, Path resourcePath, BasicFileAttributes attrs) throws IOException {
-        String path = projectPath.relativize(resourcePath).toString();
-        Long timestamp = attrs.lastAccessTime().toMillis();
-        Resource resource = new Resource().setPath(path).setTimestamp(timestamp);
-        if (attrs.isDirectory())
-            return new Resource().setHash("0").setType(FOLDER);
-        else {
-            byte[] content = Files.readAllBytes(resourcePath);
-            return resource.setContent(content).setHash(Hashing.sha1().hashBytes(content).toString()).setType(FILE);
         }
     }
 
