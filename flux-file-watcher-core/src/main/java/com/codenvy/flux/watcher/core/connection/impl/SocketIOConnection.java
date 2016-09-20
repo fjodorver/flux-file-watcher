@@ -17,6 +17,9 @@ import org.json.JSONObject;
 
 import javax.inject.Singleton;
 import java.net.URI;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Singleton
 public class SocketIOConnection extends AbstractConnection {
@@ -72,7 +75,6 @@ public class SocketIOConnection extends AbstractConnection {
     @Override
     public void connectToChannel(String channel) {
         Preconditions.checkNotNull(channel, "Channel name should not be null");
-        Preconditions.checkArgument(socket.connected(), "Cannot connect to channel. Not connected to socket.io");
         socket.emit("connectToChannel", getMessage(channel), new Ack() {
             @Override
             public void call(Object... objects) {
